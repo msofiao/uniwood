@@ -1,0 +1,23 @@
+// body {
+//   background: red;
+// }
+@import "./styles/resets.scss";
+@import "./styles/variables.scss";
+@import "./styles/test.scss";
+@import "./styles/root.scss";
+@import "./styles/profile.scss";
+@import "./styles/login.scss";
+@import "./styles/search.scss";
+@import "./styles/components/post.scss";
+@import "./styles/components/poster.scss";
+
+body {
+  background: #f0f2f5;
+}
+
+.alert-master {
+  position: absolute;
+  left: 40px;
+  bottom: 35px;
+  z-index: 5;
+}

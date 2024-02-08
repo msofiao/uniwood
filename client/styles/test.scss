@@ -1,0 +1,159 @@
+// // Root layout
+// .root {
+//   display: grid;
+//   grid-template-columns: 325px auto 325px;
+//   grid-template-rows: 70px minmax(calc(100vh - 70px), 1fr); //  ? Fix
+//   min-height: 100vh;
+//   max-width: map-get($breakpoints, lg);
+//   margin: auto;
+
+//   .left-sidebar {
+//     grid-column: 1/2;
+//     grid-row: 1/3;
+//   }
+//   nav {
+//     grid-column: 2/4;
+//     grid-row: 1/1;
+//   }
+//   main {
+//     grid-column: 2/2;
+//     grid-row: 2 / auto;
+//   }
+
+//   .right-sidebar {
+//     grid-column: 3/4;
+//     grid-row: 2/3;
+//   }
+// }
+
+// // Outer style
+// .root {
+//   nav {
+//     display: flex;
+//     align-items: center;
+//     position: relative;
+//     // background: map-get($palletes, primary);
+//     border-bottom: 1px solid map-get($borderColor, primary);
+//     .container {
+//       display: flex;
+//       align-items: center;
+//       margin-left: auto;
+//       margin-right: 25px;
+//       gap: 15px;
+//       height: 100%;
+
+//       .MuiSvgIcon-root {
+//         font-size: 25px;
+//       }
+//       .menu-item {
+//         size: 30px;
+//         padding: 15px;
+//         border-radius: 100%;
+//         background: #ebeef4;
+//       }
+
+//       .dropdown {
+//         position: absolute;
+//         top: 100%;
+//         right: 0;
+//         z-index: 5;
+//         width: 100%;
+//         background: #ebeef4;
+//         border-radius: 8px;
+
+//         * {
+//           padding: 10px;
+//         }
+//       }
+
+//       &__profile {
+//         display: flex;
+//         align-items: center;
+//         gap: 8px;
+//         .arrow-dropdown {
+//         }
+//       }
+//     }
+//   }
+//   main {
+//   }
+//   .left-sidebar {
+//     border-right: 2px solid map-get($borderColor, primary);
+//     background: rgba(195, 203, 221, 0.25);
+//     backdrop-filter: blur(3.75px);
+//   }
+//   .right-sidebar {
+//     border-left: 2px solid map-get($borderColor, primary);
+//     background: linear-gradient(
+//       331deg,
+//       rgba(247, 249, 251, 0.6) 0%,
+//       rgba(247, 249, 251, 0.5) 100%,
+//       rgba(247, 249, 251, 0.3) 100%
+//     );
+
+//     backdrop-filter: blur(12px);
+//   }
+// }
+
+// // Components
+// .root {
+//   nav {
+//     .MuiInputBase-input {
+//       min-width: 250px;
+//     }
+//     .search-bar {
+//       display: relative;
+//       left: 35px;
+//     }
+//   }
+//   .left-sidebar {
+//     .logo-label {
+//       display: block;
+//       aspect-ratio: 1/1;
+//       width: 175px;
+//       margin: auto;
+//     }
+//     .MuiList-root {
+//       position: relative;
+//       top: 50px;
+//     }
+//     .MuiSvgIcon-root {
+//       aspect-ratio: 1/1;
+//       font-size: 35px;
+//       font-weight: 300;
+//       color: map-get($text, primary);
+//     }
+//     .MuiMenuItem-root {
+//       display: center;
+//       padding: 17px 0 17px 40px;
+//       gap: 15px;
+//       padding: 25px auto;
+//       width: 100%;
+//     }
+//     .MuiTypography-root {
+//       font-weight: bold;
+//     }
+//     .MuiMenuList-root {
+//       display: inline-block;
+//       padding: 15px auto;
+//     }
+//   }
+
+//   // TODO Add blobs
+//   .blob {
+//     position: absolute;
+//   }
+//   .blob-1 {
+//     display: none; // ? Fix
+//     border-radius: 1000px;
+//     background: #a77dff;
+//     filter: blur(132.5px);
+//     width: 225px;
+//     height: 225px;
+//     z-index: 20;
+//   }
+// }
+
+// // Quick Fix
+// .root {
+// }

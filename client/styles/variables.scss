@@ -1,0 +1,39 @@
+// Breakpoints
+$breakpoints: (
+  xs: 0,
+  sm: 600px,
+  md: 900px,
+  lg: 1200px,
+  xl: 1536px,
+);
+
+$pallete: (
+  primary: #f17f69,
+  secondary: #63a3b2,
+  tertiary: #0f1419,
+);
+
+$text: (
+  primary: #2f2e41,
+  secondary: #536471,
+  // secondary in MUI theme,
+  tertiary: #0f1419,
+);
+$borderColor: (
+  primary: #cfd9de,
+  secondary: #eff3f4,
+  tertiary: #0000004d,
+);
+
+$background: (
+  primary: #ffffff,
+  secondary: #eff3f4,
+  tertiary: #f0f2f5,
+  // Facebook Background
+);
+
+$font: (
+  primary: "Segoe UI Historic",
+  secondary: "Nunito",
+  tertiary: "Roboto",
+);

@@ -1,0 +1,170 @@
+.signup {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  .main-container {
+    display: flex;
+    align-items: center;
+    justify-content: center; // Center the content horizontally
+    width: fit-content; // Adjust the width based on the content
+    max-width: 93%; // Limit the maximum width
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 30px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    color: #333;
+    padding: 15px;
+    padding-right: 70px;
+    padding-left: 10px;
+    outline: 4px solid #989b9b;
+    backdrop-filter: blur(5px);
+  }
+
+  .signup-heading {
+    font-size: 40px;
+    font-weight: 800;
+    text-transform: uppercase; // Convert text to all capital letters
+    color: #ef7158;
+    margin-bottom: 10px;
+    margin-top: 20px;
+    writing-mode: vertical-rl; // Text starts from top to bottom
+    letter-spacing: 20px; // Add spacing between letters
+  }
+
+  .sub-container1 {
+    flex: 1; // Take up remaining space
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start; // Align contents to the left
+    overflow: hidden; // Hide any content that overflows the container
+    padding-right: 100px; // Add right padding
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .sub-container1 input {
+    color: #000000;
+    width: 120%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: none;
+    background: none;
+    border-radius: 0;
+    border-bottom: 2px solid #22beb1;
+    outline: none;
+  }
+
+  .sub-container1 input:focus {
+    border-bottom: 1px solid #007bff;
+  }
+
+  .sub-container2 {
+    flex: 1; // Take up remaining space
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start; // Align contents to the right
+    padding-left: 50px;
+    padding-right: 100px;
+    overflow: hidden; // Hide any content that overflows the container
+    border-left: 4px solid #989b9b; // Line separator on the left side
+    border-right: 4px solid #989b9b; // Line separator on the right side
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+
+  .sub-container2 input,
+  .sub-container2 textarea {
+    color: #000000;
+    width: 120%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: none;
+    background: none;
+    border-radius: 0;
+    border-bottom: 2px solid #22beb1;
+    outline: none;
+  }
+
+  .sub-container2 input:focus,
+  .sub-container2 textarea:focus {
+    border-bottom: 1px solid #007bff;
+  }
+
+  .sub-container2 button {
+    width: 130%;
+    padding: 15px;
+    background-color: #ef7158;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    margin-top: 30px;
+    cursor: pointer;
+  }
+
+  .sub-container2 button:hover {
+    background-color: #c25d49;
+  }
+
+  .sub-container3 {
+    flex: 1; // Take up remaining space
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start; // Align contents to the right
+    overflow: hidden; // Hide any content that overflows the container
+    padding-left: 80px;
+  }
+
+  .profile-image {
+    width: 200px;
+    height: 200px;
+    margin-top: 10px;
+    border-radius: 8px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    object-fit: cover;
+  }
+
+  .cover-image {
+    width: 450px;
+    height: 100px;
+    margin-top: 10px;
+    border-radius: 8px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    object-fit: cover;
+  }
+
+  .signup-label {
+    margin-top: 10px;
+    display: block;
+  }
+
+  input[type="file"] {
+    margin-top: 10px;
+  }
+
+  .logo-wood-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 10px;
+    height: auto;
+  }
+
+  .login {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    color: black;
+  }
+
+  .login a {
+    color: orange;
+  }
+}
