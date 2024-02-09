@@ -7,19 +7,18 @@
     "schema": "./server/models/schema.prisma"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dll-build": "webpack --config ./webpack.vendor.dev.js",
-    "client-serve": "webpack serve --config ./webpack.dev.js",
+    "client": "npx vite && npx tailwindcss -i ./client/styles/tailwind.css -o ./client/dist/tailwind.css --watch",
     "generate": "prisma generate --schema ./server/models/schema.prisma",
     "db-push": "prisma db push --schema ./server/models/schema.prisma",
-    "server-test": "tsx watch --tsconfig  tsconfig.server.json server/index.ts --clear-screen=false",
-    "tailwind-build": "npx tailwindcss -i ./client/styles/tailwind.css -o ./client/dist/tailwind.css --watch"
+    "server": "tsx watch --tsconfig  tsconfig.server.json server/index.ts --clear-screen=false",
+    "tailwind": "npx tailwindcss -i ./client/styles/tailwind.css -o ./client/dist/tailwind.css --watch"
   },
   "author": "Bryan Gonzales",
   "license": "ISC",
   "devDependencies": {
     "@types/js-cookie": "^3.0.6",
     "@types/jsonwebtoken": "^9.0.5",
+    "@types/postcss-import": "^14.0.3",
     "@types/react": "^18.2.53",
     "@types/react-dom": "^18.2.18",
     "autoprefixer": "^10.4.17",
