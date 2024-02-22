@@ -3,17 +3,47 @@ import dotenv from "dotenv";
 import path from "node:path";
 import fastifyCookie from "@fastify/cookie";
 import "@fastify/multipart";
+import fastifyMultipart from "@fastify/multipart";
+import fastifyStatic from "@fastify/static";
+import fastifyCors from "@fastify/cors";
+import fastifySocketIO from "fastify-socket.io";
+import { FastifyInstance } from "./types/fastify";
+import { Socket } from "socket.io";
+import { parse } from "cookie";
+import {
+  corsOption,
+  multipartOption,
+  statisCoption,
+  socketIOOption,
+  cookieOption,
+} from "./config";
+import {
+  UsersRoute,
+  PostsRoute,
+  NotificationRoute,
+  LoginRoute,
+  LogoutRoute,
+  RefreshTokenRoute,
+  SearchRoute,
+  ProjectsRoute,
+  CommentsRoute,
+  TestRoute,
+} from "./routes";
+import { onRequestHook } from "./hooks";
+
+// import { authorizeWS } from "./middlewares/authorize";
 dotenv.config({
-  path: path.resolve(__dirname, "../.env"),
+  path: path.resolve(import.meta.dirname, "../.env"),
 });
 
-const app = fastify();
+const app = fastify() as FastifyInstance;
 
 // ===== CORE PLUGINS ===== //
-app.register(require("@fastify/cors"), require("./config/corsOption"));
-app.register(require("@fastify/multipart"));
-app.register(fastifyCookie, require("./config/cookieOption"));
-app.register(require("@fastify/static"), require("./config/staticOption"));
+app.register(fastifyCors, corsOption);
+app.register(fastifyMultipart, multipartOption);
+app.register(fastifyCookie, cookieOption);
+app.register(fastifyStatic, statisCoption);
+app.register(fastifySocketIO, socketIOOption);
 
 // ======= Decorators ======== //
 
@@ -22,43 +52,39 @@ app.addHook("onError", (_req, _res, error, done) => {
   console.log(error);
   done();
 });
-// app.addHook("preValidation", (req, _res, done) => {
-//   console.log({
-//     RuequestInfo: {
-//       path: req.url,
-//       isMultipart: req.isMultipart(),
-//       body: req.body,
-//       params: req.params,
-//       query: req.query,
-//       cookies: req.cookies,
-//     },
-//   });
-//   done();
-// });
+app.addHook("preValidation", (req, _res, done) => {
+  console.log({
+    RuequestInfo: {
+      path: req.url,
+      isMultipart: req.isMultipart(),
+      body: req.body,
+      params: req.params,
+      query: req.query,
+      cookies: req.cookies,
+    },
+  });
+  done();
+});
+app.addHook("onRequest", onRequestHook);
 
-app.addHook("onRequest", require("./hooks/onRequestHook"));
 // ====== ROUTES ===== //
-app.register(require("./routes/users.ts"), { prefix: "/users" });
-app.register(require("./routes/testRoute.ts"));
-app.register(require("./routes/login.ts"), { prefix: "/login" });
-app.register(require("./routes/logout.ts"), { prefix: "/logout" });
-app.register(require("./routes/refreshToken.ts"), { prefix: "/refresh_token" });
-app.register(require("./routes/posts.ts"), { prefix: "/posts" });
-app.register(require("./routes/comments.ts"), { prefix: "/comments" });
-app.register(require("./routes/projects.ts"), { prefix: "/projects" });
-app.register(require("./routes/search.ts"), { prefix: "/search" });
-app.register(require("./routes/notifications.ts"), {
+app.register(UsersRoute, { prefix: "/users" });
+app.register(TestRoute);
+app.register(LoginRoute, { prefix: "/login" });
+app.register(LogoutRoute, { prefix: "/logout" });
+app.register(RefreshTokenRoute, { prefix: "/refresh_token" });
+app.register(PostsRoute, { prefix: "/posts" });
+app.register(CommentsRoute, { prefix: "/comments" });
+app.register(ProjectsRoute, { prefix: "/projects" });
+app.register(SearchRoute, { prefix: "/search" });
+app.register(NotificationRoute, {
   prefix: "/notifications",
 });
 
-app.put("/test", async (req, res) => {
-  console.log({ cookies: req.cookies });
-  res.cookie("none,T,T", "test", {
-    sameSite: "lax",
-    secure: true,
-    httpOnly: true,
-  });
-  return res.code(404).send({ status: "fail", message: "Not foundxx" });
+app.ready((err) => {
+  if (err) throw err;
+  app.io.on("connection", onConnection);
+  console.log("Socket.io is ready");
 });
 
 app.listen(
@@ -71,3 +97,26 @@ app.listen(
     console.log(`Server listening at ${address}`);
   }
 );
+
+//! Test
+
+// ====== Sockets ===== //
+const onConnection = (socket: Socket) => {
+  socket.on("test", (message, cb) => {
+    const cookies = parse(socket.request.headers.cookie!);
+  });
+};
+
+app.get("/socket", (req, res) => {
+  app.io.emit("secured", "This is a secured message");
+  res.send({ status: "success" });
+});
+app.get("/cookie", (req, res) => {
+  res.setCookie("hello", "world", {
+    httpOnly: true,
+    sameSite: "none",
+    secure: true,
+    partitioned: true,
+  });
+  res.send({ status: "success" });
+});

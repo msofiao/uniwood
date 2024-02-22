@@ -7,7 +7,11 @@ import {
   projectsCustomMultipartConsumer,
 } from "../services/projectHandler";
 
-function Project(instance: FastifyInstance, _option: any, done: () => void) {
+export function ProjectsRoute(
+  instance: FastifyInstance,
+  _option: any,
+  done: () => void
+) {
   instance.get(
     "/",
     { preValidation: [authorize("ANY")] },
@@ -47,4 +51,3 @@ function Project(instance: FastifyInstance, _option: any, done: () => void) {
   done();
 }
 
-module.exports = Project;

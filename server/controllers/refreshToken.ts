@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from "../types/fastify";
-import { verify } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import {
   createAccessToken,
   createRefreshToken,
@@ -8,9 +8,8 @@ import {
 } from "../utils/tokens";
 import dotenv from "dotenv";
 import path from "node:path";
-;
 dotenv.config({
-  path: path.resolve(__dirname, "../../.env"),
+  path: path.resolve(import.meta.dirname, "../../.env"),
 });
 
 const refreshToken = async (req: FastifyRequest, res: FastifyReply) => {
@@ -32,7 +31,7 @@ const refreshToken = async (req: FastifyRequest, res: FastifyReply) => {
     userFullname: string;
   };
   try {
-    payload = verify(oldRefreshToken, process.env.REFRESH_TOKEN_KEY!) as {
+    payload = jwt.verify(oldRefreshToken, process.env.REFRESH_TOKEN_KEY!) as {
       id: string;
       email: string;
       username: string;

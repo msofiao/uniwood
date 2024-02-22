@@ -2,7 +2,7 @@ import { FastifyInstance } from "../types/fastify";
 
 import { notificationController } from "../controllers/notificationController";
 
-function Notification(
+export function NotificationRoute(
   fastify: FastifyInstance,
   _options: any,
   done: () => void
@@ -10,5 +10,3 @@ function Notification(
   fastify.get("/:userId", notificationController.getNotification);
   done();
 }
-
-module.exports = Notification;

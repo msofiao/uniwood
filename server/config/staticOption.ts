@@ -1,6 +1,6 @@
+import { FastifyStaticOptions } from "@fastify/static";
 import path from "node:path";
-;
-module.exports = {
-  root: path.resolve(__dirname, "../public"),
+export const statisCoption: FastifyStaticOptions = {
+  root: path.resolve(import.meta.dirname, "../public"),
   prefix: "/public/",
 };

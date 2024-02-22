@@ -7,7 +7,11 @@ import {
   postsCustomMultipartConsumer,
 } from "../services/postsHandler";
 
-function Posts(instance: FastifyInstance, _option: any, done: () => void) {
+export function PostsRoute(
+  instance: FastifyInstance,
+  _option: any,
+  done: () => void
+) {
   instance.get(
     "/",
     { preValidation: [authorize("ANY")] },
@@ -53,5 +57,3 @@ function Posts(instance: FastifyInstance, _option: any, done: () => void) {
   instance.get("/topTags", postController.getTopTags);
   done();
 }
-
-module.exports = Posts;

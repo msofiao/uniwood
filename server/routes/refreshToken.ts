@@ -1,11 +1,7 @@
 import refrehTokenController from "../controllers/refreshToken";
-import {
+import { FastifyInstance } from "../types/fastify";
 
-  FastifyInstance,
-} from "../types/fastify";
-
-
-function refreshToken(
+export function RefreshTokenRoute(
   instance: FastifyInstance,
   _options: any,
   done: () => void
@@ -13,5 +9,3 @@ function refreshToken(
   instance.post("/", refrehTokenController.refreshToken);
   done();
 }
-
-module.exports = refreshToken;

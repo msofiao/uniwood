@@ -1,7 +1,11 @@
 import { FastifyInstance, FastifyRequest } from "../types/fastify";
 import { multipartConsumer } from "../middlewares/multipartConsumer";
 
-function Login(instance: FastifyInstance, _options: any, done: () => void) {
+export function TestRoute(
+  instance: FastifyInstance,
+  _options: any,
+  done: () => void
+) {
   instance.post(
     "/test",
     { preHandler: multipartConsumer },
@@ -12,5 +16,3 @@ function Login(instance: FastifyInstance, _options: any, done: () => void) {
   );
   done();
 }
-
-module.exports = Login;

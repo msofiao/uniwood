@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { FastifyRequest, FastifyReply } from "../types/fastify";
 
-function onRequestHook(
+export function onRequestHook(
   req: FastifyRequest,
   _res: FastifyReply,
   done: () => void
@@ -10,5 +10,3 @@ function onRequestHook(
   req.prisma = new PrismaClient();
   done();
 }
-
-module.exports = onRequestHook;

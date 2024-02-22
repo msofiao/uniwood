@@ -8,7 +8,11 @@ import {
 } from "../services/usersHandler";
 import { authorize } from "../middlewares/authorize";
 
-function Users(instance: FastifyInstance, _options: any, done: () => void) {
+export function UsersRoute(
+  instance: FastifyInstance,
+  _options: any,
+  done: () => void
+) {
   instance.get("/newUsers", userController.getNewUsers);
 
   instance.get("/", userController.getAllusers);
@@ -39,5 +43,3 @@ function Users(instance: FastifyInstance, _options: any, done: () => void) {
 
   done();
 }
-
-module.exports = Users;

@@ -1,8 +1,12 @@
-import { FastifyInstance } from "../types/fastify";
-import commentController, { test } from "../controllers/commentController";
-import { authorize } from "../middlewares/authorize";
+import { FastifyInstance } from "../types/fastify.ts";
+import commentController, { test } from "../controllers/commentController.ts";
+import { authorize } from "../middlewares/authorize.ts";
 
-function Comments(instance: FastifyInstance, _option: any, done: () => void) {
+export function CommentsRoute(
+  instance: FastifyInstance,
+  _option: any,
+  done: () => void
+) {
   instance.get(
     "/",
     { preValidation: [authorize("ANY")] },
@@ -47,5 +51,3 @@ function Comments(instance: FastifyInstance, _option: any, done: () => void) {
   instance.post("/test", test);
   done();
 }
-
-module.exports = Comments;
