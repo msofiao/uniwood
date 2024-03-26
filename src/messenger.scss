@@ -329,4 +329,76 @@ body {
   .more {
     flex: 1;
   }
+
+  .info {
+    flex: 3;
+    overflow: scroll;
+    overflow-x: hidden;
+
+    .navbar {
+      padding: 20px 10px 10px 10px;
+      span {
+        font-weight: 600;
+        font-size: 22px;
+      }
+    }
+
+    .details {
+      border-bottom: 1px solid #848484;
+      .user {
+        display: flex;
+        align-items: center;
+        padding: 20px;
+        height: 50px;
+        justify-content: flex-start;
+        gap: 15px;
+        img {
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          object-fit: cover;
+        }
+        .name {
+          span {
+            font-size: 20px;
+            font-weight: 500;
+          }
+          p {
+            font-size: 16px;
+            color: rgba($color: $black, $alpha: 0.7);
+            margin: 0px;
+            padding: 0px;
+          }
+        }
+      }
+      p {
+        display: flex;
+        align-content: center;
+        justify-content: flex-start;
+        margin: 0px;
+        padding: 2px 2px 2px 20px;
+        color: $tertiary;
+        font-size: 15px;
+        cursor: pointer;
+      }
+    }
+
+    p {
+      margin: 8px;
+      padding-left: 5px;
+      font-size: 18px;
+    }
+    .media {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 0px 10px 0px 10px;
+      margin: 0px;
+      img {
+        max-width: 150px;
+        border-radius: 10px;
+      }
+    }
+  }
 }
