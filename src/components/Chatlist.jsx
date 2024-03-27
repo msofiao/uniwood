@@ -1,11 +1,16 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 
 
 // This component contains the lists of the users messaged by the owner of the account 
 const Chatlist = () => {
+    const navigate = useNavigate();
+
   return (
     <div className='Chatlist'>
-        <div className="user">
+        <div className="user" onClick={() => {
+              navigate("/messenger");
+            }}>
             <div className='user-cont'>
                 <img
             src="https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"

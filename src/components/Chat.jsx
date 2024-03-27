@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import Videocall from "../assets/videocall.svg";
 import More from "../assets/more.svg";
 import Conversation from "./Conversation";

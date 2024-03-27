@@ -5,22 +5,31 @@ import Message from "../assets/message.svg";
 import Notification from "../assets/notification.svg";
 import Profile from "../assets/profile.svg";
 import Marketplace from "../assets/marketplace.svg";
+import { useNavigate } from "react-router-dom";
 
-
-//contains the menu bar of the website on the left side 
+//contains the menu bar of the website on the left side
 const Sidebar = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="sidebar">
       <div className="logo">
         <img src={Logo} alt="logo" />
       </div>
       <div className="menu">
-        <div className="menu-bar">
+        <div className="menu-bar" onClick={() => {
+            navigate("/");
+          }}>
           <img src={Home} alt="home" />
           <div className="menu-name">Home</div>
         </div>
 
-        <div className="menu-bar">
+        <div
+          className="menu-bar"
+          onClick={() => {
+            navigate("/conversation");
+          }}
+        >
           <img src={Message} alt="message" />
           <div className="menu-name">Messages</div>
         </div>
@@ -47,10 +56,10 @@ const Sidebar = () => {
           alt=""
         />
         <div className="user-name">
-        <span>Name</span>
-        <p>username</p>
-      </div>
-      <button>Logout</button>
+          <span>Name</span>
+          <p>username</p>
+        </div>
+        <button>Logout</button>
       </div>
     </div>
   );

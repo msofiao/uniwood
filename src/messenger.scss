@@ -1,5 +1,17 @@
 @import "https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap";
 
+// @mixin mobile {
+//   @media screen and (max-width: 480px){
+//     @content;
+//   }
+// }
+
+@mixin tablet {
+  @media screen and (max-width: 800px) {
+    @content;
+  }
+}
+
 $primary: #ef6d53;
 $secondary: #63a3b2;
 $tertiary: #ba4a4a;
@@ -17,6 +29,13 @@ body {
   display: flex;
   justify-content: center;
 
+  .home {
+    flex: 5;
+  }
+  .conversation {
+    flex: 6;
+  }
+
   .sidebar {
     flex: 1;
     display: flex;
@@ -25,14 +44,31 @@ body {
     padding: 20px;
     justify-content: space-between;
 
+    @include tablet {
+      align-items: center;
+      flex: 0;
+      padding: 4px;
+    }
+
     .logo {
       display: flex;
       justify-content: center;
       cursor: pointer;
+      @include tablet {
+        height: 45px;
+        padding: 10px;
+      }
     }
 
     .menu {
       padding: 30px;
+
+      @include tablet {
+        padding: 0px;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+      }
 
       .menu-bar {
         display: flex;
@@ -48,6 +84,14 @@ body {
         }
         img {
           height: 30px;
+          @include tablet {
+            height: 30px;
+          }
+        }
+        .menu-name {
+          @include tablet {
+            display: none;
+          }
         }
       }
 
@@ -68,6 +112,12 @@ body {
         &:hover {
           background-color: rgba($color: $primary, $alpha: 1);
         }
+        @include tablet {
+          margin: 5px;
+          font-size: 15px;
+          padding: 8px 10px;
+          border-radius: 15px;
+        }
       }
     }
 
@@ -86,8 +136,12 @@ body {
         border-radius: 50%;
         object-fit: cover;
         border: 2px solid $primary;
+        cursor: pointer;
       }
       .user-name {
+        @include tablet {
+          display: none;
+        }
         span {
           font-size: 15px;
           font-weight: 500;
@@ -110,6 +164,9 @@ body {
           border-radius: 20px;
           background-color: rgba($color: $primary, $alpha: 0.3);
         }
+        @include tablet {
+          display: none;
+        }
       }
     }
   }
@@ -117,6 +174,9 @@ body {
   .convo {
     flex: 2;
     border-right: 1px solid #848484;
+    @include tablet {
+      flex: 0.5;
+    }
 
     .navbar {
       display: flex;
@@ -124,21 +184,34 @@ body {
       padding: 15px;
       height: 50px;
       justify-content: space-between;
+      @include tablet {
+        padding: 10px;
+      }
 
       span {
         font-weight: 600;
         font-size: 22px;
         padding: 5px;
+        @include tablet {
+          display: none;
+        }
       }
 
       img {
         height: 30px;
         padding-right: 15px;
         cursor: pointer;
+        @include tablet {
+          height: 30px;
+          padding: 5px;
+        }
       }
     }
 
     .search {
+      @include tablet {
+        display: none;
+      }
       border-bottom: 1px solid #848484;
 
       .searchForm {
@@ -180,8 +253,10 @@ body {
           border-radius: 50%;
           object-fit: cover;
         }
-
         .userProfile {
+          @include tablet {
+            display: none;
+          }
           span {
             font: 18px;
             font-weight: 600;
@@ -198,6 +273,9 @@ body {
         padding: 10px;
         font-size: 12px;
         color: #848484;
+        @include tablet {
+          display: none;
+        }
       }
     }
   }
@@ -230,7 +308,7 @@ body {
       .icons {
         display: flex;
         gap: 10px;
-        height: 26px;
+        height: 25px;
         cursor: pointer;
       }
     }
@@ -267,6 +345,10 @@ body {
             background: #b1d1d8;
             padding: 10px 20px;
             border-radius: 0px 10px 10px 10px;
+            @include tablet {
+              font-size: 13px;
+              padding: 8px 15px;
+            }
           }
           img {
             width: 60%;
@@ -292,6 +374,9 @@ body {
         color: gray;
         font-size: 12px;
         flex-direction: column;
+        @include tablet {
+          font-size: 10px;
+        }
       }
     }
 
@@ -340,6 +425,9 @@ body {
       span {
         font-weight: 600;
         font-size: 22px;
+        @include tablet {
+          font-size: 20px;
+        }
       }
     }
 
@@ -357,17 +445,27 @@ body {
           height: 60px;
           border-radius: 50%;
           object-fit: cover;
+          @include tablet {
+            width: 50px;
+            height: 50px;
+          }
         }
         .name {
           span {
             font-size: 20px;
             font-weight: 500;
+            @include tablet {
+              font-size: 18px;
+            }
           }
           p {
             font-size: 16px;
             color: rgba($color: $black, $alpha: 0.7);
             margin: 0px;
             padding: 0px;
+            @include tablet {
+              font-size: 14px;
+            }
           }
         }
       }
@@ -398,6 +496,10 @@ body {
       img {
         max-width: 150px;
         border-radius: 10px;
+        cursor: pointer;
+        @include tablet {
+          max-width: 100px;
+        }
       }
     }
   }
