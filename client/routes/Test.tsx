@@ -73,9 +73,9 @@ function UserSendVideoStream({
     };
   }, [peer, remotePeerId]);
 
-  if (!stream) return <p>Loading</p>
+  if (!stream) return <p>Loading</p>;
 
-  return <video src={stream}></video>
+  return <video></video>;
 }
 
 function CallerVideoVideo() {

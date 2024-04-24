@@ -13,10 +13,9 @@ export default defineConfig(({ mode }) => {
     appType: "spa",
     build: {
       cssCodeSplit: true,
-      cssMinify: "lightningcss",
       rollupOptions: {
         input: {
-          main: resolve(__dirname, "client/template.html"),
+          main: resolve(__dirname, "client/index.html"),
         },
       },
       commonjsOptions: {
