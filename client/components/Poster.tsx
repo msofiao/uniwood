@@ -5,19 +5,21 @@ import {
   Typography,
   MenuItem,
   Avatar,
-  TextField,
   Tooltip,
-  Button,
   useTheme,
   IconButton,
+  Chip,
 } from "@mui/material";
 import React, {
+  Dispatch,
   FormEvent,
   MutableRefObject,
+  SetStateAction,
   useContext,
   useRef,
   useState,
 } from "react";
+import { Input as TextField, Button } from "@mui/base";
 import { useFetcher } from "react-router-dom";
 import { UserInfoContext } from "../providers/UserInfoProvider";
 import axiosClient from "../utils/axios";
@@ -56,10 +58,8 @@ export default function Poster({
         </Typography>
       </div>
       <Button
-        fullWidth
         className="button"
         color={"secondary"}
-        variant="contained"
         onClick={() => setPostModalView(true)}
       >
         Post
@@ -67,6 +67,7 @@ export default function Poster({
     </Paper>
   );
 }
+
 export function PosterModal({
   postModalView,
   setPostModalView,
@@ -74,41 +75,31 @@ export function PosterModal({
   postModalView: boolean;
   setPostModalView: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-  // const [textFieldFocus, setTextFieldFocus] = useState(false);
-  const [textFieldFocus, setTextFieldFocus] = useState({
-    title: false,
-    context: false,
-  });
-  const [imageData, setImageData] = useState([
-    { id: "", imgSrc: "", caption: "" },
-  ]);
-  const imageFileData = useRef<{ id: string; fileSrc: File }[]>([]);
+  const [mediaData, setMediaData] = useState<MediaDataProps[]>([]);
+  const imageFileData = useRef<{ fileSrc: File; id: string }[]>([]);
   const postFormData = useRef(new FormData());
-  const { userInfo } = useContext(UserInfoContext)!;
   const postFetcher = useFetcher();
-  const [fields, setFields] = useState({ title: "", context: "", tags: "" });
   const { setAlert } = useContext(AlertContext);
   const rootFetcher = useFetcher();
 
   const handlePostSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log({ imageData });
-    if (imageData !== null) {
-      imageData.forEach((image, index) => {
-        console.log("Inside the looop");
+    if (mediaData !== null) {
+      mediaData.forEach((image, index) => {
         const imgFile = imageFileData.current?.find(
-          (imageFile) => imageFile.id === image.id
+          (imageFile) => imageFile.id === image.id,
         );
         postFetcher.formData?.append(
           `image-${index}`,
-          imgFile?.fileSrc as File
+          imgFile?.fileSrc as File,
         );
         if (image.caption !== "")
           postFetcher.formData?.append(`caption-${index}`, image.caption);
         postFormData.current.append(`image-${index}`, imgFile?.fileSrc as File);
       });
-      rootFetcher.submit({idle: true}, {method: "POST", action: "/posts"})
+      rootFetcher.submit({ idle: true }, { method: "POST", action: "/posts" });
     }
+
     axiosClient
       .post("/posts", postFormData.current, {
         headers: {
@@ -116,318 +107,357 @@ export function PosterModal({
           "Content-Type": "multipart/form-data",
         },
       })
-      .then((res) => {
+      .then(() => {
         setPostModalView(!postModalView);
         setAlert({
           severity: "success",
           message: "Posted Succesfully",
-          hidden: false,
+          visible: true,
         });
-        setFields({ title: "", context: "", tags: "" });
-        setImageData([{ id: "", imgSrc: "", caption: "" }]);
+        setMediaData([]);
         postFormData.current = new FormData();
       });
   };
-  const handleInputBlur = (
-    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement, Element>
-  ) => {
-    setTextFieldFocus({ ...textFieldFocus, [e.target.name]: false });
-    postFormData.current.append(e.target.name, e.target.value);
-  };
-  const handleInputFocus = (
-    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement, Element>
-  ) => {
-    setTextFieldFocus({ ...textFieldFocus, [e.target.name]: true });
-  };
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFields({ ...fields, [e.target.name]: e.target.value });
-  };
+
   return (
-    <Modal
-      className="root-modals"
-      open={postModalView}
-      onClose={() => setPostModalView(!postModalView)}
-    >
-      <postFetcher.Form
-        className="post-modal"
-        method="POST"
-        action="/posts"
-        onSubmit={handlePostSubmit}
-        encType="multipart/form-data"
+    postModalView && (
+      <Modal
+        open={postModalView}
+        onClose={() => setPostModalView(!postModalView)}
       >
-        <div className="header-container">
-          <Typography className="header" variant="h4">
-            Create Post
-          </Typography>
-          <MenuItem
-            className="icon-container"
-            onClick={() => setPostModalView(!postModalView)}
-          >
-            <CloseRounded className="icon" />
-          </MenuItem>
-        </div>
-        <div className="user-info">
-          <Avatar src={`${process.env.SERVER_PUBLIC}/${userInfo.pfp}`} />
-          <Typography className="name">{userInfo.fullname}</Typography>
-        </div>
-        <Paper
-          className="textField-container"
-          elevation={textFieldFocus ? 1 : 0}
-          sx={{
-            border: "1px solid #cfd9de",
-            ":hover": {
-              border: textFieldFocus
-                ? "1px solid #0000004d"
-                : "1px solid #cfd9de",
-            },
-          }}
+        <postFetcher.Form
+          className="absolute left-1/2 top-1/2 flex  max-h-[85%] w-[525px] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-lg bg-white  shadow-lg"
+          method="POST"
+          action="/posts"
+          onSubmit={handlePostSubmit}
+          encType="multipart/form-data"
         >
-          <TextField
-            className="textField"
-            placeholder="Title (Optional)"
-            name="title"
-            onChange={handleInputChange}
-            sx={{
-              width: "100%",
-              border: "none",
-              "& .MuiInputBase-input::placeholder": {
-                color: "#838489",
-                opacity: 1,
-              },
-              "& .MuiOutlinedInput-root": {
-                border: "none",
-                outline: "none",
-                "& fieldset": {
-                  border: "none",
-                },
-                "&:hover fieldset": {
-                  border: "none",
-                  outline: "none",
-                },
-                "&.Mui-focused fieldset": {
-                  border: "none",
-                },
-              },
-            }}
-            InputProps={{ fullWidth: true }}
-            fullWidth
-            onFocus={handleInputFocus}
-            onBlur={handleInputBlur}
-          />
-        </Paper>
-        <Paper
-          className="textField-container"
-          elevation={textFieldFocus ? 1 : 0}
-          sx={{
-            border: "1px solid #cfd9de",
-            ":hover": {
-              border: textFieldFocus
-                ? "1px solid #0000004d"
-                : "1px solid #cfd9de",
-            },
-            marginTop: "18px !important",
-          }}
-        >
-          <TextField
-            className="textField"
-            rows={5}
-            onChange={handleInputChange}
-            placeholder="Share your knowledge or idea"
-            name="context"
-            required
-            sx={{
-              width: "100%",
-              border: "none",
-              "& .MuiInputBase-input::placeholder": {
-                color: "#838489",
-                opacity: 1,
-              },
-              "& .MuiOutlinedInput-root": {
-                border: "none",
-                outline: "none",
-                "& fieldset": {
-                  border: "none",
-                },
-                "&:hover fieldset": {
-                  border: "none",
-                  outline: "none",
-                },
-                "&.Mui-focused fieldset": {
-                  border: "none",
-                },
-              },
-            }}
-            InputProps={{ fullWidth: true }}
-            multiline
-            fullWidth
-            onFocus={handleInputFocus}
-            onBlur={handleInputBlur}
-          />
-        </Paper>
-        <Paper
-          className="textField-container"
-          elevation={textFieldFocus ? 1 : 0}
-          sx={{
-            height: "fit-content",
-            border: "1px solid #cfd9de",
-            ":hover": {
-              border: textFieldFocus
-                ? "1px solid #0000004d"
-                : "1px solid #cfd9de",
-            },
-            width: "260px !important",
-            marginTop: "18px !important",
-          }}
-        >
-          <TextField
-            name="tags"
-            onChange={handleInputChange}
-            className="textField"
-            size="small"
-            rows={5}
-            placeholder="tags (optional) ie. #woodword #trend"
-            sx={{
-              width: "100%",
-              border: "none",
-              "& .MuiInputBase-input::placeholder": {
-                color: "#838489",
-                opacity: 1,
-              },
-              "& .MuiOutlinedInput-root": {
-                border: "none",
-                outline: "none",
-                "& fieldset": {
-                  border: "none",
-                },
-                "&:hover fieldset": {
-                  border: "none",
-                  outline: "none",
-                },
-                "&.Mui-focused fieldset": {
-                  border: "none",
-                },
-              },
-            }}
-            InputProps={{
-              fullWidth: true,
-              style: { padding: "14px 8px !important", fontSize: "14px" },
-            }}
-            onFocus={handleInputFocus}
-            onBlur={handleInputBlur}
-          />
-        </Paper>
+          <ModalHeader setModalView={setPostModalView} />
+          <UserInfo />
+          <div className="w-full overflow-y-auto pb-5">
+            <PostForm postFormDataRef={postFormData} />
+            <ImageInputSet
+              mediaData={mediaData}
+              imageFileData={imageFileData}
+              setMediaData={setMediaData}
+            />
+          </div>
 
-        <input
-          type="file"
-          accept="images/*"
-          hidden
-          id="post-image-input"
-          multiple
-          onChange={(e) => {
-            handlePostImage(e, {
-              imageData,
-              setImageData,
-              imageFileData,
-            });
-            // setImageData(parseImageData);
-          }}
-        />
-        <div className="image-input-container">
-          <label htmlFor="post-image-input" className="image-attach">
-            <Tooltip title="Attach Image" className="tooltip">
-              <AddPhotoAlternateRounded className="add-image" />
-            </Tooltip>
-          </label>
-          <ImagePostSet imageData={imageData} setImageData={setImageData} />
-        </div>
-
-        <Button
-          className="button"
-          variant="contained"
-          sx={{ textTransform: "none", fontWeight: "bold", color: "#fff" }}
-          type="submit"
-        >
-          Post
-        </Button>
-      </postFetcher.Form>
-    </Modal>
+          <div className="sticky bottom-0 w-full border-t-2 border-solid border-secondary-100 bg-white px-5 py-2 backdrop-blur-sm">
+            <Button
+              className="ml-auto block rounded-md bg-secondary-300 px-5 py-2 font-bold normal-case text-white hover:bg-secondary-400 active:bg-secondary-500 "
+              type="submit"
+            >
+              Post
+            </Button>
+          </div>
+        </postFetcher.Form>
+      </Modal>
+    )
   );
 }
 
-function ImagePostSet({
-  imageData,
-  setImageData,
+function ImageInputSet({
+  mediaData,
+  imageFileData,
+  setMediaData,
 }: {
-  imageData: { imgSrc: string; caption: string; id: string }[];
-  setImageData: React.Dispatch<
-    React.SetStateAction<{ id: string; imgSrc: string; caption: string }[]>
-  >;
+  mediaData: MediaDataProps[];
+  imageFileData: ImageFileDataProps;
+  setMediaData: SetMediaDataType;
 }) {
-  if (imageData === null) {
-    return [];
-  }
+  const handlePostImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
 
-  let imageElementSet: React.JSX.Element[] = [];
-  imageData.forEach((image) => {
-    if (image.imgSrc === "") return;
-    imageElementSet.push(
-      <div className="image-group">
-        <img src={image.imgSrc} className="image" />
-        <IconButton
-          className="icon-container"
-          onClick={() => {
-            setImageData(
-              imageData.filter((innerImage) => innerImage.id !== image.id)
-            );
-          }}
-        >
-          <CloseRounded className="icon" />
-        </IconButton>
-      </div>
-    );
-  });
-
-  return imageElementSet;
-}
-
-async function handlePostImage(
-  e: React.ChangeEvent<HTMLInputElement>,
-  {
-    imageData,
-    setImageData,
-    imageFileData,
-  }: {
-    imageData: { imgSrc: string; caption: string; id: string }[];
-    setImageData: React.Dispatch<
-      React.SetStateAction<{ id: string; imgSrc: string; caption: string }[]>
-    >;
-    imageFileData: MutableRefObject<
-      { id: string; fileSrc: File }[] | undefined
-    >;
-  }
-) {
-  const files = e.target.files;
-
-  const newImageData = await Promise.all(
-    Array.from(files || []).map((file) => {
+    const processMedia = (file: File) => {
       const id = Math.random().toString(36);
-      return new Promise<{ imgSrc: string; caption: string; id: string }>(
-        (resolve) => {
+      if (file.type.match(/image/)) {
+        return new Promise<MediaDataProps>((resolve) => {
           imageFileData.current?.push({ id, fileSrc: file });
           const reader = new FileReader();
           reader.readAsDataURL(file);
           reader.onload = () => {
             resolve({
               id,
-              imgSrc: reader.result as string,
+              src: reader.result as string,
               caption: "",
+              type: file.type,
             });
           };
-        }
-      );
-    })
-  );
-  // if (imageFileData !== null) setImageFileData([...imageFileData]);
+        });
+      } else {
+        return new Promise<MediaDataProps>((resolve) => {
+          imageFileData.current?.push({ id, fileSrc: file });
+          resolve({
+            id,
+            src: URL.createObjectURL(file),
+            caption: "",
+            type: file.type,
+          });
+        });
+      }
+    };
 
-  setImageData([...imageData, ...newImageData]);
+    const newImageData = await Promise.all(
+      Array.from(files || []).map(processMedia),
+    );
+
+    setMediaData([...mediaData, ...newImageData]);
+  };
+
+  return (
+    <div className="mt-4 flex flex-wrap gap-3 px-5 [&*]:w-full">
+      <input
+        type="file"
+        hidden
+        id="post-image-input"
+        multiple
+        onChange={handlePostImage}
+        accept="image/*, video/*"
+      />
+      <label
+        htmlFor="post-image-input"
+        className="group flex size-[100px] items-center justify-center rounded-lg bg-secondary-200 hover:cursor-pointer hover:bg-secondary-300"
+      >
+        <Tooltip
+          title="Attach Image"
+          className="text-gray-700 group-hover:text-gray-100"
+        >
+          <AddPhotoAlternateRounded />
+        </Tooltip>
+      </label>
+      <ImagePostSet mediaData={mediaData} setMediaData={setMediaData} />
+    </div>
+  );
 }
+
+function PostForm({ postFormDataRef }: PostFormProps) {
+  const [tags, setTags] = useState<string[]>([]);
+
+  const handleInputBlur = (
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement, Element>,
+  ) => {
+    postFormDataRef.current.append(e.target.name, e.target.value);
+  };
+
+  return (
+    <div className="scroll-y-auto mt-5 flex w-full flex-col gap-5 px-5">
+      <TextField
+        slotProps={{
+          input: {
+            className:
+              "bg-slate-100 w-full rounded-lg p-3 border focus-visible:outline-none hover:border-secondary-300 focus-visible:border-secondary-400 border-2 border-secondary-200",
+          },
+        }}
+        placeholder="Title (Optional)"
+        name="title"
+        onChange={handleInputBlur}
+      />
+      <TextField
+        slotProps={{
+          input: {
+            className:
+              "bg-slate-100 w-full rounded-lg p-3 border hover:border-secondary-300 focus-visible:outline-none focus-visible:border-secondary-400 border-2 border-secondary-200 resize-none",
+          },
+        }}
+        rows={5}
+        onChange={handleInputBlur}
+        placeholder="Share your knowledge or idea"
+        name="context"
+        required
+        multiline
+      />
+      <InputTag
+        tags={tags}
+        setTags={setTags}
+        postFormDataRef={postFormDataRef}
+      />
+    </div>
+  );
+}
+
+function ImagePostSet({
+  mediaData,
+  setMediaData,
+}: {
+  mediaData: MediaDataProps[];
+  setMediaData: Dispatch<SetStateAction<MediaDataProps[]>>;
+}) {
+  const processMediaDataToElement = (media: MediaDataProps, index: number) => {
+    if (media.type.match(/image/)) {
+      return (
+        <div className="relative" key={index}>
+          <img src={media.src} className="size-[100px] rounded-lg" />
+          <IconButton
+            title="Remove Image"
+            className="absolute -right-3 -top-3 size-8 border-2 border-solid border-gray-400 bg-gray-100 hover:bg-gray-200"
+            onClick={() => {
+              setMediaData(
+                mediaData.filter((innerImage) => innerImage.id !== media.id),
+              );
+            }}
+          >
+            <CloseRounded className="icon" />
+          </IconButton>
+        </div>
+      );
+    } else {
+      return (
+        <div className="relative">
+          <video src={media.src} className="size-[100px] rounded-lg" controls />
+          <IconButton
+            title="Remove Image"
+            className="absolute -right-3 -top-3 size-8 border-2 border-solid border-gray-400 bg-gray-100 hover:bg-gray-200"
+            onClick={() => {
+              setMediaData(
+                mediaData.filter((innerImage) => innerImage.id !== media.id),
+              );
+            }}
+          >
+            <CloseRounded className="icon" />
+          </IconButton>
+        </div>
+      );
+    }
+  };
+
+  return <>{mediaData.map(processMediaDataToElement)}</>;
+}
+
+function UserInfo() {
+  const { userInfo } = useContext(UserInfoContext)!;
+
+  return (
+    <div className=" flex items-center gap-2 rounded-sm border-b-4 border-solid border-b-secondary-400 px-5 pb-3 font-semibold text-slate-800">
+      <Avatar
+        className="-z-10"
+        src={`${process.env.SERVER_PUBLIC}/${userInfo.pfp}`}
+      />
+      <p>{userInfo.fullname}</p>
+    </div>
+  );
+}
+
+function ModalHeader({ setModalView }: ModalHeaderProps) {
+  const closeModal = () => setModalView(false);
+
+  return (
+    <div className="sticky top-0 mb-3 flex w-full items-center justify-center border-b-2 border-solid border-secondary-100 bg-white px-5 py-3 text-slate-800">
+      <p className="z-50 text-xl font-extrabold">Create Post</p>
+      <IconButton className="absolute right-3" onClick={closeModal}>
+        <CloseRounded />
+      </IconButton>
+    </div>
+  );
+}
+
+function InputTag({
+  tags,
+  setTags,
+  postFormDataRef,
+}: InputTagProps & PostFormProps) {
+  const { setAlert } = useContext(AlertContext)!;
+  const [inputValue, setInputValue] = useState<string>("");
+  const [inputFocused, setInputFocused] = useState<boolean>(false);
+
+  const ref = useRef<HTMLInputElement>(null);
+  const addInterest = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!e.key.match(/( |Enter)/)) return;
+
+    let tag = e.currentTarget.value;
+    if ((e.key === " " && tag === "") || (e.key === "Enter" && tag === "")) {
+      setInputValue("");
+      e.preventDefault();
+      return;
+    }
+    if (tags.find((e) => tag === e)) {
+      setInputValue("");
+      return setAlert({
+        visible: true,
+        severity: "warning",
+        message: "Word Already added",
+      });
+    }
+    setInputValue("");
+    setTags([...tags, tag]);
+    e.preventDefault();
+  };
+  const handleInputValue = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.currentTarget.value);
+  };
+  const removeChip = (word: string) => () => {
+    setTags(tags.filter((tag) => tag !== word));
+  };
+  const focusInput = () => {
+    ref.current?.focus();
+  };
+  const inputFocusIn = () => setInputFocused(true);
+  const attachTagToForm = () =>
+    postFormDataRef.current.append("tags", tags.toString());
+
+  const focusFormStyle = inputFocused
+    ? "border-secondary-400"
+    : "border-secondary-200";
+
+  return (
+    <div
+      className={`${focusFormStyle} ${inputFocused || "hover:border-secondary-300"} flex min-h-[55.2px] w-full flex-wrap justify-center rounded-lg border-2 border-solid bg-slate-100 p-2 hover:cursor-text `}
+      onClick={focusInput}
+    >
+      {tags.map((tag) => (
+        <Chip
+          key={tag}
+          className="max-w flex-gow mb-1 ml-1 min-w-[10px] border-2 border-solid border-secondary-300  bg-secondary-200  font-body text-slate-800 hover:cursor-default focus-visible:border-none"
+          label={tag}
+          onDelete={removeChip(tag)}
+        />
+      ))}
+      <input
+        className="ml-1 mr-auto bg-transparent font-mono  focus-visible:outline-none"
+        type="text"
+        placeholder={tags.length === 0 ? "tags" : ""}
+        ref={ref}
+        name="tag"
+        size={inputValue === "" ? 4 : inputValue.length + 1}
+        onChange={handleInputValue}
+        value={inputValue}
+        onFocusCapture={inputFocusIn}
+        onBlur={attachTagToForm}
+        onKeyDown={addInterest}
+      />
+    </div>
+  );
+}
+
+interface InputTagProps {
+  tags: string[];
+  setTags: React.Dispatch<React.SetStateAction<string[]>>;
+}
+
+interface ModalHeaderProps {
+  setModalView: Dispatch<SetStateAction<boolean>>;
+}
+
+interface PostFormProps {
+  postFormDataRef: MutableRefObject<FormData>;
+}
+
+interface ModalAlertProps {
+  setModalView: Dispatch<SetStateAction<boolean>>;
+}
+
+interface MediaDataProps {
+  src: string;
+  caption: string;
+  id: string;
+  type: string;
+}
+
+type ImageFileDataProps = MutableRefObject<
+  {
+    fileSrc: File;
+    id: string;
+  }[]
+>;
+
+type SetMediaDataType = Dispatch<SetStateAction<MediaDataProps[]>>;

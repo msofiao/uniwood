@@ -1,6 +1,4 @@
 import React, {
-  Dispatch,
-  SetStateAction,
   createContext,
   useState,
 } from "react";

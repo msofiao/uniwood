@@ -9,25 +9,28 @@ import Message from "./routes/Messsage.tsx";
 import Notification from "./routes/Notification.tsx";
 import Profile from "./routes/Profile.tsx";
 import Login from "./routes/Login.tsx"; // loader as loginLoader, // action as loginAction,
-import Signup from "./routes/Signup.tsx";
 import Search from "./routes/Search.tsx";
-import Test, { loader as testLoader } from "./routes/Test.tsx";
+import Test from "./routes/Test.tsx";
 
 // Api
 import { usersAction, usersLoader } from "./api/users.ts";
 import { postsAction, postsLoader } from "./api/posts.ts";
 import { loginAction } from "./api/login.ts";
 import { profileLoader } from "./api/loaders/profile.ts";
+import { loader as messageLoader } from "./api/loaders/message.ts";
+import {loader as notificationLoader} from "./api/loaders/notification.ts";
 
 // Misc
 import "./styles.scss";
 import { profileAction } from "./api/actions/profile.ts";
+import Conversation from "./components/Conversation.tsx";
+import MessageIndex from "./components/MessageIndex.tsx";
+import Post from "./routes/Post.tsx";
 
 const router = createBrowserRouter([
   {
     path: "/test",
     element: <Test />,
-    loader: testLoader,
   },
   {
     path: "/",
@@ -39,14 +42,6 @@ const router = createBrowserRouter([
         element: <Home />,
       },
       {
-        path: "/message",
-        element: <Message />,
-      },
-      {
-        path: "/notification",
-        element: <Notification />,
-      },
-      {
         path: "/profile/:usernameOrId",
         element: <Profile />,
         loader: profileLoader,
@@ -56,6 +51,10 @@ const router = createBrowserRouter([
         path: "/search",
         element: <Search />,
       },
+      {
+        path: "/post/:postId",
+        element: <Post />
+      }
     ],
   },
   {
@@ -63,10 +62,6 @@ const router = createBrowserRouter([
     element: <Login />,
     action: loginAction,
     loader: postsLoader,
-  },
-  {
-    path: "/signup",
-    element: <Signup />,
   },
   {
     path: "/users",
@@ -78,6 +73,26 @@ const router = createBrowserRouter([
     path: "/posts",
     action: postsAction,
   },
+  {
+    path: "/message",
+    element: <Message />,
+    loader: messageLoader,
+  },
+  {
+    path: "/message/:converseId",
+    element: <Message />,
+    loader: messageLoader,
+  },
+  {
+    path: "/message/new/:recipientId",
+    element: <Message />,
+    loader: messageLoader,
+  },
+  {
+    path: "/notification",
+    element: <Notification />,
+    loader: notificationLoader,
+  },
 ]);
 
 const root = createRoot(document.getElementById("root") as HTMLElement);
@@ -85,5 +100,5 @@ const root = createRoot(document.getElementById("root") as HTMLElement);
 root.render(
   <Providers>
     <RouterProvider router={router} />
-  </Providers>
+  </Providers>,
 );

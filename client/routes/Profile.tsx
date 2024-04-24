@@ -1,5 +1,4 @@
 import {
-  Alert,
   Avatar,
   Box,
   Button,
@@ -13,18 +12,31 @@ import {
   SelectChangeEvent,
   Tab,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  Dispatch,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import Post from "../components/Post.tsx";
 import Poster, { PosterModal } from "../components/Poster";
-import { CloseRounded, EditRounded } from "@mui/icons-material";
+import {
+  CloseRounded,
+  EditRounded,
+  EmailRounded,
+  LocationOnOutlined,
+  LocationOnRounded,
+} from "@mui/icons-material";
 import axiosClient from "../utils/axios";
 import {
   Form,
+  NavigateFunction,
   useActionData,
-  useFetcher,
   useLoaderData,
   useNavigate,
   useParams,
@@ -32,6 +44,7 @@ import {
 import { stringToConstant } from "../utils/stringFormatters.ts";
 import { UserInfoContext } from "../providers/UserInfoProvider.tsx";
 import { AlertContext } from "../providers/AlertProvider.tsx";
+import { TokenContext } from "../providers/TokenProvider.tsx";
 
 const ProfileContext = createContext<null | ProfileContext>(null);
 export default function Profile() {
@@ -42,13 +55,10 @@ export default function Profile() {
   const loaderData = useLoaderData() as any;
 
   const initializeContextdata = () => {
-    console.log({ loaderData });
     setUserProfileInfo(loaderData.userProfileInfo);
     setUserPosts(loaderData.userPosts);
   };
   useEffect(initializeContextdata, [loaderData]);
-
-  console.log("Profile Rendered");
 
   return (
     <ProfileContext.Provider
@@ -63,7 +73,7 @@ export default function Profile() {
 }
 function Section() {
   const { userPosts, userProfileInfo } = useContext(ProfileContext)!;
-  const [tabIndex, setTabIndex] = useState("1");
+  const [tabIndex, setTabIndex] = useState("3");
   const [postModalView, setPostModalView] = useState(false);
   const handleTabChange = (_event: React.SyntheticEvent, newValue: string) => {
     setTabIndex(newValue);
@@ -79,7 +89,9 @@ function Section() {
         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
           <TabList className="tab-list" onChange={handleTabChange}>
             <Tab label="Posts" value="1" />
-            <Tab label="Details" value="3" />
+            <Tab label="Details" value="2" />
+            <Tab label="Followers" value="3" />
+            <Tab label="Following" value="4" />
           </TabList>
         </Box>
         <TabPanel value="1">
@@ -87,10 +99,15 @@ function Section() {
           {userPosts.map((post) => {
             return <Post postParam={post} />;
           })}
-          Post
         </TabPanel>
-        <TabPanel value="3">
+        <TabPanel value="2">
           <UserDetail />
+        </TabPanel>
+        <TabPanel className="min-h-100%" value="3">
+          <FollowerList />
+        </TabPanel>
+        <TabPanel value="4">
+          <FollowingList />
         </TabPanel>
       </TabContext>
       <PosterModal
@@ -126,18 +143,11 @@ function UserDetail() {
         <Typography className="value">{userProfileInfo?.address}</Typography>
       </div>
       <div className="field-container">
-        <Typography className="label">Proffeciency: </Typography>
-        <Typography className="value">
-          {userProfileInfo?.proffeciency}
-        </Typography>
-      </div>
-      <div className="field-container">
         <Typography className="label">Affiliation: </Typography>
         <Typography className="value">
           {userProfileInfo?.affiliation}
         </Typography>
       </div>
-
       <div className="field-container">
         <Typography className="label">Birth date: </Typography>
         <Typography className="value">
@@ -152,11 +162,124 @@ function UserDetail() {
   );
 }
 function UserProfileContent() {
+  const navigate = useNavigate();
+  const [followed, setFollowed] = useState<boolean | null>(null);
   const [editProfileModalView, setEditProfileModalView] = useState(false);
-  const { userProfileInfo } = useContext(ProfileContext)!;
 
-  console.log({ userProfileInfo });
+  const { userProfileInfo, setUserProfileInfo } = useContext(ProfileContext)!;
+  const { accessToken } = useContext(TokenContext)!;
 
+  const checkIfUserIsFollowed = () => {
+    if (!accessToken || !userProfileInfo) return;
+    axiosClient
+      .get(`/users/verifyIfFollowed?targetUser=${userProfileInfo.id}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+      .then((res) => {
+        setFollowed(res.data.data.isFollowed);
+      })
+      .catch((err) => {
+        if (err.response.status === 404) setFollowed(false);
+      });
+    console.log({ followed });
+  };
+  const followToggle = () => {
+    if (!userProfileInfo || !accessToken) return;
+    if (followed) {
+      axiosClient
+        .patch(
+          `/users/unfollow?userId=${userProfileInfo.id}`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          },
+        )
+        .then((res) => {
+          if (res.status === 200) {
+            setFollowed(false);
+            setUserProfileInfo({
+              ...userProfileInfo,
+              followersCount: Number(userProfileInfo.followersCount) - 1,
+            });
+          }
+        });
+    } else {
+      axiosClient
+        .patch(
+          `/users/follow?userId=${userProfileInfo?.id}`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          },
+        )
+        .then((res) => {
+          console.log({ userProfileInfo });
+          if (res.status === 200) {
+            setFollowed(true);
+            setUserProfileInfo({
+              ...userProfileInfo,
+              followersCount: Number(userProfileInfo?.followersCount + 1),
+            });
+          }
+        });
+    }
+  };
+  const navToMessage = () => {
+    if (!accessToken) return;
+    axiosClient
+      .get(`/converse/search?recipientId=${userProfileInfo?.id}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+      .then((res) => {
+        console.log(res.data);
+        navigate(`/message/${res.data.data.converseId}`); //
+      })
+      .catch((err) => {
+        console.log(err.response);
+
+        navigate(`/message/new/${userProfileInfo?.id}`); //
+      });
+  };
+
+  const FollowtoggleBtn = () => {
+    if (localStorage.getItem("id") !== userProfileInfo?.id) {
+      return (
+        <Button
+          className="  rounded-full px-9 py-2 font-semibold normal-case text-white"
+          color={"secondary"}
+          variant="contained"
+          onClick={followToggle}
+        >
+          {followed ? "Unfollow" : "Follow"}
+        </Button>
+      );
+    } else return <></>;
+  };
+
+  const ProfileEditBtn = () => {
+    if (localStorage.getItem("id") === userProfileInfo?.id) {
+      return (
+        <Button
+          color={"secondary"}
+          variant="contained"
+          sx={{ textTransform: "none", color: "#fff" }}
+          onClick={() => setEditProfileModalView(true)}
+        >
+          Edit profile
+        </Button>
+      );
+    } else return <></>;
+  };
+
+  useEffect(checkIfUserIsFollowed, [accessToken]);
   return (
     <div className="user-profile-container">
       <div className="user-images">
@@ -168,29 +291,39 @@ function UserProfileContent() {
           className="avatar"
           src={`${process.env.SERVER_PUBLIC}/${userProfileInfo?.pfp}`}
         />
-        {localStorage.getItem("id") === userProfileInfo?.id && (
-          <Button
-            className="edit-profile"
-            color={"secondary"}
-            variant="contained"
-            sx={{ textTransform: "none", color: "#fff" }}
-            onClick={() => setEditProfileModalView(true)}
-          >
-            Edit profile
-          </Button>
-        )}
+        <div className="absolute right-6 mt-6 flex gap-2">
+          {localStorage.getItem("id") !== userProfileInfo?.id && (
+            <Tooltip title="Send Message" placement="top">
+              <IconButton className="text-secondary-400" onClick={navToMessage}>
+                <EmailRounded />
+              </IconButton>
+            </Tooltip>
+          )}
+          <FollowtoggleBtn />
+          <ProfileEditBtn />
+        </div>
       </div>
-      <div className="user-details">
-        <Typography className="name" variant="h5">
+      <div className="px-4">
+        <p className="font-body text-lg font-bold text-slate-800">
           {userProfileInfo?.fullname}
-          <Typography className="woodwork-type" variant="subtitle2">
-            {userProfileInfo?.affiliation}
-          </Typography>
-        </Typography>
-
-        <Typography className="username" variant="subtitle2">
-          @{userProfileInfo?.username}
-        </Typography>
+        </p>
+        <p className="text-base text-slate-500">@{userProfileInfo?.username}</p>
+        <p className="mt-1 text-base text-slate-800">{userProfileInfo?.bio}</p>
+        <div></div>
+        <div className="mt-2 flex gap-3">
+          <p className="text-base text-slate-600 hover:cursor-pointer hover:underline">
+            <span className="text-base font-bold text-slate-800">
+              {userProfileInfo?.followersCount}
+            </span>{" "}
+            Followers
+          </p>
+          <p className="font-bodt text-base text-slate-600 hover:cursor-pointer hover:underline">
+            <span className="text-base font-bold text-slate-800">
+              {userProfileInfo?.followingCount}
+            </span>{" "}
+            Following
+          </p>
+        </div>
       </div>
       <EditProfileModal
         editProfileModalView={editProfileModalView}
@@ -249,7 +382,7 @@ function EditProfileModal({
   const handleInputChange = (
     e:
       | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-      | SelectChangeEvent<string>
+      | SelectChangeEvent<string>,
   ) => {
     setUserRawInfo({ ...userRawInfo!, [e.target.name]: e.target.value });
   };
@@ -261,13 +394,13 @@ function EditProfileModal({
       setAlert({
         severity: "success",
         message: "Profile Updated",
-        hidden: false,
+        visible: false,
       });
     } else if (actionData?.status === "fail") {
       setAlert({
         severity: "error",
         message: "Profile Update Failed",
-        hidden: false,
+        visible: false,
       });
     }
     setEditProfileModalView(false);
@@ -545,6 +678,132 @@ function EditProfileModal({
   );
 }
 
+// function FollwerListTab({ modalView, setModalView }: ModalViewProps) {
+//   const [followers, setFollowers] = useState<PostAuthor[]>([]);
+//   const { userProfileInfo } = useContext(ProfileContext)!;
+//   const { accessToken } = useContext(TokenContext)!;
+
+//   const initializeFollowersData = () => {
+//     if (!accessToken || !userProfileInfo) return;
+//     axiosClient
+//       .get(`/users/followers?targetUserId=${userProfileInfo}`, {
+//         headers: { Authorization: `Bearer ${accessToken}` },
+//       })
+//       .then((res) => {
+//         console.log(res.data);
+//         setFollowers(res.data.data);
+//       });
+//   };
+
+//   useEffect(initializeFollowersData, [accessToken]);
+//   return <div></div>;
+// }
+
+function FollowerElement({
+  follow,
+  navigate,
+}: {
+  follow: FollowProps;
+  navigate: NavigateFunction;
+}) {
+  const navigateToProfile = () => {
+    navigate(`/profile/${follow.id}`);
+  };
+  return (
+    <Paper className="flex items-center gap-4 px-5 py-2">
+      <Avatar className="size-[50px]" src={`${follow.pfp}`} />
+      <div className="">
+        <p
+          className="font-body font-bold text-slate-800 hover:cursor-pointer hover:underline"
+          onClick={navigateToProfile}
+        >
+          {follow.fullname}
+        </p>
+        <p className="text small font-body text-sm text-slate-600">
+          {follow.username}
+        </p>
+        <div className="mt-1 flex items-center">
+          <LocationOnOutlined className="text-sm font-thin text-slate-500" />
+          <p className=" small font-body text-sm text-slate-500">
+            {follow.address}
+          </p>
+        </div>
+      </div>
+      <Button variant="contained" className=" ml-auto normal-case text-white ">
+        {follow.followedByTheUser ? "Unfollow" : "Follow"}
+      </Button>
+    </Paper>
+  );
+}
+
+function FollowerList() {
+  const [followers, setFollowers] = useState<FollowProps[]>([]);
+  const { accessToken } = useContext(TokenContext)!;
+  const { userProfileInfo } = useContext(ProfileContext)!;
+  const navigate = useNavigate();
+  const params = useParams<{ usernameOrId: string }>();
+
+  const getFollowers = () => {
+    if (!accessToken || !userProfileInfo) return;
+    axiosClient
+      .get(`/users/followers?targetUserId=${params.usernameOrId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      })
+      .then((res) => {
+        setFollowers(res.data.data);
+      });
+  };
+
+  useEffect(getFollowers, [accessToken, params.usernameOrId]);
+
+  return (
+    <>
+      {followers.map((follower) => {
+        return <FollowerElement follow={follower} navigate={navigate} />;
+      })}
+      {!followers.length && (
+        <p className="italic text-slate-600">No followers</p>
+      )}
+    </>
+  );
+}
+
+function FollowingList() {
+  const [followers, setFollowers] = useState<FollowProps[]>([]);
+  const { accessToken } = useContext(TokenContext)!;
+  const { userProfileInfo } = useContext(ProfileContext)!;
+  const navigate = useNavigate();
+  const params = useParams<{ usernameOrId: string }>();
+
+  const getFollowers = () => {
+    if (!accessToken || !userProfileInfo) return;
+    axiosClient
+      .get(`/users/following?targetUserId=${params.usernameOrId}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+      .then((res) => {
+        setFollowers(res.data.data);
+      });
+  };
+
+  useEffect(getFollowers, [accessToken, params.usernameOrId]);
+
+  return (
+    <>
+      {followers.map((follower) => {
+        return <FollowerElement follow={follower} navigate={navigate} />;
+      })}
+      {!followers.length && (
+        <p className="italic text-slate-600">No Following</p>
+      )}
+    </>
+  );
+}
+
 // Type Defs
 interface UserRawInfo {
   id: string;
@@ -561,4 +820,13 @@ interface UserRawInfo {
   barangay: string;
   municipality: string;
   province: string;
+}
+
+interface ModalViewProps {
+  modalView: boolean;
+  setModalView: Dispatch<React.SetStateAction<boolean>>;
+}
+
+interface FollowProps extends PostAuthor {
+  followedByTheUser: boolean;
 }

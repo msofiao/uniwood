@@ -5,8 +5,9 @@ import { PostPostBody, PostPutBody } from "../controllers/postsController";
 // *This Multipart consumer is for posts with meedia that contains each caption in the image
 
 /**
- * Custom Multipart Consumer for Posts
- * ? Client Side must hace a field in the form Data for uploading medias ie. caption-[hash], image-[hash], video-[hash]
+ * Multipart Consumer for arbitrary numner of files and fields
+ * body type = Record<string, string> & media: {caption?: string, filename: string}[]
+ * ? Client Side must have a field in the form Data for uploading medias ie. caption-[hash], image-[hash], video-[hash]
  * @param req
  * @param res
  * @returns

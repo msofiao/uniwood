@@ -33,7 +33,7 @@ export async function storeFile(
     await pipeline(
       multFile.file,
       createWriteStream(
-        path.join(__dirname, `../${location}/${filename}.${extension}`)
+        path.join(import.meta.dirname, `../${location}/${filename}.${extension}`)
       )
     );
   } catch (error) {
@@ -64,8 +64,8 @@ export function removeFiles(
     console.log({ filesInfo });
     if (filesInfo === undefined) return;
     if (typeof filesInfo === "string")
-      return unlink(path.resolve(__dirname, `../${folder}/${filesInfo}`));
-    unlink(path.resolve(__dirname, `../${folder}/${filesInfo.filename}`));
+      return unlink(path.resolve(import.meta.dirname, `../${folder}/${filesInfo}`));
+    unlink(path.resolve(import.meta.dirname, `../${folder}/${filesInfo.filename}`));
   });
 }
 
@@ -85,13 +85,13 @@ export async function moveFile(
     if (!fileInfo) return;
     if (typeof fileInfo !== "string") {
       await rename(
-        path.resolve(__dirname, `../${currentFolder}/${fileInfo.filename}`),
-        path.resolve(__dirname, `../${targetFolder}/${fileInfo.filename}`)
+        path.resolve(import.meta.dirname, `../${currentFolder}/${fileInfo.filename}`),
+        path.resolve(import.meta.dirname, `../${targetFolder}/${fileInfo.filename}`)
       );
     } else {
       await rename(
-        path.resolve(__dirname, `../${currentFolder}/${fileInfo}`),
-        path.resolve(__dirname, `../${targetFolder}/${fileInfo}`)
+        path.resolve(import.meta.dirname, `../${currentFolder}/${fileInfo}`),
+        path.resolve(import.meta.dirname, `../${targetFolder}/${fileInfo}`)
       );
     }
   });

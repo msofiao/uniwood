@@ -17,17 +17,18 @@ export function PostsRoute(
     { preValidation: [authorize("ANY")] },
     postController.getAllPosts
   );
+  instance.get('/:postId', {preValidation: [authorize("ANY")]}, postController.getPostById)
 
   instance.get(
     "/user/:usernameOrId",
     { preValidation: [authorize("ANY")] },
     postController.getAllUserPost
   );
-  instance.get(
-    "/:postId",
-    { preValidation: [authorize("ANY")] },
-    postController.getPost
-  );
+  // instance.get(
+  //   "/:postId",
+  //   { preValidation: [authorize("ANY")] },
+  //   postController.getPost
+  // );
   instance.post(
     "/",
     {

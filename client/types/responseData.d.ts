@@ -28,3 +28,20 @@ declare interface LoginResponseError {
   message: string;
   fieldError: { field: string; message: string }[];
 }
+
+declare interface SearchConversationResponse {
+  conversationId: string;
+  messages: {
+    id: string;
+    authorId: string;
+    type: "CHAT" | "IMAGE" | "VIDEO" | "AUDIO" | "FILE";
+    chat: string;
+    createdAt: string;
+    media:
+      | []
+      | {
+          filname: string;
+          caption?: string;
+        };
+  };
+}

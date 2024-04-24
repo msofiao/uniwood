@@ -39,3 +39,12 @@ declare interface PostContext {
   post: (Post & { author: PostAuthor }) | null;
   setPost: Dispatch<SetStateAction<Post & { author: PostAuthor }>>;
 }
+
+declare interface IMessageComponentContext {
+  searchNewUserFocus: boolean;
+  setSearchNewUserFocus: React.Dispatch<React.SetStateAction<boolean>>;
+  recipientInfo?: IRecipientInfo;
+  setRecipientInfo: React.Dispatch<
+    React.SetStateAction<IRecipientInfo | undefined>
+  >;
+}

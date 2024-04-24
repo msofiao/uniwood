@@ -89,8 +89,6 @@ export const login = async (
   );
 };
 
-
-
 const loginController = { login };
 
 export default loginController;

@@ -1,10 +1,11 @@
-import React, { StrictMode } from "react";
+import React from "react";
 import { ThemeProvider as MuiThemeProvider, createTheme } from "@mui/material";
-import { Theme as MuiTheme, useTheme } from "@mui/material/styles";
 import "@fontsource/nunito";
 import "@fontsource/roboto";
 import "@fontsource/poppins";
 import "@fontsource/montserrat";
+import "@fontsource/space-mono";
+import "@fontsource/inter";
 
 const theme = createTheme({
   palette: {

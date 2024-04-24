@@ -1,18 +1,22 @@
 import { FastifyInstance, FastifyRequest } from "../types/fastify";
-import { multipartConsumer } from "../middlewares/multipartConsumer";
+import {
+  arbitraryMultipartConsumer,
+  multipartConsumer,
+} from "../middlewares/multipartConsumer";
+import { moveFile } from "../utils/fileManager";
 
 export function TestRoute(
   instance: FastifyInstance,
   _options: any,
-  done: () => void
+  done: () => void,
 ) {
   instance.post(
     "/test",
-    { preHandler: multipartConsumer },
+    { preHandler: arbitraryMultipartConsumer },
     async (req: FastifyRequest<{ Body: Record<string, any> }>, res) => {
-      // console.log({ body: req.body });
-      return res.send({ message: "Hello World", body: req.body });
-    }
+      moveFile(req.body.media, "tmp", "public");
+      return res.send({ message: "success", body: { ...req.body } });
+    },
   );
   done();
 }

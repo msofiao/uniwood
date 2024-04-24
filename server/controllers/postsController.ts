@@ -8,7 +8,7 @@ import { capitalize } from "../utils";
 
 const createPost = async (
   req: FastifyRequest<{ Body: PostPostBody }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) => {
   const userId = req.userId; // Edit from "string" to "req.user.id
 
@@ -26,16 +26,17 @@ const createPost = async (
     console.error(error);
     return res.code(500).send({ status: "fail", message: "Internal Error" });
   }
+
   // Move tmp file to the public folder
   req.body.media.forEach(
-    async (elem) => await moveFile([elem.filename], "tmp", "public")
+    async (elem) => await moveFile([elem.filename], "tmp", "public"),
   );
   return res.code(201).send({ status: "success", message: "Post created" });
 };
 
 const updatePost = async (
   req: FastifyRequest<{ Body: PostPutBody }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) => {
   if (!req.userId)
     return res
@@ -73,7 +74,7 @@ const updatePost = async (
   // Move tmp file to the public folder
   if (req.body.media)
     req.body.media.forEach(
-      async (elem) => await moveFile([elem.filename], "tmp", "public")
+      async (elem) => await moveFile([elem.filename], "tmp", "public"),
     );
   return res.code(200).send({ status: "success", message: "Post updated" });
 };
@@ -147,7 +148,7 @@ const getPosts = async (req: FastifyRequest, res: FastifyReply) => {
 
 const getAllUserPost = async (
   req: FastifyRequest<{ Params: { usernameOrId: string }; Body: any }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) => {
   let posts = await req.prisma.post.findMany({
     where: {
@@ -276,7 +277,7 @@ const getAllUserPost = async (
           author: {
             id: comment.author.id,
             fullname: capitalize(
-              `${comment.author.firstname} ${comment.author.lastname}`
+              `${comment.author.firstname} ${comment.author.lastname}`,
             ),
             bio: comment.author.bio,
             affiliation: comment.author.affiliation,
@@ -290,14 +291,14 @@ const getAllUserPost = async (
       author: {
         id: post.author.id,
         fullname: capitalize(
-          `${post.author.firstname} ${post.author.lastname}`
+          `${post.author.firstname} ${post.author.lastname}`,
         ),
         bio: post.author.bio,
         affiliation: post.author.affiliation,
         cover: post.author.user_image.cover_name,
         pfp: post.author.user_image.pfp_name,
         address: capitalize(
-          `${post.author.address.barangay}, ${post.author.address.municipality}, ${post.author.address.province}`
+          `${post.author.address.barangay}, ${post.author.address.municipality}, ${post.author.address.province}`,
         ),
         username: post.author.username,
       },
@@ -312,7 +313,7 @@ const getAllUserPost = async (
 
 const deletePost = async (
   req: FastifyRequest<{ Body: { postId: string | undefined } }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) => {
   // TODO add validation
   if (req.body.postId === undefined)
@@ -421,7 +422,7 @@ const getAllPosts = async (req: FastifyRequest, res: FastifyReply) => {
           author: {
             id: comment.author.id,
             fullname: capitalize(
-              `${comment.author.firstname} ${comment.author.lastname}`
+              `${comment.author.firstname} ${comment.author.lastname}`,
             ),
             bio: comment.author.bio,
             affiliation: comment.author.affiliation,
@@ -435,14 +436,14 @@ const getAllPosts = async (req: FastifyRequest, res: FastifyReply) => {
       author: {
         id: post.author.id,
         fullname: capitalize(
-          `${post.author.firstname} ${post.author.lastname}`
+          `${post.author.firstname} ${post.author.lastname}`,
         ),
         bio: post.author.bio,
         affiliation: post.author.affiliation,
         cover: post.author.user_image.cover_name,
         pfp: post.author.user_image.pfp_name,
         address: capitalize(
-          `${post.author.address.barangay}, ${post.author.address.municipality}, ${post.author.address.province}`
+          `${post.author.address.barangay}, ${post.author.address.municipality}, ${post.author.address.province}`,
         ),
         username: post.author.username,
       },
@@ -454,7 +455,7 @@ const getAllPosts = async (req: FastifyRequest, res: FastifyReply) => {
 
 const getPost = async (
   req: FastifyRequest<{ Params: { postId: string }; Body: any }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) => {
   if (!req.params.postId)
     return res
@@ -482,7 +483,7 @@ const getPost = async (
 
 const likePostToggle = async (
   req: FastifyRequest<{ Body: { postId?: string } }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) => {
   if (!req.userId)
     return res
@@ -497,7 +498,7 @@ const likePostToggle = async (
     });
   await likePostToggleFnc(
     { postId: req.body.postId, userId: req.userId },
-    req.prisma
+    req.prisma,
   );
 
   const postExist = await req.prisma.post.findUnique({
@@ -515,19 +516,22 @@ const likePostToggle = async (
 
   if (!postExist)
     return res.code(404).send({ status: "fail", message: "Post not found" });
-  await req.prisma.user.update({
-    where: {
-      id: postExist.author.id,
-    },
-    data: {
-      notification: {
-        create: {
-          type: "REACT",
-          post_id: req.body.postId,
-        },
-      },
-    },
-  });
+
+  // Todo create notification
+
+  // await req.prisma.user.update({
+  //   where: {
+  //     id: postExist.author.id,
+  //   },
+  //   data: {
+  //     notification: {
+  //       create: {
+  //         type: "REACT",
+  //         post_id: req.body.postId,
+  //       },
+  //     },
+  //   },
+  // });
   return res
     .code(200)
     .send({ status: "success", message: "Post like status toggled" });
@@ -535,7 +539,7 @@ const likePostToggle = async (
 
 const getTopTags = async (
   req: FastifyRequest<{ Querystring: { count: string } }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) => {
   const count = parseInt(req.query.count) || 10;
   const tags = await req.prisma.post.findMany({
@@ -553,7 +557,7 @@ const getTopTags = async (
   });
 
   const sortedTags = Object.entries(tagCount).sort(
-    (a, b) => tagCount[b[0]] - tagCount[a[0]]
+    (a, b) => tagCount[b[0]] - tagCount[a[0]],
   );
 
   console.log({ sortedTags, tagCount });
@@ -561,6 +565,105 @@ const getTopTags = async (
     status: "success",
     data: Object.fromEntries(sortedTags.slice(0, count)),
   });
+};
+
+const getPostById = async (
+  req: FastifyRequest<{ Params: { postId: string }; Body: any }>,
+  res: FastifyReply,
+) => {
+  const postDoc = await req.prisma.post.findUnique({
+    where: { id: req.params.postId },
+    select: {
+      id: true,
+      title: true,
+      context: true,
+      createdAt: true,
+      liked_by_users_id: true,
+      media: true,
+      tags: true,
+      comments: {
+        select: {
+          id: true,
+          content: true,
+          createdAt: true,
+          author: {
+            select: {
+              firstname: true,
+              lastname: true,
+              user_image: true,
+              affiliation: true,
+              id: true,
+              bio: true,
+              address: true,
+              username: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      },
+      author: {
+        select: {
+          firstname: true,
+          lastname: true,
+          user_image: true,
+          affiliation: true,
+          id: true,
+          bio: true,
+          address: true,
+          username: true,
+        },
+      },
+    },
+  });
+
+  if (!postDoc)
+    return res.code(404).send({ status: "fail", error: "Post not found" });
+
+  const parsedDoc = {
+    id: postDoc.id,
+    title: postDoc.title,
+    context: postDoc.context,
+    createdAt: postDoc.createdAt,
+    liked_by_users_id: postDoc.liked_by_users_id,
+    media: postDoc.media,
+    tags: postDoc.tags,
+    author: {
+      id: postDoc.author.id,
+      affilitaion: postDoc.author.affiliation,
+      fullname: capitalize(
+        `${postDoc.author.firstname} ${postDoc.author.lastname}`,
+      ),
+      username: postDoc.author.username,
+      pfp: postDoc.author.user_image.pfp_name,
+      cover: postDoc.author.user_image.cover_name,
+      address: capitalize(
+        `${postDoc.author.address.barangay}, ${postDoc.author.address.municipality}, ${postDoc.author.address.province}`,
+      ),
+    },
+    comments: postDoc.comments.map((comment) => {
+      return {
+        ...comment,
+        author: {
+          id: comment.author.id,
+          fullname: capitalize(
+            `${comment.author.firstname} ${comment.author.lastname}`,
+          ),
+          username: comment.author.username,
+          bio: comment.author.bio,
+          pfp: comment.author.user_image.pfp_name,
+          cover: comment.author.user_image.cover_name,
+          address: capitalize(
+            `${comment.author.address.barangay}, ${comment.author.address.municipality}, ${comment.author.address.province}`,
+          ),
+          affiliation: comment.author.affiliation,
+        },
+      };
+    }),
+  };
+
+  return res.code(200).send({ status: "ok", data: parsedDoc });
 };
 
 export type PostPostBody = {
@@ -590,6 +693,7 @@ const postController = {
   likePostToggle,
   getAllUserPost,
   getTopTags,
+  getPostById,
 };
 
 export default postController;

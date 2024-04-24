@@ -1,36 +1,39 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import axiosClient from "../utils/axios";
 import { AxiosError } from "axios";
 import { sendPostPostRequest } from "../utils";
+import PostComponent from "../components/Post";
+import { useParams, useSearchParams } from "react-router-dom";
+import { TokenContext } from "../providers/TokenProvider";
 
-export async function action({ request }: { request: Request; params: any }) {
-  let data = null;
-  switch (request.method) {
-    case "POST":
-      data = await sendPostPostRequest(await request.formData());
-      break;
-    default:
-      data = null;
-  }
-  return data;
-}
-export default function Post({ postId }: { postId: string }) {
-  const [post, setPost] = useState<post | null>(null);
-  useEffect(() => {
+
+export default function Post() {
+  const { accessToken } = useContext(TokenContext)!;
+  const [post, setPost] = useState<Post>();
+  const params = useParams<{ postId: string }>();
+
+  const initializePost = () => {
     axiosClient
-      .get(`/post/${postId}`)
-      .then((res) => {
-        setPost(res.data.data);
+      .get(`/posts/${params.postId}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       })
-      .catch((err: AxiosError) => {
-        console.log(err);
+      .then((res) => {
+        console.log({ data: res.data.data });
+        setPost(res.data.data);
       });
-  });
+  };
+
+  useEffect(initializePost, [accessToken]);
   return (
-    <div>
-      <h1>{post?.title}</h1>
-      <p>{post?.context}</p>
-    </div>
+    <>
+      {post && (
+        <div className="px-8">
+          <PostComponent postParam={post} />
+        </div>
+      )}
+    </>
   );
 }
 

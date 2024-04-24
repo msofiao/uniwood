@@ -31,41 +31,21 @@ import React, {
 import { dateWhenFormat } from "../utils/dateTools";
 import { UserInfoContext } from "../providers/UserInfoProvider";
 import axiosClient from "../utils/axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const PostProvider = createContext<PostContext | null>(null);
 
 export default function Post({ postParam }: { postParam: Post }) {
-  const [post, setPost] = useState<(Post & { author: PostAuthor }) | null>(
-    null
-  );
+  const [post, setPost] = useState<Post | null>(null);
   const [textVisible, setTextVisibility] = useState<boolean>(false);
   const initializeContextData = () => {
     setPost(postParam);
   };
   const loading = post === null;
-  const navigate = useNavigate();
 
-  const handleTagSearch = (
-    e: MouseEvent<HTMLSpanElement, globalThis.MouseEvent>
-  ) => {
-    navigate(`/search?q=${e.currentTarget.textContent!.slice(1)}`);
-  };
   useEffect(() => {
     initializeContextData();
   }, []);
-
-  const tags = post?.tags.map((tag) => {
-    if (tag === "") return <></>;
-    return (
-      <span
-        onClick={handleTagSearch}
-        className="text-blue-400 hover:text-blue-700 hover:underline hover:cursor-pointer"
-      >
-        #{tag}
-      </span>
-    );
-  }) ?? [<></>];
 
   return loading ? (
     <p>loading...</p>
@@ -81,44 +61,34 @@ export default function Post({ postParam }: { postParam: Post }) {
             <Typography className="name" variant="body1">
               {post.author.fullname}
             </Typography>
-            <Typography
-              // className="post-date"
-              variant="subtitle2"
-              sx={{ color: "#536471" }}
-            >
+            <Typography variant="subtitle2" sx={{ color: "#536471" }}>
               {dateWhenFormat(new Date(post.createdAt))}
             </Typography>
           </div>
         </div>
         <div className="line line__1"></div>
-        {post.title && (
-          <Typography className="my-2 font-bold" variant="h5">
-            {post.title}
-          </Typography>
-        )}
+        <Typography className="my-2 font-bold" variant="h5">
+          {post.title}
+        </Typography>
         {post.context.length < 200 ? (
           <>
             <Typography variant="body1">{post.context}</Typography>
-            {tags}
+            <Tags tags={post.tags} />
           </>
         ) : (
           <>
             <Typography variant="body1">
               {textVisible ? post.context : post.context.slice(0, 200) + "..."}
               <Button
+                className="normal-case text-blue-400 hover:cursor-pointer hover:text-blue-700 hover:underline"
                 variant="text"
                 color="secondary"
-                sx={{
-                  textTransform: "none",
-                  textDecoration: "underline",
-                  display: "inline-block",
-                }}
                 onClick={() => setTextVisibility(!textVisible)}
               >
                 {textVisible ? "Show Less" : "Show More"}
               </Button>
             </Typography>
-            {tags}
+            <Tags tags={post.tags} />
           </>
         )}
         <ImageList medias={post.media} />
@@ -175,72 +145,78 @@ function ImageList({
       gridBluePrint[3] = { gridCol: "1/4", gridRow: "2/3" };
       gridBluePrint[4] = { gridCol: "4/7", gridRow: "2/3" };
   }
-  const imgageSet = medias.map((media, index) => {
-    return (
-      <img
-        className="image"
-        key={index}
-        src={`${process.env.SERVER_PUBLIC}/${media.filename}`}
-        style={{
-          gridRow: gridBluePrint[index].gridRow,
-          gridColumn: gridBluePrint[index].gridCol,
-          objectFit: "cover",
-          display: "block",
-        }}
-        width="100%"
-        height="100%"
-        alt="post"
-      />
-    );
+  const mediaSet: JSX.Element[] = [];
+  medias.forEach((media, index) => {
+    if (media.filename.match(/\.(jpg|png|gif|png|heif|webp|bmp|avif)/)) {
+      mediaSet.push(
+        <img
+          className=" image block h-full w-full object-cover"
+          key={media.filename.slice(0, 15)}
+          src={`${process.env.SERVER_PUBLIC}/${media.filename}`}
+          style={{
+            gridRow: gridBluePrint[index].gridRow,
+            gridColumn: gridBluePrint[index].gridCol,
+          }}
+          alt="post"
+        />,
+      );
+    } else {
+      mediaSet.push(
+        <video
+          className="block h-full w-full border-2 border-solid border-slate-800 object-cover"
+          key={media.filename.slice(0, 15)}
+          style={{
+            gridRow: gridBluePrint[index].gridRow,
+            gridColumn: gridBluePrint[index].gridCol,
+          }}
+          src={`${process.env.SERVER_PUBLIC}/${media.filename}`}
+          controls
+        />,
+      );
+    }
   });
   return (
     <Box
-      className="image-list"
+      className="image-list flex-center grid items-center justify-center gap-[2px] overflow-hidden"
       sx={{
-        display: "grid",
-        gridGap: "2px",
         gridTemplateRows: gridRows,
         gridTemplateColumns: gridCols,
-        justifyContent: "center",
-        alignItems: "center",
-        // maxHeight: "500px",
-        overflow: "hidden",
       }}
     >
-      {...imgageSet}
+      {...mediaSet}
     </Box>
   );
 }
 
 function PostActions() {
-  const { post, setPost } = useContext(PostProvider)!;
+  const { post } = useContext(PostProvider)!;
   const theme = useTheme();
   const [fillHeart, setFillHeart] = useState(
     post?.liked_by_users_id.includes(
-      (localStorage.getItem("id") as string) ?? false
-    )
+      (localStorage.getItem("id") as string) ?? false,
+    ),
   );
   const [commentModalView, setCommentModalView] = useState(false);
   const [likeCountState, setLikeCountState] = useState(
-    post?.liked_by_users_id.length ?? 0
+    post?.liked_by_users_id.length ?? 0,
   );
   return (
     <>
-      <div className="post-interactions">
-        <MenuItem className="interaction-group">
-          <FavoriteRounded className="icon" />
+      <div className="mt-4 flex items-center justify-between px-2">
+        <MenuItem className="rounded-md">
+          <FavoriteRounded className={`text-gray-400`} />
           <Typography
-            className="context"
+            className="ml-2"
             variant="subtitle2"
             color={theme.palette.text.secondary}
           >
             {likeCountState === 0 ? "" : likeCountState}
           </Typography>
         </MenuItem>
-        <MenuItem className="interaction-group">
-          <ChatRounded className="icon" />
+        <MenuItem className="rounded-md">
+          <ChatRounded className={`text-gray-400`} />
           <Typography
-            className="context"
+            className={`ml-2`}
             variant="subtitle2"
             color={theme.palette.text.secondary}
           >
@@ -248,12 +224,12 @@ function PostActions() {
           </Typography>
         </MenuItem>
       </div>
-      <div className="line line__2"></div>
-      <div className="post-actions">
+      <div className="my-2 w-full border-b-2 border-solid border-gray-300" />
+      <div className="flex items-center justify-center gap-4">
         <MenuItem
-          className="action-container"
+          className="rounded-md"
           color="primary"
-          onClick={(e) => {
+          onClick={() => {
             axiosClient.patch(
               "/posts/likeToggle",
               {
@@ -262,29 +238,29 @@ function PostActions() {
               {
                 headers: {
                   Authorization: `Bearer ${localStorage.getItem(
-                    "accessToken"
+                    "accessToken",
                   )}`,
                 },
-              }
+              },
             );
             setLikeCountState(likeCountState + (fillHeart ? -1 : 1));
             setFillHeart(!fillHeart);
           }}
         >
           {fillHeart ? (
-            <FavoriteRounded />
+            <FavoriteRounded className="text-primary-300" />
           ) : (
-            <FavoriteBorderRounded className="icon" />
+            <FavoriteBorderRounded className="text-gray-600" />
           )}
-          <Typography className="context">Like</Typography>
+          <Typography className="ml-2">Like</Typography>
         </MenuItem>
         <MenuItem
-          className="action-container"
+          className="rounded-md"
           onClick={() => setCommentModalView(!commentModalView)}
           color="primary"
         >
-          <ChatBubbleOutlineRounded className="icon" />
-          <Typography className="context">Comment</Typography>
+          <ChatBubbleOutlineRounded className="text-gray-600" />
+          <Typography className="ml-2">Comment</Typography>
         </MenuItem>
         <CommentModal
           commentModalView={commentModalView}
@@ -302,153 +278,205 @@ function CommentModal({
   setCommentModalView: React.Dispatch<React.SetStateAction<boolean>>;
   commentModalView: boolean;
 }) {
-  const { post } = useContext(PostProvider)!;
+  const { post, setPost } = useContext(PostProvider)!;
   const commentRef = useRef<HTMLInputElement>(null);
   const [newComment, setNewComment] = useState<CommentProps[]>([]);
   const { userInfo } = useContext(UserInfoContext)!;
   const genId = useId();
+  const [searchParams] = useSearchParams();
+  const commentContainerRef = useRef<HTMLDivElement>(null);
+
   const clearCommentBox = () => {
     commentRef.current!.value = "";
   };
-
   const loading = userInfo === null;
+
+  const hoistHighlightedComment = () => {
+    const paramsCommentId = searchParams.get("commentId");
+    if (!paramsCommentId || !post) return;
+
+    const highlightedComment = post.comments.find(
+      (comment) => paramsCommentId === comment.id,
+    );
+
+    console.log({ highlightedComment });
+
+    if (!highlightedComment) return;
+
+    post.comments = [highlightedComment, ...post.comments.filter(comment => comment.id !== paramsCommentId)]
+    setPost(post);
+  };
+
+  useEffect(hoistHighlightedComment, );
+
   return loading ? (
     <div>Loading...</div>
   ) : (
     <Modal
-      className="root-modals"
       open={commentModalView}
       onClose={() => setCommentModalView(!commentModalView)}
     >
-      <Paper className="comment-modal" elevation={12}>
-        <Box style={{ position: "relative", width: "100%", height: "100%" }}>
-          <div className="header-container">
-            <Typography className="header" variant="h4">
-              Bryan's Post
-            </Typography>
-            <MenuItem
-              className="close-modal-group"
-              onClick={() => setCommentModalView(!commentModalView)}
-            >
-              <CloseRounded className="icon" />
-            </MenuItem>
-          </div>
-          <div className="comment-list">
-            {newComment?.map((comment, index) => (
-              <Comment key={index} comment={comment} />
-            ))}
-            {post?.comments.map((comment, index) => (
-              <Comment key={index} comment={comment} />
-            )) ?? (
-              <Box
-                sx={{
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                }}
-              ></Box>
-            )}
-          </div>
-          <Paper className="user-comment" elevation={2}>
-            <Avatar
-              className="avatar"
-              src={`${process.env.SERVER_PUBLIC}/${userInfo.pfp}`}
+      <div className="absolute left-1/2 top-1/2 flex max-h-[90%] w-[600px] -translate-x-1/2 -translate-y-1/2 flex-col rounded-lg bg-white shadow-md  2xl:min-h-[450px] ">
+        <div className="header flex items-center justify-center bg-transparent py-5">
+          <Typography variant="h4">{post?.author.fullname}'s Post</Typography>
+          <MenuItem
+            className="absolute right-3 rounded-[100%] p-2"
+            onClick={() => setCommentModalView(!commentModalView)}
+          >
+            <CloseRounded className="text-gray-500" />
+          </MenuItem>
+        </div>
+        <div
+          className="h-full overflow-auto px-4 pb-[125px]"
+          ref={commentContainerRef}
+        >
+          {newComment?.map((comment, index) => (
+            <Comment highlight={false} key={index} comment={comment} />
+          ))}
+          {post?.comments.map((comment, index) => (
+            <Comment
+              highlight={
+                searchParams.get("commentId") === comment.id ? true : false
+              }
+              key={index}
+              comment={comment}
             />
-            <form style={{ width: "100%" }}>
-              <TextField
-                className="input"
-                placeholder="Write a comment"
-                multiline
-                rows={2}
-                sx={{
-                  "& .MuiInputBase-input::placeholder": {
-                    color: "#838489",
-                    opacity: 1,
+          )) ?? (
+            <Box className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform"></Box>
+          )}
+        </div>
+        <Paper
+          className="fixed bottom-0 flex w-full gap-2 px-4 py-4"
+          elevation={2}
+        >
+          <Avatar
+            className="avatar"
+            src={`${process.env.SERVER_PUBLIC}/${userInfo.pfp}`}
+          />
+          <form className="relative w-full">
+            <TextField
+              className="input"
+              placeholder="Write a comment"
+              multiline
+              rows={2}
+              sx={{
+                "& .MuiInputBase-input::placeholder": {
+                  color: "#838489",
+                  opacity: 1,
+                },
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "none",
                   },
-                  "& .MuiOutlinedInput-root": {
-                    "& fieldset": {
-                      borderColor: "none",
-                      // This removes the border
-                    },
-                    "&:hover fieldset": {
-                      borderColor: "none", // This removes the hover effect
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "none", // This removes the focus effect
+                  "&:hover fieldset": {},
+                  "&.Mui-focused fieldset": {
+                    borderColor: "none",
+                  },
+                },
+              }}
+              inputProps={{ ref: commentRef }}
+              fullWidth
+              required
+            />
+            <IconButton
+              type="submit"
+              className="absolute bottom-2 right-2"
+              onClick={(e) => {
+                e.preventDefault();
+                axiosClient.post(
+                  "/comments",
+                  {
+                    comment: commentRef.current?.value,
+                    postId: post?.id,
+                  },
+                  {
+                    headers: {
+                      Authorization: `Bearer ${localStorage.getItem(
+                        "accessToken",
+                      )}`,
                     },
                   },
-                }}
-                inputProps={{ ref: commentRef }}
-                fullWidth
-                required
-              />
-              <IconButton
-                type="submit"
-                className="icon-container"
-                onClick={(e) => {
-                  e.preventDefault();
-                  axiosClient.post(
-                    "/comments",
-                    {
-                      comment: commentRef.current?.value,
-                      postId: post?.id,
-                    },
-                    {
-                      headers: {
-                        Authorization: `Bearer ${localStorage.getItem(
-                          "accessToken"
-                        )}`,
-                      },
-                    }
-                  );
-                  newComment.push({
-                    author: {
-                      id: userInfo.id,
-                      fullname: userInfo.fullname,
-                      affiliation: userInfo.affiliation,
-                      pfp: userInfo.pfp,
-                      cover: userInfo.cover,
-                      address: userInfo.address,
-                      username: userInfo.username,
-                      bio: userInfo.bio,
-                    },
-                    id: genId,
-                    content: commentRef.current?.value ?? "",
-                    createdAt: new Date().toISOString(),
-                    up_voted_by_users_id: [],
-                    down_voted_by_users_id: [],
-                  });
-                  e.currentTarget.value = "";
-                  setNewComment([...newComment]);
-                  clearCommentBox();
-                }}
-              >
-                <SendRounded className="icon" />
-              </IconButton>
-            </form>
-          </Paper>
-        </Box>
-      </Paper>
+                );
+                newComment.push({
+                  author: {
+                    id: userInfo.id,
+                    fullname: userInfo.fullname,
+                    affiliation: userInfo.affiliation,
+                    pfp: userInfo.pfp,
+                    cover: userInfo.cover,
+                    address: userInfo.address,
+                    username: userInfo.username,
+                    bio: userInfo.bio,
+                  },
+                  id: genId,
+                  content: commentRef.current?.value ?? "",
+                  createdAt: new Date().toISOString(),
+                  up_voted_by_users_id: [],
+                  down_voted_by_users_id: [],
+                });
+                e.currentTarget.value = "";
+                setNewComment([...newComment]);
+                clearCommentBox();
+
+                if (commentContainerRef.current) {
+                  commentContainerRef.current.scrollTop = 0;
+                }
+              }}
+            >
+              <SendRounded className="icon" />
+            </IconButton>
+          </form>
+        </Paper>
+      </div>
     </Modal>
+  );
+}
+
+function Tags({ tags }: { tags: string[] }) {
+  const navigate = useNavigate();
+  const handleTagNavigation = (
+    e: MouseEvent<HTMLSpanElement, globalThis.MouseEvent>,
+  ) => {
+    navigate(`/search?q=${e.currentTarget.textContent!.slice(1)}`);
+  };
+  return (
+    <>
+      {tags.map((tag) => {
+        if (tag === "") return <></>;
+        return (
+          <span
+            onClick={handleTagNavigation}
+            className="text-blue-400 hover:cursor-pointer hover:text-blue-700 hover:underline"
+          >
+            #{tag}
+          </span>
+        );
+      })}
+    </>
   );
 }
 
 function Comment({
   comment,
+  highlight,
 }: {
-  comment: CommentProps & { author: CommentAuthor };
+  comment: CommentProps;
+  highlight: boolean;
 }) {
   return (
-    <div className="comment">
+    <div className="mb-12 flex gap-4">
       <Avatar
-        className="avatar"
+        className="border"
         src={`${process.env.SERVER_PUBLIC}/${comment.author.pfp}`}
       />
-      <div className="comment-details">
-        <Typography className="username">{comment.author.fullname}</Typography>
-        <Typography className="context">{comment.content}</Typography>
-        <Typography className="date">
+      <div
+        className={`relative max-w-[85%] rounded-md ${!highlight ? "bg-gray-100" : "border-2 border-solid border-primary-300 bg-primary-100"} p-4`}
+      >
+        <p className="font-body text-sm font-semibold  text-slate-800">
+          {comment.author.fullname}
+        </p>
+        <Typography className="">{comment.content}</Typography>
+        <Typography className="absolute top-full">
           {dateWhenFormat(new Date(comment.createdAt))}
         </Typography>
       </div>

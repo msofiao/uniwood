@@ -37,8 +37,14 @@ export const authorize = (userRole: "USER" | "ADMIN" | "ANY") => {
       select: { role: true },
     });
 
-    if (!userExist || userExist?.role === userRole || userRole !== "ANY")
-      return res.status(401).send({ status: "fail", message: "Unauthorized" });
+    if (!userExist || (userExist.role !== userRole && userRole !== "ANY"))
+      return res
+        .status(401)
+        .send({
+          status: "fail",
+          error: "Unauthorized",
+          message: "Mismatch Role",
+        });
 
     // attach userId
     req.userId = payload.id;

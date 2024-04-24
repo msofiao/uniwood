@@ -11,7 +11,7 @@ import { authorize } from "../middlewares/authorize";
 export function UsersRoute(
   instance: FastifyInstance,
   _options: any,
-  done: () => void
+  done: () => void,
 ) {
   instance.get("/newUsers", userController.getNewUsers);
 
@@ -25,7 +25,7 @@ export function UsersRoute(
       preValidation: [authorize("ANY"), multipartConsumer],
       onResponse: userPutOnResponseHandler,
     },
-    userController.updateUser
+    userController.updateUser,
   );
   instance.post(
     "/",
@@ -33,13 +33,55 @@ export function UsersRoute(
       preValidation: [multipartConsumer],
       onResponse: usersPostOnResponseHandler,
     },
-    userController.createUser
+    userController.createUser,
   );
   instance.get(
     "/raw/:usernameOrId",
     { preValidation: [authorize("ANY")] },
-    userController.getUserRawData
+    userController.getUserRawData,
   );
+  instance.get(
+    "/register/recommendedAccounts",
+    userController.getRecommendedAccountsForNewUser,
+  );
+  instance.patch(
+    "/follow",
+    { preValidation: [authorize("ANY")] },
+    userController.followUser,
+  );
+  instance.patch(
+    "/unfollow",
+    { preValidation: [authorize("ANY")] },
+    userController.unfollowUser,
+  );
+  instance.patch(
+    "/addInterest",
+    { preValidation: [authorize("USER")] },
+    userController.addInterests,
+  );
+
+  instance.get(
+    "/search",
+    { preValidation: [authorize("USER")] },
+    userController.searchUsers,
+  );
+
+  instance.get(
+    "/verifyIfFollowed",
+    { preValidation: [authorize("USER")] },
+    userController.verifyUserIfFollowed,
+  );
+
+  instance.get(
+    "/followers",
+    { preValidation: [authorize("USER")] },
+    userController.getFollowers,
+  );
+
+  instance.get("/following", {
+    preValidation: [authorize("USER")],
+    handler: userController.getFollowings,
+  });
 
   done();
 }

@@ -2,14 +2,21 @@ import { Affiliation, Proffeciency, Role, Gender } from "@prisma/client";
 import { FastifyReply } from "fastify";
 import { FastifyRequest } from "../types/fastify";
 import { hash } from "bcrypt";
-
-import { FileInfo } from "../types/global";
-import { moveFile, capitalize, constantToCapitalize } from "../utils";
+import { ObjectId } from "mongodb";
+import { FileInfo, UserProfileInfo } from "../types/global";
+import {
+  moveFile,
+  capitalize,
+  constantToCapitalize,
+  createAccessToken,
+  createRefreshToken,
+  sendRefreshToken,
+} from "../utils";
 import { isValidObjectId } from "../utils/checker";
 
 const createUser = async (
   req: FastifyRequest<{ Body: UserPostBody }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) => {
   // Check if Email
   const emailExist = await req.prisma.user.findUnique({
@@ -40,11 +47,12 @@ const createUser = async (
 
   // hash Password
   const hashedPassword = await hash(req.body.password.replace(" ", ""), 10);
-
+  const userId = new ObjectId().toHexString();
   // Create User & Credential
   try {
     await req.prisma.user.create({
       data: {
+        id: userId,
         email: req.body.email.toLowerCase(),
         username: req.body.username.toLowerCase().replace(/w/, ""),
         firstname: req.body.firstname.replace(/w(2, )/, " ").trim(),
@@ -59,9 +67,6 @@ const createUser = async (
           municipality: req.body.municipality.replace(/w(2, )/, " ").trim(),
           province: req.body.province.replace(/w(2, )/, " ").trim(),
         },
-        proffeciency: req.body.proffeciency
-          .toUpperCase()
-          .replace(" ", "_") as Proffeciency,
         affiliation: req.body.affiliation
           .toUpperCase()
           .replace(" ", "_") as Affiliation,
@@ -88,15 +93,32 @@ const createUser = async (
   // Move files to public folder
   moveFile([req.body?.pfp, req.body?.cover], "tmp", "public");
 
+  const accessToken = createAccessToken({
+    email: req.body.email,
+    id: userId,
+    username: req.body.username,
+    userFullname: capitalize(`${req.body.firstname} ${req.body.lastname}`),
+  });
+  const refreshToken = createRefreshToken({
+    email: req.body.email,
+    id: userId,
+  });
+
+  sendRefreshToken(refreshToken, res);
+
   return res.code(201).send({
     status: "success",
     message: "User Successfully Created",
+    data: {
+      id: userId,
+      accessToken: accessToken,
+    },
   });
 };
 
 const updateUser = async (
   req: FastifyRequest<{ Body: UserPutBody }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) => {
   // TODO Add authorization if the user is the same as the one updating or an Admin
   // Check if id exist
@@ -135,7 +157,7 @@ const updateUser = async (
         lastname: req.body.lastname ?? userExist.lastname,
         bio: req.body.bio ?? userExist.bio,
         date_of_Birth: new Date(
-          req.body.dateOfBirth || userExist.date_of_Birth
+          req.body.dateOfBirth || userExist.date_of_Birth,
         ),
         gender: req.body.gender ?? userExist.gender,
         address: {
@@ -146,7 +168,6 @@ const updateUser = async (
             province: req.body.province ?? userExist.address.province,
           },
         },
-        proffeciency: req.body.profeciency ?? userExist.proffeciency,
         affiliation: req.body.affiliation ?? userExist.affiliation,
         user_image: {
           pfp_name: req.body.pfp?.filename ?? userExist.user_image.pfp_name,
@@ -182,7 +203,7 @@ const updateUser = async (
 
 const deleteUser = async (
   req: FastifyRequest<{ Body: { id: string } }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) => {
   // TODO Add authorization if the user is the same as the one deleting or an Admin
   // Check if id exist
@@ -222,7 +243,7 @@ const getAllusers = async (req: FastifyRequest, res: FastifyReply) => {
 };
 const getNewUsers = async (
   req: FastifyRequest<{ Querystring: { count: string } }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) => {
   // TODO Add authorization if the user is the same as the one deleting or an Admin
 
@@ -249,7 +270,7 @@ const getNewUsers = async (
       cover: user.user_image.cover_name,
       pfp: user.user_image.pfp_name,
       address: capitalize(
-        `${user.address.barangay}, ${user.address.municipality}, ${user.address.province}`
+        `${user.address.barangay}, ${user.address.municipality}, ${user.address.province}`,
       ),
       bio: user.bio,
       affiliation: constantToCapitalize(user.affiliation),
@@ -264,7 +285,7 @@ const getNewUsers = async (
 
 const getUser = async (
   req: FastifyRequest<{ Params: { id: string } }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) => {
   // TODO Add authorization if the user is logged
 
@@ -274,16 +295,44 @@ const getUser = async (
   // Check get user
   let user;
   try {
-    user = await req.prisma.user.findUnique({
-      where: {
-        username: req.params.id,
-      },
-    });
-
-    if (isValidObjectId(req.params.id) && !user)
-      user = await req.prisma.user.findUnique({
-        where: { id: req.params.id },
+    if (isValidObjectId(req.params.id)) {
+      user = await req.prisma.user.findFirst({
+        where: {
+          id: req.params.id,
+        },
+        include: {
+          followers: {
+            select: {
+              id: true,
+            },
+          },
+          following: {
+            select: {
+              id: true,
+            },
+          },
+        },
       });
+    } else {
+      console.log("Finding by username");
+      user = await req.prisma.user.findFirst({
+        where: {
+          username: req.params.id,
+        },
+        include: {
+          followers: {
+            select: {
+              id: true,
+            },
+          },
+          following: {
+            select: {
+              id: true,
+            },
+          },
+        },
+      });
+    }
   } catch (error) {
     console.error(error);
     return res.status(500).send({
@@ -292,11 +341,12 @@ const getUser = async (
     });
   }
 
-  if (!user)
+  if (!user) {
     return res.status(404).send({
       status: "fail",
       message: "User not found",
     });
+  }
 
   return res.send({
     status: "success",
@@ -307,22 +357,23 @@ const getUser = async (
       cover: user.user_image.cover_name,
       pfp: user.user_image.pfp_name,
       address: capitalize(
-        `${user.address.barangay}, ${user.address.municipality}, ${user.address.province}`
+        `${user.address.barangay}, ${user.address.municipality}, ${user.address.province}`,
       ),
       username: user.username,
       bio: user.bio,
       dateOfBirth: user.date_of_Birth,
-      proffeciency: constantToCapitalize(user.proffeciency),
-      Affiliation: constantToCapitalize(user.affiliation),
+      affiliation: constantToCapitalize(user.affiliation),
       gender: constantToCapitalize(user.gender),
       email: user.email,
+      followersCount: user.followers.length,
+      followingCount: user.following.length,
     },
   });
 };
 
 const getUserRawData = async (
   req: FastifyRequest<{ Params: { usernameOrId: string }; Body: any }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) => {
   let user = await req.prisma.user.findUnique({
     where: { username: req.params.usernameOrId },
@@ -388,7 +439,374 @@ const getUserRawData = async (
   });
 };
 
-// TODO Create Search User Controller
+const getRecommendedAccountsForNewUser = async (
+  req: FastifyRequest<{ Querystring: { limit: string } }>,
+  res: FastifyReply,
+) => {
+  // TODO add algorithm to get recommended accounts for new Users
+  const recommendedAccountsDocs = await req.prisma.user.findMany({
+    take: parseInt("5"),
+    select: {
+      id: true,
+      firstname: true,
+      lastname: true,
+      bio: true,
+      email: true,
+      user_image: true,
+      address: true,
+      date_of_Birth: true,
+      gender: true,
+      username: true,
+      affiliation: true,
+    },
+  });
+
+  const recommendedAccounts = recommendedAccountsDocs.map((user) => ({
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    fullname: capitalize(`${user.firstname} ${user.lastname}`),
+    cover: user.user_image.cover_name,
+    gender: user.gender,
+    pfp: user.user_image.pfp_name,
+    affiliation: constantToCapitalize(user.affiliation),
+    address: capitalize(
+      `${user.address.barangay}, ${user.address.municipality}, ${user.address.province}`,
+    ),
+    bio: user.bio,
+    dateOfBirth: user.date_of_Birth,
+  }));
+
+  return res.code(200).send({ status: "success", recommendedAccounts });
+};
+
+const followUser = async (
+  req: FastifyRequest<{ Querystring: { userId: string }; Body: any }>,
+  res: FastifyReply,
+) => {
+  try {
+    await req.prisma.user.update({
+      where: { id: req.userId },
+      data: {
+        following: {
+          connect: { id: req.query.userId },
+        },
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send({
+      status: "fail",
+      error: "Database Erorr",
+      message: "Unable to follow user",
+    });
+  }
+
+  return res
+    .code(200)
+    .send({ status: "success", message: "Successfully followed" });
+};
+
+const unfollowUser = async (
+  req: FastifyRequest<{ Querystring: { userId: string }; Body: any }>,
+  res: FastifyReply,
+) => {
+  try {
+    await req.prisma.user.update({
+      where: { id: req.userId },
+      data: {
+        following: {
+          disconnect: { id: req.query.userId },
+        },
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    return res.code(500).send({
+      status: "fail",
+      error: "Database Error",
+      message: "Unable to unfollow user",
+    });
+  }
+
+  return res
+    .code(200)
+    .send({ status: "success", message: "Successfully unfollowed" });
+};
+
+const addInterests = async (
+  req: FastifyRequest<{ Body: { interests: string[] } }>,
+  res: FastifyReply,
+) => {
+  // To lowercase
+  req.body.interests = req.body.interests.map((interest) =>
+    interest.toLowerCase(),
+  );
+
+  try {
+    let eInterestDoc = await req.prisma.user.findUnique({
+      where: { id: req.userId },
+      select: {
+        interests: true,
+      },
+    })!;
+    if (eInterestDoc == null) throw Error("User not found");
+    eInterestDoc.interests.forEach((interest) => {
+      if (!req.body.interests.includes(interest)) {
+        req.body.interests.push(interest);
+      }
+    });
+
+    // Save Interest
+    await req.prisma.user.update({
+      where: { id: req.userId },
+      data: {
+        interests: {
+          set: req.body.interests,
+        },
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send({
+      status: "fail",
+      error: "DB Error",
+      message: error,
+    });
+  }
+
+  return res
+    .code(200)
+    .send({ status: "success", message: "Successfully added interests" });
+};
+
+const searchUsers = async (
+  req: FastifyRequest<{ Body: any; Querystring: { q: string } }>,
+  res: FastifyReply,
+) => {
+  let usersDoc = await req.prisma.user.findMany({
+    where: {
+      OR: [
+        {
+          username: {
+            contains: req.query.q,
+            mode: "insensitive",
+          },
+        },
+        {
+          firstname: {
+            contains: req.query.q,
+            mode: "insensitive",
+          },
+        },
+        {
+          lastname: {
+            contains: req.query.q,
+            mode: "insensitive",
+          },
+        },
+      ],
+    },
+  });
+
+  let parsedUsersData: UserProfileInfo[] = usersDoc.map((user) => {
+    return {
+      id: user.id,
+      fullname: capitalize(`${user.firstname} ${user.lastname}`),
+      affiliation: constantToCapitalize(user.affiliation),
+      bio: user.bio || "",
+      dateOfBirth: user.date_of_Birth.toDateString(),
+      gender: constantToCapitalize(user.gender),
+      address: capitalize(
+        `${user.address.barangay}, ${user.address.municipality}, ${user.address.province}`,
+      ),
+      email: user.email,
+      username: user.username,
+      pfp: user.user_image.pfp_name,
+      cover: user.user_image.cover_name,
+    };
+  });
+
+  return res.code(200).send({ status: "success", data: parsedUsersData });
+};
+
+const verifyUserIfFollowed = async (
+  req: FastifyRequest<{ Querystring: { targetUser: string }; Body: any }>,
+  res: FastifyReply,
+) => {
+  const targetUserDoc = await req.prisma.user.findFirst({
+    where: {
+      id: req.query.targetUser,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!targetUserDoc)
+    return res
+      .code(404)
+      .send({ status: "success", data: { isFollowed: false } });
+
+  const isFollowed = await req.prisma.user.findFirst({
+    where: {
+      id: req.userId,
+      following_ids: {
+        has: targetUserDoc.id,
+      },
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!isFollowed)
+    return res
+      .code(404)
+      .send({ status: "success", data: { isFollowed: false } });
+
+  return res.code(200).send({ status: "success", data: { isFollowed: true } });
+};
+
+const getFollowers = async (
+  req: FastifyRequest<{ Body: any; Querystring: { targetUserId: string } }>,
+  res: FastifyReply,
+) => {
+  let followersDoc;
+  if (isValidObjectId(req.query.targetUserId)) {
+    followersDoc = await req.prisma.user.findUnique({
+      where: { id: req.query.targetUserId },
+      select: {
+        followers: {
+          select: {
+            id: true,
+            firstname: true,
+            lastname: true,
+            username: true,
+            user_image: true,
+            bio: true,
+            address: true,
+            affiliation: true,
+          },
+        },
+      },
+    });
+  } else {
+    followersDoc = await req.prisma.user.findUnique({
+      where: { username: req.query.targetUserId },
+      select: {
+        followers: {
+          select: {
+            id: true,
+            firstname: true,
+            lastname: true,
+            username: true,
+            user_image: true,
+            bio: true,
+            address: true,
+            affiliation: true,
+          },
+        },
+      },
+    });
+  }
+
+  const userFollowedAccountsDoc = await req.prisma.user.findUnique({
+    where: { id: req.userId },
+    select: {
+      following: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  });
+
+  const parsedFollowersData = followersDoc?.followers.map((follower) => {
+    return {
+      id: follower.id,
+      fullname: capitalize(`${follower.firstname} ${follower.lastname}`),
+      username: follower.username,
+      pfp: follower.user_image.pfp_name,
+      cover: follower.user_image.cover_name,
+      bio: follower.bio,
+      address: capitalize(
+        `${follower.address.barangay}, ${follower.address.municipality}, ${follower.address.province}`,
+      ),
+      affiliation: constantToCapitalize(follower.affiliation),
+      followedByTheUer:
+        userFollowedAccountsDoc?.following.some(
+          (userFollowedAcc) => userFollowedAcc.id === follower.id,
+        ) ?? false,
+    };
+  });
+
+  return res.code(200).send({ status: "success", data: parsedFollowersData });
+};
+
+const getFollowings = async (
+  req: FastifyRequest<{ Body: any; Querystring: { targetUserId: string } }>,
+  res: FastifyReply,
+) => {
+  let followingDoc;
+
+  if (isValidObjectId(req.query.targetUserId)) {
+    followingDoc = await req.prisma.user.findUnique({
+      where: { id: req.query.targetUserId },
+      select: {
+        following: {
+          select: {
+            id: true,
+            firstname: true,
+            lastname: true,
+            username: true,
+            user_image: true,
+            bio: true,
+            address: true,
+            affiliation: true,
+          },
+        },
+      },
+    });
+  } else {
+    followingDoc = await req.prisma.user.findUnique({
+      where: { username: req.query.targetUserId },
+      select: {
+        following: {
+          select: {
+            id: true,
+            firstname: true,
+            lastname: true,
+            username: true,
+            user_image: true,
+            bio: true,
+            address: true,
+            affiliation: true,
+          },
+        },
+      },
+    });
+  }
+
+  const parsedFollowersData = followingDoc?.following.map((follower) => {
+    return {
+      id: follower.id,
+      fullname: capitalize(`${follower.firstname} ${follower.lastname}`),
+      username: follower.username,
+      pfp: follower.user_image.pfp_name,
+      cover: follower.user_image.cover_name,
+      bio: follower.bio,
+      address: capitalize(
+        `${follower.address.barangay}, ${follower.address.municipality}, ${follower.address.province}`,
+      ),
+      affiliation: constantToCapitalize(follower.affiliation),
+    };
+  });
+
+  console.log({parsedFollowersData});
+
+  return res.code(200).send({ status: "success", data: parsedFollowersData });
+};
 
 export interface UserPostBody {
   username: string;
@@ -400,7 +818,6 @@ export interface UserPostBody {
   dateOfBirth: Date;
   gender: Gender;
   role: Role;
-  proffeciency: Proffeciency;
   affiliation: Affiliation;
   password: string;
   pfp: FileInfo | undefined;
@@ -438,6 +855,14 @@ const userController = {
   getUser,
   getUserRawData,
   getNewUsers,
+  getRecommendedAccountsForNewUser,
+  followUser,
+  unfollowUser,
+  addInterests,
+  searchUsers,
+  verifyUserIfFollowed,
+  getFollowings,
+  getFollowers,
 };
 
 export default userController;

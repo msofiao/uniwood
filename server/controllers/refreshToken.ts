@@ -19,7 +19,7 @@ const refreshToken = async (req: FastifyRequest, res: FastifyReply) => {
   if (!oldRefreshToken)
     return res.code(401).send({
       status: "fail",
-      error: "MissingCookie",
+      error: "Missing RefeshToken Cookie",
       message: "Unauthorized",
     });
 
@@ -65,7 +65,7 @@ const refreshToken = async (req: FastifyRequest, res: FastifyReply) => {
       id: payload.id,
     },
     accessToken,
-    res
+    res,
   );
 };
 const refrehTokenController = { refreshToken };

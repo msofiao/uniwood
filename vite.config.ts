@@ -29,10 +29,10 @@ export default defineConfig(({ mode }) => {
       port: 3000,
       https: {
         key: fs.readFileSync(
-          resolve(__dirname, "./client/private/127.0.0.1.key")
+          resolve(__dirname, "./client/private/127.0.0.1.key"),
         ),
         cert: fs.readFileSync(
-          resolve(__dirname, "./client/private/127.0.0.1.crt")
+          resolve(__dirname, "./client/private/127.0.0.1.crt"),
         ),
       },
       watch: {
@@ -44,6 +44,7 @@ export default defineConfig(({ mode }) => {
       "process.env.CLIENT_PORT": JSON.stringify(env.CLIENT_PORT),
       "process.env.BASE_SERVER_URL": JSON.stringify(env.BASE_SERVER_URL),
       "process.env.SERVER_PUBLIC": JSON.stringify(env.SERVER_PUBLIC),
+      "process.env.WS_SERVER_URL": JSON.stringify(env.WS_SERVER_URL),
     },
   };
 });

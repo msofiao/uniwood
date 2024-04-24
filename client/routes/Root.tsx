@@ -40,7 +40,7 @@ import axiosClient from "../utils/axios";
 export async function loader() {
   const refreshTokenResponse = await sendRefreshTokenRequest();
   const userInfoResponse = await sendUserInfoRequest(
-    localStorage.getItem("id") as string
+    localStorage.getItem("id") as string,
   );
 
   if (

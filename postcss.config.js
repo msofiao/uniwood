@@ -1,8 +1,11 @@
-module.exports = {
-  plugins: [
-    require("autoprefixer"),
-    require("postcss-preset-env"),
-    require("postcss-import"),
-    require("tailwindcss"),
-  ],
-};
+import autoprefixer from "autoprefixer";
+import postcssPresetEnv from "postcss-preset-env";
+import postcssImport from "postcss-import";
+import tailwindcss from "tailwindcss";
+
+export const plugins = [
+  autoprefixer,
+  postcssPresetEnv,
+  postcssImport,
+  tailwindcss,
+];

@@ -1,53 +1,89 @@
 import {
   Alert,
   Avatar,
-  Box,
   Button,
+  Chip,
+  Fade,
   FormControl,
   IconButton,
   InputLabel,
+  LinearProgress,
   MenuItem,
   Modal,
   Select,
   SelectChangeEvent,
-  TextField,
+  Slide,
+  Step,
+  StepLabel,
+  Stepper,
+  TextField as TextFieldMUI,
   Typography,
 } from "@mui/material";
-import React, {
+import {
   Dispatch,
   SetStateAction,
+  createContext,
   useContext,
   useEffect,
+  useReducer,
   useRef,
   useState,
 } from "react";
-import { useTheme } from "@mui/material/styles";
-import { CloseRounded, EditRounded } from "@mui/icons-material";
-import axiosClient from "../utils/axios";
-import { Form, useActionData, useFetcher, useNavigate } from "react-router-dom";
+import { styled, useTheme } from "@mui/material/styles";
+import {
+  CloseRounded,
+  EditRounded,
+  PersonAddAltRounded,
+  PersonRemoveAlt1Rounded,
+} from "@mui/icons-material";
+import {
+  Form,
+  Link,
+  useActionData,
+  useFetcher,
+  useNavigate,
+} from "react-router-dom";
 import { TokenContext } from "../providers/TokenProvider";
 import shareProjectsSvg from "../assets/images/share-projects.svg";
-import logo from "../assets/images/logo.svg";
-import { AlertContext } from "../providers/AlertProvider";
+import React from "react";
+import { LoadingButton, TabContext, TabPanel } from "@mui/lab";
+import axiosClient from "../utils/axios";
+import { login } from "../api/login";
+
+const RFormDataContext = createContext<RegisterFDataProps | null>(null);
+const ModalAlertContext = createContext<ModalAlertContextProps | null>(null);
+const steps = [
+  "Personal Infortmation",
+  "User Credential",
+  "Interest and Recommendation",
+];
+
+const TextField = styled(TextFieldMUI)(() => ({
+  "& .MuiFormHelperText-root": {
+    textAlign: "right",
+  },
+}));
 
 export default function Login() {
   const theme = useTheme();
-  const [registerModalView, setregisterModalView] = useState(false);
-  return (
-    <div className="login" style={{ background: "#fff" }}>
-      {/* <Box
-        className="alert-master"
-        sx={{ display: alerts.error.visible ? "block" : "none" }}
-      >
-        <Alert severity="error" onClose={handleAlertClose("error")}>
-          <Typography variant="body1">{alerts.error.message}</Typography>
-        </Alert>
-      </Box> */}
+  const [registerModalView, setRegisterModalView] = useState(false);
 
+  const handleRegisterModalView = (
+    _e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+  ) => {
+    setRegisterModalView(true);
+  };
+
+  return (
+    <div className="login bg-white">
       <nav>
         <div className="logo-container">
-          <img className="logo" src={logo} alt="" />
-          <Typography className="logo-text" variant="h3" fontFamily={"Nunito"}>
+          <img
+            className="logo"
+            src={`${process.env.SERVER_PUBLIC}/assets/logo.svg`}
+            alt=""
+          />
+          <Typography className="logo-text " variant="h3" fontFamily={"Nunito"}>
             Uniwood
           </Typography>
         </div>
@@ -60,11 +96,10 @@ export default function Login() {
             No account registered ?
           </Typography>
           <Button
-            className="register-button"
+            className="register-button normal-case"
             variant="text"
-            sx={{ textTransform: "none" }}
             color={"primary"}
-            onClick={() => setregisterModalView(true)}
+            onClick={handleRegisterModalView}
           >
             Register
           </Button>
@@ -96,411 +131,136 @@ export default function Login() {
             </Typography>
           </div>
         </div>
-        <LoginForm setRegisterModalView={setregisterModalView} />
+        <LoginForm setRegisterModalView={setRegisterModalView} />
         <RegisterModal
           registerModalView={registerModalView}
-          setregisterModalView={setregisterModalView}
+          setRegisterModalView={setRegisterModalView}
         />
       </main>
     </div>
   );
 }
+
 function RegisterModal({
   registerModalView,
-  setregisterModalView,
-}: {
-  registerModalView: boolean;
-  setregisterModalView: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
-  const [inputError, setInputError] = useState({} as any);
-  const userFetcher = useFetcher();
-  const fetcherFormRef = useRef<HTMLFormElement>(null);
-  const submitRef = useRef<HTMLButtonElement>(null);
-  const emailRef = useRef<HTMLInputElement>(null);
-  const usernameRef = useRef<HTMLInputElement>(null);
-  const passowrdRef = useRef<HTMLInputElement>(null);
-  const confirmPasswordRef = useRef<HTMLInputElement>(null);
-  const [inputInfo, setInputInfo] = useState({
-    password: "",
-    confirmPassword: "",
+  setRegisterModalView,
+}: RegisterModalProps) {
+  const navigate = useNavigate();
+  const { accessToken } = useContext(TokenContext)!;
+  const [stepValue, dispatchStepValue] = useReducer(stepReducer, 0);
+  const [recommendations, setRecommendations] = useState<string[]>([
+    "workout",
+    "singing",
+    "coding",
+    "dancing",
+    "gaming",
+    "reading",
+    "writing",
+    "drawing",
+    "painting",
+    "woodworking",
+    "gardening",
+    "biking",
+    "hiking",
+    "swimming",
+    "running",
+    "cooking",
+    "baking",
+  ]);
+  const [pickedRecs, setPickedRecs] = useState<string[]>([]);
+  const [alertState, setAlertState] = useState<AlertStateProps>({
+    severity: "success",
+    message: "Account Created",
+    visible: true,
   });
-  const coverImgRef = useRef<HTMLInputElement>(null);
-  const pfpImgRef = useRef<HTMLInputElement>(null);
-  const [userImage, setUserImage] = useState<{
-    cover: {
-      imgString: string | null;
-      imgFile: File | null;
-    };
-    pfp: {
-      imgString: string | null;
-      imgFile: File | null;
-    };
-  }>({
-    cover: {
-      imgString: null,
-      imgFile: null,
-    },
-    pfp: {
-      imgString: null,
-      imgFile: null,
-    },
-  });
-  const [genderSelect, setGenderSelect] = useState("");
-  const [affiliationSelect, setAffiliationSelect] = useState("");
-  const [proffeciencySelect, setProffeciencySelect] = useState("");
-  const { setAlert } = useContext(AlertContext);
+  const formDataRef = useRef<FormData>(new FormData());
 
-  // utilitiies handle select change
-  const handleSelectGenderChange = (e: SelectChangeEvent<string>) => {
-    setGenderSelect(e.target.value);
+  const autoAlertRemoval = () => {
+    setTimeout(() => {
+      setAlertState({ ...alertState, visible: false });
+    }, 4000);
   };
-  const handleSelectAffiliationChange = (e: SelectChangeEvent<string>) => {
-    setAffiliationSelect(e.target.value);
-  };
-  const handleSelectProffeciencyChange = (e: SelectChangeEvent<string>) => {
-    setProffeciencySelect(e.target.value);
-  };
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files === null || !(e.target.files[0] instanceof File)) return;
-
-    const file = e.target.files[0];
-
-    const reader = new FileReader();
-    reader.onload = (f) => {
-      setUserImage({
-        ...userImage,
-        [e.target.name]: {
-          imgString: f.target?.result?.toString() ?? null,
-          imgFile: file,
-        },
-      });
-    };
-    reader.readAsDataURL(file);
-  };
-  const handleDefaultImage = () => {
-    axiosClient
-      .get(`${process.env.SERVER_PUBLIC}/default-pfp.jpg`, {
-        responseType: "blob",
-      })
-      .then((res) => {
-        setUserImage({
-          ...userImage,
-          pfp: {
-            imgString: URL.createObjectURL(res.data),
-            imgFile: new File([res.data], "default-pfp.jpg", {
-              type: res.headers["content-type"],
-            }),
-          },
-        });
-      });
-    axiosClient
-      .get(`${process.env.SERVER_PUBLIC}/default-cover.jpg`, {
-        responseType: "blob",
-      })
-      .then((res) => {
-        setUserImage({
-          ...userImage,
-          cover: {
-            imgString: URL.createObjectURL(res.data),
-            imgFile: new File([res.data], "default-cover.jpg", {
-              type: res.headers["content-type"],
-            }),
-          },
-        });
-      });
-  };
-  const handleRegisterStatusAlert = () => {
-    if (userFetcher.data?.status === "success") {
-      setAlert({
-        severity: "success",
-        message: "Account Created",
-        hidden: false,
-      });
-      setregisterModalView(false);
-    } else if (userFetcher.data?.status === "fail") {
-      setAlert({
-        severity: "error",
-        message: "Account not created",
-        hidden: false,
-      });
-    }
-    // setregisterModalView(false);
-  };
-  const handleInputError = () => {
-    console.log({ inputError });
-    if (userFetcher.data?.status !== "fail") return;
-    if (userFetcher.data?.error === "ValidationError") {
-      userFetcher.data?.errorFields?.forEach(
-        (errorFields: { field: string; message: string }) => {
-          setInputError({
-            ...inputError,
-            [errorFields.field]: errorFields.message,
-          });
-        }
-      );
-    }
-  };
-  const handleFocusInputError = () => {
-    const lastErrorField = Object.entries(inputError).filter(
-      (elem) => elem[1] !== null
+  const addInterests = () =>
+    axiosClient.patch(
+      "/users/addInterest",
+      { interests: pickedRecs },
+      { headers: { Authorization: `Bearer ${accessToken}` } },
     );
-    const lastErrorFieldKey = lastErrorField[lastErrorField.length - 1]?.[0];
 
-    console.log({ lastErrorFieldKey });
-
-    if (!lastErrorFieldKey) return;
-    if (lastErrorFieldKey === "email")
-      emailRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-    else if (lastErrorFieldKey === "username")
-      usernameRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    else if (lastErrorFieldKey === "password")
-      passowrdRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    else if (lastErrorFieldKey === "confirmPassword")
-      confirmPasswordRef.current?.scrollIntoView({
-        block: "center",
-        behavior: "smooth",
-      });
+  const goToHomePage = () => {
+    addInterests();
+    navigate("/");
   };
 
-  useEffect(handleDefaultImage, []);
-  useEffect(handleRegisterStatusAlert, [userFetcher.data]);
-  useEffect(handleInputError, [userFetcher.data]);
-  useEffect(handleFocusInputError, [inputError, userFetcher.data]);
+  useEffect(autoAlertRemoval, [alertState.visible]);
 
   return (
     <Modal
-      className="login-modals"
+      className="login-modal flex items-center justify-center"
       open={registerModalView}
-      onClose={() => setregisterModalView(false)}
+      onClose={() => setRegisterModalView(false)}
     >
-      <userFetcher.Form
-        className="signup-modal"
-        ref={fetcherFormRef}
-        action="/users"
-        method="POST"
-        encType="multipart/form-data"
-      >
-        <div className="header-container">
-          <IconButton
-            className="icon-container"
-            onClick={() => setregisterModalView(false)}
-          >
-            <CloseRounded className="icon" />
-          </IconButton>
-          <Typography className="name" variant="h5">
-            Create Account
-          </Typography>
-          <Button
-            type="submit"
-            className="button"
-            variant="contained"
-            color="secondary"
-            sx={{ color: "#ffffff" }}
-          >
-            Signup
-          </Button>
-        </div>
-        <div className="images-container">
-          <IconButton
-            className="cover-icon-container"
-            sx={{
-              borderRadius: 0,
-              "&:hover": { backgroundColor: "rgba(0,0,0, .4)" },
-            }}
-          >
-            <label htmlFor="edit-profile-cover" className="cover-label">
-              <EditRounded className="icon" sx={{ color: "#fff" }} />
-            </label>
-            <input
-              ref={coverImgRef}
-              id="edit-profile-cover"
-              type="file"
-              name="cover"
-              hidden
-              accept="*/image"
-              onChange={handleImageChange}
-            />
-          </IconButton>
-          <img
-            className="cover"
-            src={
-              userImage.cover.imgString ??
-              `${process.env.SERVER_PUBLIC}/default-cover.jpg`
-            }
-          />
-          <div className="avatar-container">
-            <Avatar
-              className="avatar"
-              src={
-                userImage.pfp.imgString ??
-                `${process.env.SERVER_PUBLIC}/default-pfp.jpg`
-              }
-            />
-            <IconButton
-              className="icon-container"
-              sx={{
-                "&:hover": {
-                  backgroundColor: "rgba(0, 0, 0, 0.4)",
-                },
-              }}
-            >
-              <label htmlFor="edit-profile-pfp" className="pfp-label">
-                <EditRounded className="icon" sx={{ color: "#fff" }} />
-              </label>
-              <input
-                ref={pfpImgRef}
-                id="edit-profile-pfp"
-                type="file"
-                name="pfp"
-                hidden
-                accept="*/image"
-                onChange={handleImageChange}
-              />
-            </IconButton>
+      <RFormDataContext.Provider value={formDataRef}>
+        <ModalAlertContext.Provider value={{ setAlert: setAlertState }}>
+          <div className="signup-modal relative flex h-[90%] max-h-[750px] w-[500px] flex-col   rounded-xl bg-white pb-0 shadow-md ">
+            <ModalHeader setRegisterModalView={setRegisterModalView} />
+            <RegisterStepper step={stepValue} />
+            <div className="overflow-y-auto">
+              <TabContext value={stepValue.toString()}>
+                <TabPanel className="p-0" value="0">
+                  <ImageForm />
+                  <PersonalInfoForm
+                    stepValue={stepValue}
+                    dispatchStepValue={dispatchStepValue}
+                  />
+                </TabPanel>
+                <TabPanel className="h-full p-0" value="1">
+                  <CredentialForm
+                    dispatchStepValue={dispatchStepValue}
+                    setAlert={setAlertState}
+                  />
+                </TabPanel>
+                <TabPanel className="p-8" value="2">
+                  <RecommendedAccounts />
+                  <RecommendedSelect
+                    recommendations={recommendations}
+                    pickedRecs={pickedRecs}
+                    setPickedRecs={setPickedRecs}
+                  />
+                  <Button
+                    className="ml-auto mt-2 block w-fit rounded-md bg-primary-400 px-3 py-2 text-base font-semibold normal-case text-white hover:bg-primary-500"
+                    variant="contained"
+                    onClick={goToHomePage}
+                  >
+                    Go to Home Page
+                  </Button>
+                </TabPanel>
+              </TabContext>
+            </div>
           </div>
-        </div>
-        <Box className="input-container">
-          <Button
-            ref={submitRef}
-            type="submit"
-            sx={{ display: "none" }}
-          ></Button>
-          <TextField
-            name="firstname"
-            label="First Name"
-            error={inputError.firstname ? true : false}
-            onChange={() => {
-              setInputError({ ...inputError, firstname: null });
-            }}
-            required
-            helperText=" "
-          />
-          <TextField
-            name="middlename"
-            label="Middle Name"
-            required
-            helperText=" "
-          />
-          <TextField
-            name="lastname"
-            label="Last Name"
-            required
-            helperText=" "
-          />
-          <TextField
-            ref={emailRef}
-            name="email"
-            label="Email"
-            required
-            type="email"
-            helperText={inputError.email ?? " "}
-            error={inputError.email ? true : false}
-            onChange={() => setInputError({ ...inputError, email: null })}
-          />
-          <TextField
-            ref={usernameRef}
-            name="username"
-            label="Username"
-            required
-            error={inputError.username ? true : false}
-            helperText={inputError.username ?? " "}
-            autoFocus={inputError.username ? true : false}
-            onChange={() => setInputError({ ...inputError, username: null })}
-          />
-          <TextField
-            ref={passowrdRef}
-            name="password"
-            label="Password"
-            required
-            helperText={inputError.password ?? " "}
-            error={inputError.password ? true : false}
-            onChange={(e) => {
-              setInputError({ ...inputError, password: null });
-              setInputInfo({ ...inputInfo, password: e.target.value });
-            }}
-          />
-          <TextField
-            ref={confirmPasswordRef}
-            name="confirmPassword"
-            label="Confirm Password"
-            required
-            helperText={inputError.password ?? " "}
-            error={inputError.password ? true : false}
-            onChange={(e) => {
-              setInputError({ ...inputError, confirmPassword: null });
-              setInputInfo({ ...inputInfo, confirmPassword: e.target.value });
-            }}
-          />
-          <TextField name="bio" label="Bio" required />
-          <TextField
-            name="dateOfBirth"
-            label="Date of Birth"
-            type="date"
-            required
-            InputLabelProps={{
-              shrink: true,
-            }}
-            sx={{ margin: "25px 0" }}
-          />
-          <TextField name="barangay" label="barangay" required helperText=" " />
-          <TextField
-            name="municipality"
-            label="municipality"
-            required
-            helperText=" "
-          />
-          <TextField name="province" label="province" required helperText=" " />
-          <FormControl fullWidth>
-            <InputLabel id="edit-profile-proffeciency">
-              Proffeciency{" "}
-            </InputLabel>
-            <Select
-              name="proffeciency"
-              labelId="edit-profile-proffeciency"
-              label="Proffeciency"
-              value={proffeciencySelect}
-              onChange={handleSelectProffeciencyChange}
+
+          <Fade in={alertState.visible}>
+            <Alert
+              className="absolute bottom-6 left-14 z-50 w-[250px]"
+              severity={alertState.severity}
+              action={
+                <IconButton
+                  aria-label="close"
+                  color="inherit"
+                  size="small"
+                  onClick={() => {
+                    setAlertState({ ...alertState, visible: false });
+                  }}
+                >
+                  <CloseRounded fontSize="inherit" />
+                </IconButton>
+              }
             >
-              <MenuItem value="newbie">Newbie</MenuItem>
-              <MenuItem value="novice">Novice</MenuItem>
-              <MenuItem value="expert">Expert</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl fullWidth>
-            <InputLabel id="edit-profile-affiliation">Affiliation</InputLabel>
-            <Select
-              name="affiliation"
-              labelId="edit-profile-affiliation"
-              label="Affiliation"
-              value={affiliationSelect}
-              onChange={handleSelectAffiliationChange}
-            >
-              <MenuItem value="WOOD_ENTHUSIAST">Wood Ethusiast</MenuItem>
-              <MenuItem value="WOOD_WORKER">Woodworker</MenuItem>
-              <MenuItem value="WOOD_CRAFTER">Wood Crafter</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl fullWidth>
-            <InputLabel id="edit-profile-gender">Gender</InputLabel>
-            <Select
-              value={genderSelect}
-              labelId="edit-profile-gender"
-              name="gender"
-              label="Gender"
-              onChange={handleSelectGenderChange}
-            >
-              <MenuItem value="MALE">Male</MenuItem>
-              <MenuItem value="FEMALE">Female</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-      </userFetcher.Form>
+              {alertState.message}
+            </Alert>
+          </Fade>
+        </ModalAlertContext.Provider>
+      </RFormDataContext.Provider>
     </Modal>
   );
 }
@@ -517,10 +277,6 @@ function LoginForm({
   const [inputError, setInputError] = useState({
     usernameOrEmail: "",
     password: "",
-  });
-  const [alerts, setAlerts] = useState({
-    error: { visible: false, message: "" },
-    success: { visible: false, message: "" },
   });
 
   //utilitiees
@@ -542,7 +298,7 @@ function LoginForm({
                 ...inputError,
                 password: error.message,
               });
-          }
+          },
         );
       }
       if (actionData.error === "UserNotFound") {
@@ -560,11 +316,6 @@ function LoginForm({
     }
   };
 
-  const handleAlertClose = (alertType: "error" | "success") => {
-    return () => {
-      setAlerts({ ...alerts, [alertType]: { visible: false, message: "" } });
-    };
-  };
   const handleClearInputError = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputError({ ...inputError, [e.currentTarget.name]: "" });
   };
@@ -577,9 +328,8 @@ function LoginForm({
         Login
       </Typography>
       <TextField
-        className="textfield"
+        className="textfield mb-[10px]"
         InputLabelProps={{ shrink: true }}
-        sx={{ marginBottom: "10px" }}
         type="email"
         variant="standard"
         name="usernameOrEmail"
@@ -592,9 +342,8 @@ function LoginForm({
         error={inputError.usernameOrEmail ? true : false}
       />
       <TextField
-        className="textfield"
+        className="textfield mb-[20px]"
         required
-        sx={{ marginBottom: "20px;" }}
         InputLabelProps={{ shrink: true }}
         type="password"
         variant="standard"
@@ -608,44 +357,752 @@ function LoginForm({
       />
       <Button
         type="submit"
-        className="login-button"
+        className="login-button mb-[15px] block font-bold normal-case text-white"
         variant="contained"
-        sx={{
-          display: "block",
-          textTransform: "none",
-          fontWeight: "bold",
-          color: "#fff",
-          marginBottom: "15px",
-        }}
         color={"primary"}
         fullWidth
       >
         Login
       </Button>
-      <div className="or-container" style={{ marginBottom: "15px" }}>
+      <div className="or-container mb-[15px]">
         <span className="line"></span>
         <Typography fontFamily={"Roboto"}>OR</Typography>
         <span className="line"></span>
       </div>
       <Button
-        className="login-button"
+        className="login-button mb-[15px] block font-bold normal-case text-white"
         variant="contained"
-        sx={{
-          display: "block",
-          textTransform: "none",
-          fontWeight: "bold",
-          color: "#fff",
-        }}
         color={"secondary"}
         fullWidth
         onClick={() => setRegisterModalView(true)}
       >
         Register
       </Button>
-      <Box
-        className="success-alert"
-        sx={{ display: alerts.success.visible ? "block" : "none" }}
-      ></Box>
     </Form>
   );
+}
+
+function ModalHeader({ setRegisterModalView }: ModalHeaderProps) {
+  return (
+    <div className="header-container sticky top-0 z-50 flex items-center bg-white px-2 py-3">
+      <IconButton
+        className="/  absolute left-2 hover:bg-gray-500 hover:bg-opacity-40"
+        onClick={() => setRegisterModalView(false)}
+      >
+        <CloseRounded className="icon" />
+      </IconButton>
+      <p className="name block w-full text-center font-header text-lg font-semibold">
+        Create Account
+      </p>
+      <Button
+        type="submit"
+        className="bg-primary-400D absolute right-3 rounded-full px-4 py-1 font-bold normal-case text-white"
+        variant="contained"
+      >
+        Skip
+      </Button>
+    </div>
+  );
+}
+
+function RecommendedSelect({
+  recommendations,
+  pickedRecs,
+  setPickedRecs,
+}: RecommendedSelectProps) {
+  const togglePickRecommendation = (
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>,
+  ) => {
+    const recommendation = e.currentTarget.id;
+    if (pickedRecs.find((e) => e === recommendation)) {
+      setPickedRecs(pickedRecs.filter((e) => e !== recommendation));
+    } else {
+      setPickedRecs([...pickedRecs, recommendation]);
+    }
+  };
+
+  return (
+    <div className={`mx-aut mt-4 rounded-lg p-2 hover:cursor-text`}>
+      <p className="font-body text-lg">Interests:</p>
+
+      <div className="mt-3 flex min-h-[163.2px] flex-wrap justify-center">
+        {recommendations.map((recommend) => {
+          const selected = pickedRecs.find((e) => e === recommend)
+            ? "border-primary-300 bg-primary-300 hover:border-primary-400 text-white"
+            : "border-primary-200 bg-primary-100 hover:border-primary-300 text-slate-700";
+          return (
+            <Chip
+              id={recommend}
+              className={`max-w flex-gow mb-1 ml-1 min-w-[10px] border-2  border-solid  text-slate-700 ${selected} hover:cursor-pointer focus-visible:border-none`}
+              key={recommend}
+              label={recommend}
+              onClick={togglePickRecommendation}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function PersonalInfoForm({
+  stepValue,
+  dispatchStepValue,
+}: PersonalInfoFormProp) {
+  const submitRef = useRef<HTMLButtonElement>(null);
+  const rFormData = useContext(RFormDataContext)!;
+  const [genderSelect, setGenderSelect] = useState("");
+  const [affiliationSelect, setAffiliationSelect] = useState("");
+
+  const handleSelectGenderChange = (e: SelectChangeEvent<string>) => {
+    setGenderSelect(e.target.value);
+  };
+  const handleSelectAffiliationChange = (e: SelectChangeEvent<string>) => {
+    setAffiliationSelect(e.target.value);
+  };
+  const attachFormToRForm = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const formIteratable = formData.entries();
+
+    let formDataEntry = formIteratable.next();
+
+    while (!formDataEntry.done) {
+      const [key, value] = formDataEntry.value;
+      rFormData.current.append(key, value);
+      formDataEntry = formIteratable.next();
+    }
+    dispatchStepValue("next");
+  };
+
+  const hiddenStatus = stepValue === 0 ? "block" : "hidden";
+
+  // TODO Needed For Email and Password Validation
+
+  return (
+    <Slide direction="right" in={stepValue === 0}>
+      <form
+        className={`input-container mb-4 flex flex-col gap-0 px-6 ${hiddenStatus}`}
+        onSubmit={attachFormToRForm}
+      >
+        <Button className="hidden" ref={submitRef} type="submit" />
+        <TextField
+          className="w-full"
+          margin="none"
+          name="firstname"
+          label="Firstname"
+          required
+          helperText=" "
+          value={rFormData.current.get("firstname")}
+        />
+        <TextField
+          margin="none"
+          name="middlename"
+          label="Middle Name"
+          required
+          helperText=" "
+          value={rFormData.current.get("middlename")}
+        />
+        <TextField
+          name="lastname"
+          label="Last Name"
+          required
+          helperText=" "
+          value={rFormData.current.get("lastname")}
+        />
+
+        <TextField
+          name="bio"
+          label="Bio"
+          required
+          helperText=" "
+          value={rFormData.current.get("bio")}
+        />
+        <TextField
+          name="dateOfBirth"
+          label="Date of Birth"
+          type="date"
+          helperText=" "
+          required
+          InputLabelProps={{
+            shrink: true,
+          }}
+          value={rFormData.current.get("dateOfBirth")}
+        />
+        <FormControl fullWidth className="mb-[20px]">
+          <InputLabel id="edit-profile-affiliation">Affiliation</InputLabel>
+          <Select
+            name="affiliation"
+            labelId="edit-profile-affiliation"
+            label="Affiliation"
+            value={
+              affiliationSelect ||
+              (rFormData.current.get("affiliation") as string)
+            }
+            onChange={handleSelectAffiliationChange}
+          >
+            <MenuItem value="WOOD_ENTHUSIAST">Wood Ethusiast</MenuItem>
+            <MenuItem value="WOOD_WORKER">Woodworker</MenuItem>
+            <MenuItem value="WOOD_CRAFTER">Wood Crafter</MenuItem>
+          </Select>
+        </FormControl>
+        <FormControl fullWidth className="mb-[20px]">
+          <InputLabel id="edit-profile-gender">Gender</InputLabel>
+          <Select
+            labelId="edit-profile-gender"
+            name="gender"
+            label="Gender"
+            value={genderSelect || (rFormData.current.get("gender") as string)}
+            onChange={handleSelectGenderChange}
+          >
+            <MenuItem value="MALE">Male</MenuItem>
+            <MenuItem value="FEMALE">Female</MenuItem>
+          </Select>
+        </FormControl>
+        <TextField
+          name="barangay"
+          label="barangay"
+          required
+          helperText=" "
+          value={rFormData.current.get("barangay")}
+        />
+        <TextField
+          name="municipality"
+          label="municipality"
+          required
+          helperText=" "
+          value={rFormData.current.get("municipality")}
+        />
+        <TextField
+          name="province"
+          label="province"
+          required
+          helperText=" "
+          value={rFormData.current.get("province")}
+        />
+
+        <Button
+          className="w-12 self-end bg-primary-400 p-2 font-semibold normal-case text-white"
+          type="submit"
+          variant="contained"
+        >
+          Next
+        </Button>
+      </form>
+    </Slide>
+  );
+}
+
+function RecommendedAccounts() {
+  const [accountsInfo, stetAccountsInfo] = useState<UserProfileInfo[]>([]);
+
+  const getRecommendedAccounts = () => {
+    axiosClient
+      .get("users/register/recommendedAccounts", {
+        params: { limit: 5 },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      })
+      .then((res) => {
+        stetAccountsInfo(res.data.recommendedAccounts);
+      });
+  };
+
+  useEffect(getRecommendedAccounts, []);
+  return (
+    <div className="rounded-md border-2 border-solid border-primary-300 py-4">
+      <p className="mb-5 ml-5 font-header text-base font-semibold text-slate-700">
+        Suggested Accounts:
+      </p>
+      {accountsInfo.map((account) => (
+        <Account account={account} />
+      ))}
+    </div>
+  );
+}
+
+function Account({ account }: { account: UserProfileInfo }) {
+  const { setAccessToken } = useContext(TokenContext)!;
+  const { setAlert } = useContext(ModalAlertContext)!;
+
+  const followUser = () =>
+    axiosClient.patch(
+      "/users/follow",
+      {},
+      {
+        params: { userId: account.id },
+        headers: {
+          Authorization: `Bearrer ${localStorage.getItem("accessToken")}`,
+        },
+      },
+    );
+  const unfollowUser = () =>
+    axiosClient.patch(
+      "/users/unfollow",
+      {},
+      {
+        params: { userId: account.id },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      },
+    );
+  const refreshToken = () => {
+    axiosClient
+      .post("/refresh_token", {}, { withCredentials: true })
+      .then((res) => {
+        setAccessToken(res.data.accessToken);
+        localStorage.setItem("accessToken", res.data.accessToken);
+      });
+  };
+  const [isFollowing, setIsFollowing] = useState(false);
+  const follow = () => {
+    followUser().then(() => {
+      setAlert({ message: "Followed", severity: "success", visible: true });
+      setIsFollowing(true);
+    });
+  };
+  const unFollow = () => {
+    setIsFollowing(false);
+    unfollowUser().then(() => {
+      setAlert({ message: "Unfollowed", severity: "success", visible: true });
+      setIsFollowing(false);
+    });
+  };
+
+  useEffect(refreshToken, []);
+  return (
+    <div className="mb-4 flex items-center gap-3 px-3">
+      <Avatar
+        className="size-14"
+        src={`${process.env.SERVER_PUBLIC}/${account.pfp}`}
+      />
+      <div>
+        <p className="font-body2 text-base font-medium text-slate-700 hover:underline">
+          {account.fullname}
+        </p>
+        <p className="font-body text-sm text-slate-500">
+          {account.affiliation}
+        </p>
+        <p className="font-body2 text-sm text-slate-500"></p>
+        <p className="font-body2  text-sm text-slate-500">{account.address}</p>
+      </div>
+      {!isFollowing ? (
+        <IconButton className="ml-auto" onClick={follow}>
+          <PersonAddAltRounded className="text-primary-400" />
+        </IconButton>
+      ) : (
+        <IconButton className="ml-auto">
+          <PersonRemoveAlt1Rounded
+            className="text-primary-400"
+            onClick={unFollow}
+          />
+        </IconButton>
+      )}
+    </div>
+  );
+}
+
+function ImageForm() {
+  const rFormData = useContext(RFormDataContext)!;
+  const [userImg, setUserImg] = useState<UserImageState>({
+    cover: null,
+    pfp: null,
+  });
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files === null || !(e.target.files[0] instanceof File)) return;
+    const file = e.target.files[0];
+
+    rFormData.current.append(e.currentTarget.name, file);
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      setUserImg({
+        ...userImg,
+        [e.target.name]: reader.result?.toString() ?? null,
+      });
+    };
+  };
+  const displaySelectedImage = () => {
+    if (rFormData.current.get("pfp") !== null) {
+      const reader = new FileReader();
+      reader.readAsDataURL(rFormData.current.get("pfp") as File);
+      reader.onload = () => {
+        setUserImg((prev) => ({
+          ...prev,
+          pfp: reader.result?.toString() ?? null,
+        }));
+      };
+    }
+    if (rFormData.current.get("cover") !== null) {
+      const reader = new FileReader();
+      reader.readAsDataURL(rFormData.current.get("cover") as File);
+      reader.onload = () => {
+        setUserImg((prev) => ({
+          ...prev,
+          cover: reader.result?.toString() ?? null,
+        }));
+      };
+    }
+  };
+
+  useEffect(displaySelectedImage, []);
+
+  return (
+    <div className="relative mb-[65px] flex w-full items-center justify-center ">
+      <IconButton
+        title="Set cover image"
+        className="cover-icon-container absolute aspect-square h-full w-full rounded-none hover:bg-black hover:bg-opacity-40 "
+      >
+        <label htmlFor="edit-profile-cover" className="cover-label">
+          <EditRounded className="icon text-white hover:cursor-pointer" />
+        </label>
+        <input
+          id="edit-profile-cover"
+          type="file"
+          name="cover"
+          hidden
+          accept="*/image"
+          onChange={handleImageChange}
+        />
+      </IconButton>
+      <img
+        className="h-[25vh] max-h-[250px] w-full bg-cover"
+        src={
+          userImg.cover ??
+          `${process.env.SERVER_PUBLIC}/assets/default-cover.jpg`
+        }
+      />
+      <div className="avatar-container absolute bottom-[-60px] left-[30px] flex h-[120px] w-[120px] items-center justify-center rounded-full border-4 border-solid border-white">
+        <Avatar
+          className="avatar h-full w-full "
+          src={
+            userImg.pfp ?? `${process.env.SERVER_PUBLIC}/assets/default-pfp.jpg`
+          }
+        />
+        <IconButton
+          title="Set avatar"
+          className="icon-container absolute  h-full w-full  hover:bg-black hover:bg-opacity-40 "
+        >
+          <label htmlFor="edit-profile-pfp" className="pfp-label">
+            <EditRounded className="icon text-white hover:cursor-pointer" />
+          </label>
+          <input
+            id="edit-profile-pfp"
+            type="file"
+            name="pfp"
+            hidden
+            accept="*/image"
+            onChange={handleImageChange}
+          />
+        </IconButton>
+      </div>
+    </div>
+  );
+}
+
+function CredentialForm({ dispatchStepValue }: CredentialFormProps) {
+  const { setAlert } = useContext(ModalAlertContext)!;
+  const { setAccessToken } = useContext(TokenContext)!;
+  const userFetcher = useFetcher();
+  const rFormData = useContext(RFormDataContext)!;
+  const emailRef = useRef<HTMLInputElement>(null);
+  const usernameRef = useRef<HTMLInputElement>(null);
+  const passowrdRef = useRef<HTMLInputElement>(null);
+  const confirmPasswordRef = useRef<HTMLInputElement>(null);
+  const [tfErrors, setTfErrors] = useState<tfErrorsState>({
+    email: null,
+    username: null,
+    password: null,
+  });
+  const [pMatcher, setPMatcher] = useState<PMathcherState>({
+    password: null,
+    confirmPassword: null,
+  });
+
+  const handleRegisterStatusAlert = () => {
+    if (userFetcher.data?.status === "success") {
+      setAlert({
+        severity: "success",
+        message: "Account Created",
+        visible: true,
+      });
+    } else if (userFetcher.data?.status === "fail") {
+      setAlert({
+        severity: "error",
+        message: "Account not created",
+        visible: true,
+      });
+    }
+  };
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    if (rFormData.current) {
+      rFormData.current.append("email", formData.get("email") as string);
+      rFormData.current.append("username", formData.get("username") as string);
+      rFormData.current.append("password", formData.get("password") as string);
+    }
+
+    userFetcher.submit(rFormData.current, {
+      method: "POST",
+      action: "/users",
+      encType: "multipart/form-data",
+    });
+  };
+
+  const handleTfErrors = () => {
+    if (userFetcher.data?.status !== "fail") return;
+    if (userFetcher.data?.error === "ValidationError") {
+      userFetcher.data?.errorFields?.forEach(
+        (errorFields: { field: string; message: string }) => {
+          setTfErrors({
+            ...tfErrors,
+            [errorFields.field]: errorFields.message,
+          });
+        },
+      );
+    }
+  };
+
+  const handleFocusTfErrors = () => {
+    const lastErrorField = Object.entries(tfErrors).filter(
+      (elem) => elem[1] !== null,
+    );
+    const lastErrorFieldKey = lastErrorField[lastErrorField.length - 1]?.[0];
+
+    if (!lastErrorFieldKey) return;
+    if (lastErrorFieldKey === "email")
+      emailRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    else if (lastErrorFieldKey === "username")
+      usernameRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    else if (lastErrorFieldKey === "password")
+      passowrdRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    else if (lastErrorFieldKey === "confirmPassword")
+      confirmPasswordRef.current?.scrollIntoView({
+        block: "center",
+        behavior: "smooth",
+      });
+  };
+  const matchPassword = (e: React.ChangeEvent<HTMLInputElement>) =>
+    setPMatcher({
+      ...pMatcher,
+      [e.target.name]: e.target.value,
+    });
+
+  const removeTfError = (e: React.ChangeEvent<HTMLInputElement>) =>
+    setTfErrors({
+      ...tfErrors,
+      [e.target.name]: null,
+    });
+  const initializeToken = () => {
+    console.log("initializeTokenfnc triggered");
+    console.log({ fetcherData: userFetcher.data?.status });
+    if (userFetcher.data?.status === "success") {
+      localStorage.setItem("accessToken", userFetcher.data.data.accessToken);
+      setAccessToken(userFetcher.data.data.accessToken);
+      localStorage.setItem("id", userFetcher.data.data.id);
+      dispatchStepValue("next");
+    }
+  };
+  // const handleLogin = () => {
+  //   login({
+  //     emailOrUsername: rFormData.current.get("email") as string,
+  //     password: rFormData.current.get("password") as string,
+  //   });
+  // };
+
+  const previousStep = () => dispatchStepValue("back");
+  const isSubmitting = userFetcher.state === "submitting";
+
+  // useEffect(handleLogin, [userFetcher.data]);
+  useEffect(handleTfErrors, [userFetcher.data]);
+  useEffect(handleFocusTfErrors, [tfErrors, userFetcher.data]);
+  useEffect(initializeToken, [userFetcher.data]);
+  useEffect(handleRegisterStatusAlert, [userFetcher.data]);
+
+  return (
+    <>
+      <form
+        className="relative flex h-full flex-col justify-center  px-6 "
+        onSubmit={handleFormSubmit}
+      >
+        <p className="mb-5 font-body text-xl font-bold tracking-wide text-slate-800">
+          Setup Credential
+        </p>
+        <TextField
+          className="mb-[8px]"
+          ref={emailRef}
+          name="email"
+          label="Email"
+          required
+          type="email"
+          helperText={tfErrors.email ?? " "}
+          error={tfErrors.email ? true : false}
+          onChange={removeTfError}
+          fullWidth
+          disabled={isSubmitting}
+        />
+        <TextField
+          className="mb-[8px]"
+          ref={usernameRef}
+          name="username"
+          label="Username"
+          type="text"
+          required
+          error={tfErrors.username ? true : false}
+          helperText={tfErrors.username ?? " "}
+          autoFocus={tfErrors.username ? true : false}
+          onChange={removeTfError}
+          fullWidth
+          disabled={isSubmitting}
+        />
+        <TextField
+          className="mb-[8px]"
+          ref={passowrdRef}
+          name="password"
+          label="Password"
+          type="password"
+          required
+          helperText={tfErrors.password ?? " "}
+          error={tfErrors.password ? true : false}
+          fullWidth
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            removeTfError(e);
+            matchPassword(e);
+          }}
+          disabled={isSubmitting}
+        />
+
+        <TextField
+          className="mb-[8px]"
+          ref={confirmPasswordRef}
+          name="confirmPassword"
+          label="Confirm Password"
+          required
+          type="password"
+          helperText={tfErrors.password ?? " "}
+          error={tfErrors.password ? true : false}
+          fullWidth
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            removeTfError(e);
+            matchPassword(e);
+          }}
+          disabled={isSubmitting}
+        />
+        <div className="flex justify-between">
+          <Button
+            className="font-body font-semibold normal-case text-white "
+            variant="contained"
+            onClick={previousStep}
+          >
+            Back
+          </Button>
+          <LoadingButton
+            loading={userFetcher.state === "submitting"}
+            className="font-body font-semibold normal-case text-white "
+            variant="contained"
+            type="submit"
+          >
+            <span>Create Account</span>
+          </LoadingButton>
+        </div>
+      </form>
+      {isSubmitting && (
+        <LinearProgress
+          className="absolute bottom-0 z-10 w-full"
+          variant="indeterminate"
+        />
+      )}
+    </>
+  );
+}
+
+function RegisterStepper({ step }: RegisterStepperProps) {
+  return (
+    <div className="sticky top-[52px] z-10 w-full border-b-4  border-solid  border-primary-300 bg-primary-50 py-2">
+      <Stepper activeStep={step} alternativeLabel>
+        {steps.map((label) => (
+          <Step key={label}>
+            <StepLabel>{label}</StepLabel>
+          </Step>
+        ))}
+      </Stepper>
+    </div>
+  );
+}
+
+function stepReducer(state: number, action: "next" | "back") {
+  switch (action) {
+    case "next":
+      return state + 1;
+    case "back":
+      return state - 1;
+    default:
+      return state;
+  }
+}
+
+// Types
+type RegisterFDataProps = React.MutableRefObject<FormData>;
+
+interface PMathcherState {
+  password: string | null;
+  confirmPassword: string | null;
+}
+interface tfErrorsState {
+  email: string | null;
+  username: string | null;
+  password: string | null;
+}
+interface CredentialFormProps {
+  dispatchStepValue: Dispatch<"next" | "back">;
+  setAlert: Dispatch<SetStateAction<AlertStateProps>>;
+}
+
+interface RegisterStepperProps {
+  step: number;
+}
+
+interface RegisterModalProps {
+  registerModalView: boolean;
+  setRegisterModalView: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+interface PersonalInfoFormProp {
+  stepValue: number;
+  dispatchStepValue: Dispatch<"next" | "back">;
+}
+
+interface ModalHeaderProps {
+  setRegisterModalView: Dispatch<SetStateAction<boolean>>;
+}
+
+interface AlertStateProps {
+  severity: "success" | "error" | "warning" | "info";
+  message: string;
+  visible: boolean;
+}
+interface UserImageState {
+  cover: string | null;
+  pfp: string | null;
+}
+
+interface ModalAlertContextProps {
+  setAlert: Dispatch<SetStateAction<AlertStateProps>>;
+}
+
+interface RecommendedSelectProps {
+  recommendations: string[];
+  pickedRecs: string[];
+  setPickedRecs: React.Dispatch<React.SetStateAction<string[]>>;
 }

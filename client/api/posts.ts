@@ -8,14 +8,8 @@ export async function postsAction({
   params: any;
 }) {
   // ! Debugging =====================
-  console.log("Entered Post Route");
   const form = await request.formData();
-  console.log({ form });
-  form.forEach((value, key) => {
-    {
-      console.log(key, value);
-    }
-  });
+
   //  !============================
 
   let data = null;

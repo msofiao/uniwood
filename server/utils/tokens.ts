@@ -1,13 +1,13 @@
-import { sign } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import path from "node:path";
 import dotenv from "dotenv";
 import { FastifyReply } from "../types/fastify";
 import { accessTokenOption, refreshTokenOptions } from "../config/jwtOption";
-;
 import "@fastify/cookie";
+import { AccessTokenPayload, RefreshTokenPayload } from "../types/global";
 
 dotenv.config({
-  path: path.resolve(__dirname, "../../.env"),
+  path: path.resolve(import.meta.dirname, "../../.env"),
 });
 
 export const createAccessToken = (userInfo: {
@@ -16,18 +16,18 @@ export const createAccessToken = (userInfo: {
   userFullname: string;
   username: string;
 }) => {
-  return sign(
-    userInfo,
+  return jwt.sign(
+    userInfo as AccessTokenPayload,
     process.env.ACCESS_TOKEN_KEY as string,
-    accessTokenOption
+    accessTokenOption,
   );
 };
 
 export const createRefreshToken = (userInfo: { email: string; id: string }) => {
-  return sign(
-    userInfo,
+  return jwt.sign(
+    userInfo as RefreshTokenPayload,
     process.env.REFRESH_TOKEN_KEY as string,
-    refreshTokenOptions
+    refreshTokenOptions,
   );
 };
 
@@ -37,6 +37,7 @@ export const sendRefreshToken = (token: string, res: FastifyReply) => {
     path: "/refresh_token",
     sameSite: "none",
     secure: true,
+    partitioned: true,
   });
 };
 
@@ -45,7 +46,18 @@ export const sendAccessToken = (
     id: string;
   },
   token: string,
-  res: FastifyReply
+  res: FastifyReply,
 ) => {
   return res.send({ status: "success", accessToken: token, ...userInfo });
+};
+
+export const verifyAccessToken = (token: string) => {
+  return jwt.verify(token, process.env.ACCESS_TOKEN_KEY!) as AccessTokenPayload;
+};
+
+export const verifyRefreshToken = (token: string) => {
+  return jwt.verify(
+    token,
+    process.env.REFRESH_TOKEN_KEY!,
+  ) as RefreshTokenPayload;
 };

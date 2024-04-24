@@ -130,3 +130,8 @@ dist
 .pnp.*
 
 .vscode
+
+# Develpoers ignore files
+index.test.ts
+server/public
+!server/public/*/

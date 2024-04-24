@@ -7,10 +7,11 @@ import {
   replyComment as replyCommentFc,
   testCommentQuery,
 } from "../models/commentsQuery";
+import { ObjectId } from "mongodb";
 
 const createComment = async (
   req: FastifyRequest<{ Body: { comment: string; postId: string } }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) => {
   if (!req.body?.comment)
     return res.code(400).send({
@@ -30,30 +31,63 @@ const createComment = async (
       message: "User is unauthorize",
     });
 
+  const commentId = new ObjectId().toHexString();
+
   const commentSuccess = await req.prisma.post.update({
     where: { id: req.body.postId },
     data: {
       comments: {
         create: {
+          id: commentId,
           content: req.body.comment,
           author_id: req.userId,
           type: "POST",
         },
       },
     },
-  });
-
-  await req.prisma.user.update({
-    where: { id: req.userId },
-    data: {
-      notification: {
-        create: {
-          type: "COMMENT",
-          post_id: req.body.postId,
+    select: {
+      comments: {
+        where: {
+          author_id: req.userId,
+          content: req.body.comment,
+          id: commentId,
+        },
+        select: {
+          id: true,
         },
       },
     },
   });
+
+  const postDoc = await req.prisma.post.findUnique({
+    where: { id: req.body.postId },
+    select: { author_id: true },
+  });
+
+  if (!postDoc)
+    return res
+      .code(404)
+      .send({ status: "fail", message: "Post author not found" });
+
+  // Create Notificatoin
+  await req.prisma.notification.create({
+    data: {
+      type: "POST_COMMENT",
+      Comment: {
+        connect: { id: commentSuccess.comments[0].id },
+      },
+      NotifFrom: {
+        connect: { id: req.userId },
+      },
+      NotifTo: {
+        connect: { id: postDoc.author_id },
+      },
+      Post: {
+        connect: { id: req.body.postId },
+      },
+    },
+  });
+
   if (!commentSuccess)
     return res.code(500).send({ status: "fail", message: "Internal Error" });
 
@@ -64,7 +98,7 @@ const createComment = async (
 
 const updateComment = async (
   req: FastifyRequest<{ Body: { commentId: string; comment: string } }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) => {
   if (!req.body?.comment)
     return res.code(400).send({
@@ -112,7 +146,7 @@ const updateComment = async (
 
 const deleteComment = async (
   req: FastifyRequest<{ Body: { commentId: string } }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) => {
   if (!req.body?.commentId)
     return res
@@ -154,7 +188,7 @@ const deleteComment = async (
  */
 const getComments = async (
   req: FastifyRequest<{ Querystring: { postId: string }; Body: any }>,
-  reply: FastifyReply
+  reply: FastifyReply,
 ) => {
   // Filter Params
   let comments: Comment[] = [];
@@ -178,7 +212,7 @@ const getComments = async (
 
 const getComment = async (
   req: FastifyRequest<{ Params: { commentId: string }; Body: any }>,
-  reply: FastifyReply
+  reply: FastifyReply,
 ) => {
   const comment = await req.prisma.comment.findUnique({
     where: { id: req.params.commentId },
@@ -189,7 +223,7 @@ const getComment = async (
 
 const upVoteToggle = async (
   req: FastifyRequest<{ Body: { commentId: string } }>,
-  reply: FastifyReply
+  reply: FastifyReply,
 ) => {
   if (!req.body.commentId)
     return reply.code(400).send({
@@ -205,7 +239,7 @@ const upVoteToggle = async (
 
   const isCommentExist = await commentExist(
     { commentId: req.body.commentId },
-    req.prisma
+    req.prisma,
   );
   if (!isCommentExist)
     return reply
@@ -214,7 +248,7 @@ const upVoteToggle = async (
 
   await upVoteToggleQuery(
     { commentId: req.body.commentId, userId: req.userId },
-    req.prisma
+    req.prisma,
   );
 
   return reply.code(200).send({ status: "success" });
@@ -222,7 +256,7 @@ const upVoteToggle = async (
 
 const downVoteToggle = async (
   req: FastifyRequest<{ Body: { commentId: string } }>,
-  reply: FastifyReply
+  reply: FastifyReply,
 ) => {
   if (!req.body?.commentId)
     return reply
@@ -236,7 +270,7 @@ const downVoteToggle = async (
 
   const isCommentExist = await commentExist(
     { commentId: req.body.commentId },
-    req.prisma
+    req.prisma,
   );
   if (!isCommentExist)
     return reply
@@ -245,7 +279,7 @@ const downVoteToggle = async (
 
   await downVoteToggleQuery(
     { userId: req.userId, commentId: req.body.commentId },
-    req.prisma
+    req.prisma,
   );
 
   return reply.code(200).send({ status: "success" });
@@ -260,7 +294,7 @@ const replyComment = async (
       type?: "post" | "project";
     };
   }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) => {
   if (
     req.body.type === null ||
@@ -288,7 +322,7 @@ const replyComment = async (
       content: req.body.content,
       type: req.body.type.toUpperCase() as "POST" | "PROJECT",
     },
-    req.prisma
+    req.prisma,
   );
 
   return res.code(200).send({ status: "success", message: "Comment Replied" });
@@ -310,12 +344,12 @@ export default commentController;
 // ! Test
 export const test = async (
   req: FastifyRequest<{ Body: { commentId: string } }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) => {
   if (req.userId)
     await testCommentQuery(
       { userId: req.userId, commentId: req.body.commentId },
-      req.prisma
+      req.prisma,
     );
   res.send({ status: "success" });
 };

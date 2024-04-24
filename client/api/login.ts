@@ -26,7 +26,7 @@ export async function loginAction({
               usernameOrEmail: formData.get("usernameOrEmail"),
               password: formData.get("password"),
             },
-            { withCredentials: true }
+            { withCredentials: true },
           )
           .then((res) => res.data)
           .catch((err) => err.response?.data);
@@ -48,3 +48,13 @@ export async function loginLoader() {
     redirect("/");
   } else return data;
 }
+
+export const login = ({
+  emailOrUsername,
+  password,
+}: {
+  emailOrUsername: string;
+  password: string;
+}) => {
+  return axiosClient.post("/login", { emailOrUsername, password });
+};

@@ -27,6 +27,7 @@ export async function usersAction({
               headers: {
                 "Content-Type": "multipart/form-data",
               },
+              withCredentials: true,
             })
             .then((res) => (data = res.data));
         } catch (error) {

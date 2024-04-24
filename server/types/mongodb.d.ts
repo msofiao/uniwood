@@ -4,8 +4,9 @@ export interface IConverseDocument {
   messengers: unknown[];
   createdAt: Date;
   updatedAt: Date;
-  messages: unknown[];
-  unreadCount: number;
+  unread: IUnread[];
+  messages_id: string[];
+  messages: IMessageDocument[];
 }
 
 export interface IUserDocument {
@@ -20,9 +21,34 @@ export interface IUserDocument {
   address: IAddress;
   role: TGender;
   affiliation: TAffiliation;
-
+  account_visibility: TAccountVisibility;
   createdAt: Date;
   updatedAt: Date;
+
+  liked_posts_id: string[];
+  disliked_posts_id: string[];
+  up_voted_comments_id: string[];
+  down_voted_comments_id: string[];
+  liked_projects_id: string[];
+  disliked_projects_id: string[];
+  convere_id: string[];
+  follower_ids: string[];
+  followind_ids: string[];
+
+  credentials: ICredentialDocument;
+  posts: IPostDocument[];
+  projects: IProjectDocument[];
+  notifications: INotificationDocument[];
+  comments: ICommentDocument[];
+  conversations: IConverseDocument[];
+  liked_posts: IPostDocument[];
+  disliked_posts: IPostDocument[];
+  liked_projects: IProjectDocument[];
+  disliked_projects: IProjectDocument[];
+  up_voted_comments: ICommentDocument[];
+  down_voted_comments: ICommentDocument[];
+  followers: IUserDocument[];
+  followings: IUserDocument[];
 }
 
 export interface ICredentialDocument {
@@ -31,21 +57,6 @@ export interface ICredentialDocument {
   password: string;
   createdAt: Date;
   updatedAt: Date;
-  user: IUserDocument;
-}
-
-export interface INotificationDocument {
-  _id: string;
-  type: TNotificationType;
-  createdAt: Date;
-  updatedAt: Date;
-
-  user_id?: string;
-  post_id?: string;
-  project_id?: string;
-  comment_id?: string;
-  foolower_id?: string;
-
   user: IUserDocument;
 }
 
@@ -113,6 +124,30 @@ export interface ICommentDocument {
   replied_to?: ICommentDocument;
 }
 
+export interface IMessageDocument {
+  _id: string;
+  converse_id: string;
+  author_id: string;
+  type: TMessageType;
+  media?: IPostMedia[];
+  chat?: string;
+  createdAt: Date;
+  status: TMessageStatus;
+  recipient_id: string;
+}
+
+export interface INotificationDocument {
+  _id: string;
+  type: TNotificationType;
+  createdAt: Date;
+  updatedAt: Date;
+
+  notifTo_id: string;
+  notifFrom_id: string;
+  post_id?: string;
+  comment_id?: string;
+}
+
 interface IAddress {
   barangay: string;
   municipality: string;
@@ -125,12 +160,16 @@ type TGender = "MALE" | "FEMALE";
 type TRole = "ADMIN" | "USER";
 
 // * TYPES
-interface IMessage {
-  _id: string;
+export interface IMessage {
+  id: string;
   author_id: string;
   type: TMessageType;
-  media: string;
-  chat: string | undefined;
+  media?: IPostMedia[];
+  chat?: string;
+  createdAt: Date;
+  status: TMessageStatus;
+  converse_id: string;
+  recipient_id: string;
 }
 
 interface IUserImage {
@@ -148,20 +187,18 @@ interface IProjectMedia {
   caption: string | undefined;
 }
 
+interface IUnread {
+  user_id: string;
+  count: number;
+}
+
 // * ENUMS
 
-type TNotificationType =
-  | "PROJECT_LIKE"
-  | "PROJECT_DISLIKE"
-  | "COMMENT_LIKE"
-  | "COMMENT_DISLIKE"
-  | "COMMENT_REPLY"
-  | "POST_LIKE"
-  | "POST_DISLIKE"
-  | "FOLLOW";
+type TNotificationType = "POST_REACT" | "POST_COMMENT" | "FOLLOW";
 type TAccountVisibility = "PUBLIC" | "PRIVATE";
 type TMessageType = "TEXT" | "IMAGE" | "VIDEO" | "AUDIO" | "FILE";
 type TCommentType = "POST" | "PROJECT";
 type TUserStatus = "ACTIVE" | "ARCHIVED";
 type TUserActivity = "ONLINE" | "OFFLINE";
 type TPostStatus = "ACTIVE" | "ARCHIVED";
+type TMessageStatus = "SENT" | "DELIVERED" | "READ";

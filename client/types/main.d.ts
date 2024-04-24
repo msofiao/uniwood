@@ -9,8 +9,9 @@ declare interface UserProfileInfo {
   gender: string;
   pfp: string;
   cover: string;
-  proffeciency: string;
   username: string;
+  followersCount: number;
+  followingCount: number;
 }
 
 declare interface PostAuthor {
@@ -49,14 +50,14 @@ declare interface Post {
   }[];
   tags: string[];
   comments: CommentProps[];
-  author: Author;
+  author: PostAuthor;
 }
 
 declare interface CommentProps {
   id: string;
   content: string;
   createdAt: string;
-  author: CommentPropsAuthor;
+  author: CommentAuthor;
   up_voted_by_users_id: string[];
   down_voted_by_users_id: string[];
 }
@@ -74,4 +75,62 @@ declare interface Projects {
   tags: string[];
   comments: CommentProps[];
   author: Author;
+}
+
+declare interface IConvo {
+  reecipiendInfo: {
+    fullname: string;
+    username: string | undefined;
+    pfp: string | undefined;
+    id: string | undefined;
+  };
+  messages: IMessage[];
+}
+
+declare interface IMessage {
+  id: string;
+  author_id: string;
+  type: "TEXT" | "VIDEO" | "IMAGE" | "FILE" | "AUDIO";
+  chat: string | null;
+  createdAt: string;
+  media?: {
+    filename: string;
+    caption: string | null;
+  }[];
+  status: "SENT" | "DELIVERED" | "READ";
+}
+
+declare interface IConvoUnit {
+  converseId: string;
+  message: Omit<IMessage, "id">;
+  recipientInfo: {
+    recipientId: string;
+    fullname: string;
+    pfp: string;
+  };
+}
+
+declare type IRecipientInfo = {
+  id: string;
+  recipientId: string;
+  fullname: string;
+  pfp: string;
+  username: string;
+};
+
+declare interface INotifSocketPayload {
+  type: "POST_REACT" | "POST_COMMENT" | "FOLLOW";
+  createdAt: string;
+
+  notifTo_id: string;
+  notifFrom_id: string;
+  post_id?: string;
+  comment_id?: string;
+  id: string;
+  notifBy: {
+    id: string;
+    fullname: string;
+    username: string;
+    pfp: string;
+  };
 }

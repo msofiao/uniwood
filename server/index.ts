@@ -30,6 +30,9 @@ import {
   TestRoute,
 } from "./routes";
 import { onRequestHook } from "./hooks";
+import ConverseRoute from "./routes/converse";
+import { messageChangeHandler } from "./mongodb/sockets";
+import { NotificationChangeHandler } from "./mongodb/sockets/notificationHandler";
 
 // import { authorizeWS } from "./middlewares/authorize";
 dotenv.config({
@@ -77,6 +80,7 @@ app.register(PostsRoute, { prefix: "/posts" });
 app.register(CommentsRoute, { prefix: "/comments" });
 app.register(ProjectsRoute, { prefix: "/projects" });
 app.register(SearchRoute, { prefix: "/search" });
+app.register(ConverseRoute, { prefix: "/converse" });
 app.register(NotificationRoute, {
   prefix: "/notifications",
 });
@@ -84,7 +88,8 @@ app.register(NotificationRoute, {
 app.ready((err) => {
   if (err) throw err;
   app.io.on("connection", onConnection);
-  console.log("Socket.io is ready");
+
+  // Change Stream Handlers
 });
 
 app.listen(
@@ -95,7 +100,7 @@ app.listen(
   (err, address) => {
     if (err) throw err;
     console.log(`Server listening at ${address}`);
-  }
+  },
 );
 
 //! Test
@@ -103,13 +108,20 @@ app.listen(
 // ====== Sockets ===== //
 const onConnection = (socket: Socket) => {
   socket.on("test", (message, cb) => {
-    const cookies = parse(socket.request.headers.cookie!);
+    // const cookies = parse(socket.request.headers.cookie!);
+    socket.emit("test", message);
+    socket.broadcast.emit("test", message);
   });
+
+  console.log("Socket Connected");
+  messageChangeHandler(app.io, socket);
+  NotificationChangeHandler(app.io, socket);
 };
 
 app.get("/socket", (req, res) => {
   app.io.emit("secured", "This is a secured message");
   res.send({ status: "success" });
+  app.io.emit("test", "Hello from server");
 });
 app.get("/cookie", (req, res) => {
   res.setCookie("hello", "world", {
@@ -118,5 +130,5 @@ app.get("/cookie", (req, res) => {
     secure: true,
     partitioned: true,
   });
-  res.send({ status: "success" });
+  return res.send({ status: "success", message: "cookie sent" });
 });
