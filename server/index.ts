@@ -36,7 +36,7 @@ import { NotificationChangeHandler } from "./mongodb/sockets/notificationHandler
 
 // import { authorizeWS } from "./middlewares/authorize";
 dotenv.config({
-  path: path.resolve(import.meta.dirname, "../.env"),
+  path: path.resolve(import.meta.dirname, ".env"),
 });
 
 const app = fastify() as FastifyInstance;

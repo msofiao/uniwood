@@ -2,7 +2,7 @@ import { FastifyCorsOptions } from "@fastify/cors";
 import { config } from "dotenv";
 import path from "node:path";
 
-config({ path: path.resolve(import.meta.dirname, "../../.env") });
+config({ path: path.resolve(import.meta.dirname, "../.env") });
 export const corsOption: FastifyCorsOptions = {
   origin: [
     `https://${process.env.CLIENT_HOST}:${process.env.CLIENT_PORT}`,

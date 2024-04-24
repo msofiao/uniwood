@@ -6,7 +6,7 @@ import { Socket } from "socket.io";
 import { PrismaClient } from "@prisma/client";
 import { RefreshTokenPayload } from "../types/global";
 dotenv.config({
-  path: path.resolve(import.meta.dirname, "../../.env"),
+  path: path.resolve(import.meta.dirname, "../.env"),
 });
 const prisma = new PrismaClient();
 

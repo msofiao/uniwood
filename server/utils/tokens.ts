@@ -7,7 +7,7 @@ import "@fastify/cookie";
 import { AccessTokenPayload, RefreshTokenPayload } from "../types/global";
 
 dotenv.config({
-  path: path.resolve(import.meta.dirname, "../../.env"),
+  path: path.resolve(import.meta.dirname, "../.env"),
 });
 
 export const createAccessToken = (userInfo: {
