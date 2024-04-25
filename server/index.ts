@@ -92,6 +92,10 @@ app.ready((err) => {
   // Change Stream Handlers
 });
 
+app.get("/", async (req, res) => {
+  return { status: "success", message: "Welcome to the API" };
+});
+
 app.listen(
   {
     port: parseInt(process.env.SERVER_PORT as string),
