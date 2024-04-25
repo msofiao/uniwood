@@ -5,6 +5,7 @@ import { moveFile } from "../utils/fileManager";
 import { likePostTogggle as likePostToggleFnc } from "../models/postQuery";
 import { isValidObjectId } from "../utils/checker";
 import { capitalize } from "../utils";
+import { recommendPosts } from "../utils/recomAlgo";
 
 const createPost = async (
   req: FastifyRequest<{ Body: PostPostBody }>,
@@ -666,6 +667,74 @@ const getPostById = async (
   return res.code(200).send({ status: "ok", data: parsedDoc });
 };
 
+const getRecommendedPosts = async (
+  req: FastifyRequest<{ Body: any }>,
+  res: FastifyReply,
+) => {
+  const allPosts = await req.prisma.post.findMany({
+    where: { status: "ACTIVE" },
+    select: {
+      id: true,
+      context: true,
+      title: true,
+      tags: true,
+      media: true,
+      createdAt: true,
+      liked_by_users_id: true,
+      author: {
+        select: {
+          firstname: true,
+          lastname: true,
+          proffeciency: true,
+          affiliation: true,
+          user_image: {
+            select: {
+              pfp_name: true,
+              cover_name: true,
+            },
+          },
+        },
+      },
+      comments: {
+        select: {
+          content: true,
+          createdAt: true,
+          up_voted_by_users_id: true,
+          author: {
+            select: {
+              firstname: true,
+              lastname: true,
+              proffeciency: true,
+              affiliation: true,
+              user_image: {
+                select: {
+                  pfp_name: true,
+                  cover_name: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const user = await req.prisma.user.findUnique({
+    where: { id: req.userId },
+    select: {
+      id: true,
+      interests: true,
+      liked_posts_id: true,
+    },
+  });
+
+  if (!user)
+    return res.code(404).send({ status: "fail", message: "User not found" });
+
+  const recomPost = await recommendPosts(user, allPosts);
+
+  return res.code(200).send({ status: "success", data: recomPost ?? [] });
+};
 export type PostPostBody = {
   title?: string;
   context: string;
@@ -694,6 +763,7 @@ const postController = {
   getAllUserPost,
   getTopTags,
   getPostById,
+  getRecommendedPosts,
 };
 
 export default postController;

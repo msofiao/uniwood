@@ -15,6 +15,7 @@ const imageSrcSet = [
 ];
 
 import { Peer } from "peerjs";
+import React from "react";
 
 const remotePeerId = "testCall";
 
@@ -22,17 +23,15 @@ export default function Test() {
   const peer = new Peer("id2");
 
   return (
-    <div className="flex h-screen w-screen gap-10">
+    <div className="flex h-screen w-screen items-center justify-center gap-10">
       <div className="h-[450px] w-[600px] bg-gray-300">
-        <UserSendVideoStream peer={peer} remotePeerId={remotePeerId} />
+        <VideoStream peer={peer} remotePeerId={remotePeerId} />
       </div>
-      <div className="h-[450px] w-[600px] bg-gray-300">
-        <UserSendVideoStream peer={peer} remotePeerId={remotePeerId} />
-      </div>
+      <div className="h-[450px] w-[600px] bg-red-300"></div>
     </div>
   );
 }
-function UserSendVideoStream({
+function VideoStream({
   peer,
   remotePeerId,
 }: {
@@ -41,27 +40,20 @@ function UserSendVideoStream({
 }) {
   const [stream, setStream] = useState<MediaStream | null>(null);
 
-  const initializeCall = () => {
-    const peer = new Peer("sampleId");
-
-    try {
-      navigator.mediaDevices
-        .getUserMedia({
-          video: true,
-        })
-        .then((userStream) => {
-          setStream(userStream);
-          const call = peer.call(remotePeerId, userStream);
-          call.on("stream", setStream); // Update state with remote stream
-          return () => call.close(); // Cleanup function for call on unmount
-        });
-    } catch (err) {
-      console.error("Failed to get local stream", err);
-    }
-  };
-
   useEffect(() => {
-    const getStream = async () => {};
+    const getStream = async () => {
+      try {
+        const userStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+        });
+        setStream(userStream);
+        const call = peer.call(remotePeerId, userStream);
+        call.on("stream", setStream); // Update state with remote stream
+        return () => call.close(); // Cleanup function for call on unmount
+      } catch (err) {
+        console.error("Failed to get local stream", err);
+      }
+    };
 
     getStream();
 
@@ -71,17 +63,16 @@ function UserSendVideoStream({
         stream.getTracks().forEach((track) => track.stop());
       }
     };
-  }, [peer, remotePeerId]);
+  }, [peer, remotePeerId]); // Re-run on peer or remotePeerId changes
 
-  if (!stream) return <p>Loading</p>;
+  if (!stream) {
+    return <div>Loading...</div>;
+  }
 
-  return <video></video>;
-}
-
-function CallerVideoVideo() {
   return (
-    <div>
-      <video></video>
-    </div>
+    <video autoPlay muted playsInline ref={videoRef}>
+      Your browser does not support the video tag.
+    </video>
   );
 }
+const videoRef = React.createRef<HTMLVideoElement>();

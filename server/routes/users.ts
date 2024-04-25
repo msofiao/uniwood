@@ -5,8 +5,8 @@ import { multipartConsumer } from "../middlewares/multipartConsumer";
 import {
   userPutOnResponseHandler,
   usersPostOnResponseHandler,
-} from "../services/usersHandler";
-import { authorize } from "../middlewares/authorize";
+} from "../services/usersHandler.ts";
+import { authorize } from "../middlewares/authorize.ts";
 
 export function UsersRoute(
   instance: FastifyInstance,

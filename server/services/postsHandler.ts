@@ -1,6 +1,6 @@
-import { FastifyRequest, FastifyReply } from "../types/fastify";
-import { removeFiles, storeFile } from "../utils/fileManager";
-import { PostPostBody, PostPutBody } from "../controllers/postsController";
+import type { FastifyRequest, FastifyReply } from "../types/fastify.d.ts";
+import { removeFiles, storeFile } from "../utils/fileManager.ts";
+import { PostPostBody, PostPutBody } from "../controllers/postsController.ts";
 
 // *This Multipart consumer is for posts with meedia that contains each caption in the image
 
@@ -14,7 +14,7 @@ import { PostPostBody, PostPutBody } from "../controllers/postsController";
  */
 export async function postsCustomMultipartConsumer(
   req: FastifyRequest<{ Body: Record<string, any> }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) {
   console.log({ isMultipart: req.isMultipart() });
   if (!req.isMultipart() || req.isMultipart() === undefined) return;
@@ -75,7 +75,7 @@ export async function postsCustomMultipartConsumer(
 
 export async function postPostOnresponseHander(
   req: FastifyRequest<{ Body: PostPostBody }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) {
   // Remove Files From Temp Folder
   if (res.statusCode === 201) return;
@@ -89,7 +89,7 @@ export async function postPostOnresponseHander(
  */
 export async function postPutOnresponseHander(
   req: FastifyRequest<{ Body: PostPutBody }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) {
   // Remove Files From Temp Folder
   if (res.statusCode === 200) return;

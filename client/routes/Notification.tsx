@@ -44,7 +44,7 @@ export default function Notification() {
   return (
     <NotificationLayout>
       <Nav />
-      <div className="border-x-solid w-full border-2 border-slate-200">
+      <div className="border-x-solid border-2 ">
         <Header />
         <NotifTab />
       </div>
@@ -66,6 +66,9 @@ function NotifTab() {
   const { userInfo } = useContext(UserInfoContext)!;
   const [tabIndex, setTabIndex] = useState("1");
   const [notifications, setNotifications] = useState<INotifSocketPayload[]>([]);
+  const [followingNotifs, setFollowingNotifs] = useState<INotifSocketPayload[]>(
+    [],
+  );
 
   const navigate = useNavigate();
   const handleTabChange = (e: React.SyntheticEvent, newValue: string) => {
@@ -90,6 +93,19 @@ function NotifTab() {
       })
       .then((res) => {
         setNotifications(res.data.data);
+      });
+  };
+
+  const initializeNotificationsFromFollowing = () => {
+    if (!accessToken) return;
+    axiosClient
+      .get(`/notifications?fromFollowedUsers=${true}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+      .then((res) => {
+        setFollowingNotifs(res.data.data);
       });
   };
 
@@ -160,6 +176,7 @@ function NotifTab() {
     }
   };
 
+  useEffect(initializeNotificationsFromFollowing, [accessToken]);
   useEffect(initializeNotifications, [accessToken]);
   useEffect(listenToNotification, [accessToken]);
 
@@ -174,13 +191,166 @@ function NotifTab() {
         />
       </TabList>
       <TabPanel value="1" className="flex flex-col px-0 pt-0">
-        {notifications.map(NotifElemeGenerator)}
+        {notifications.length !== 0 ? (
+          notifications.map(NotifElemeGenerator)
+        ) : (
+          <p className="ml-5 mt-5 font-body text-lg italic text-slate-500">
+            No notification from followed users
+          </p>
+        )}
       </TabPanel>
-      <TabPanel value="2">Following</TabPanel>
+      <TabPanel
+        value="2"
+        className="relative bottom-[24px] flex flex-col px-0 pt-0"
+      >
+        {followingNotifs.length !== 0 ? (
+          followingNotifs.map(NotifElemeGenerator)
+        ) : (
+          <p className=" ml-5 mt-5 font-body text-lg italic text-slate-500">
+            No notification from followed users
+          </p>
+        )}
+      </TabPanel>
+      {/* <TabPanel value="2" className="flex flex-col px-0 pt-0">
+        {notifications.length !== 0 ? (
+          notifications.map(NotifElemeGenerator)
+        ) : (
+          <p className="ml-5 mt-5 font-body text-lg italic text-slate-500">
+            No notification
+          </p>
+        )}
+      </TabPanel> */}
     </TabContext>
   );
   4;
 }
+
+// function NotifFromFollowingTab() {
+//   const { accessToken } = useContext(TokenContext)!;
+//   const { userInfo } = useContext(UserInfoContext)!;
+//   const [tabIndex, setTabIndex] = useState("1");
+//   const [notifications, setNotifications] = useState<INotifSocketPayload[]>([]);
+
+//   const navigate = useNavigate();
+//   const handleTabChange = (e: React.SyntheticEvent, newValue: string) => {
+//     setTabIndex(newValue);
+//   };
+
+//   const listenToNotification = () => {
+//     socketClient.on(
+//       `notification/${userInfo.id}`,
+//       (payload: INotifSocketPayload) => {
+//         setNotifications([payload, ...notifications]);
+//       },
+//     );
+//   };
+//   const initializeNotifications = () => {
+//     if (!accessToken) return;
+//     axiosClient
+//       .get(`/notifications?fromFollowers=${true}`, {
+//         headers: {
+//           Authorization: `Bearer ${accessToken}`,
+//         },
+//       })
+//       .then((res) => {
+//         setNotifications(res.data.data);
+//       });
+//   };
+
+//   let latestDate: Date;
+//   let dateReference: "TODAY" | "THIS WEEK" | "EARLIER" | null = null;
+
+//   const DateReferencer = ({ notifDate }: { notifDate: string }) => {
+//     if (dateReference === null) {
+//       latestDate = new Date(notifDate);
+//     }
+
+//     const dateDiffByHours = dateUtil
+//       .subtract(new Date(notifDate), latestDate)
+//       .toHours();
+
+//     if (dateDiffByHours < 24 && dateReference !== "TODAY") {
+//       dateReference = "TODAY";
+//       return (
+//         <p className="text-header test-slate-800 mb-2 ml-6 mt-4 text-2xl">
+//           Today
+//         </p>
+//       );
+//     } else if (dateDiffByHours > 24 && dateReference !== "THIS WEEK") {
+//       dateReference = "THIS WEEK";
+//       return (
+//         <p className="text-header test-slate-800 mb-2 ml-6 mt-4 text-2xl">
+//           This Week
+//         </p>
+//       );
+//     } else if (dateDiffByHours > 24 * 7 && dateReference !== "EARLIER") {
+//       dateReference = "EARLIER";
+//       return (
+//         <p className="text-header test-slate-800 mb-2 ml-6 mt-4 text-2xl">
+//           Earlier
+//         </p>
+//       );
+//     } else return <></>;
+//   };
+//   const NotifElemeGenerator = (notif: INotifSocketPayload) => {
+//     if (notif.type === "POST_REACT") {
+//       return (
+//         <>
+//           <DateReferencer
+//             key={`date/${notif.id}`}
+//             notifDate={notif.createdAt}
+//           />
+//           <LikedPost
+//             key={`notif/${notif.id}`}
+//             notif={notif}
+//             navigate={navigate}
+//           />
+//         </>
+//       );
+//     } else if (notif.type === "POST_COMMENT") {
+//       return (
+//         <>
+//           <DateReferencer
+//             key={`date/${notif.id}`}
+//             notifDate={notif.createdAt}
+//           />
+//           <CommentedPost
+//             key={`notif/${notif.id}`}
+//             notif={notif}
+//             navigate={navigate}
+//           />
+//         </>
+//       );
+//     }
+//   };
+
+//   useEffect(initializeNotifications, [accessToken]);
+//   useEffect(listenToNotification, [accessToken]);
+
+//   return (
+//     <TabContext value={tabIndex}>
+//       <TabList onChange={handleTabChange}>
+//         <Tab className="w-1/2 font-bold normal-case" label="All" value="1" />
+//         <Tab
+//           className="w-1/2 font-bold normal-case"
+//           label="Following"
+//           value="2"
+//         />
+//       </TabList>
+//       <TabPanel value="1" className="flex flex-col px-0 pt-0">
+//         {notifications.length !== 0 ? (
+//           notifications.map(NotifElemeGenerator)
+//         ) : (
+//           <p className="ml-5 mt-5 font-body text-lg italic text-slate-500">
+//             No notification
+//           </p>
+//         )}
+//       </TabPanel>
+//       <TabPanel value="2">Following</TabPanel>
+//     </TabContext>
+//   );
+//   4;
+// }
 
 function LikedPost({ notif, navigate }: NotifElemProps) {
   const navToPost = () => {
@@ -254,7 +424,7 @@ function FollowedYou({ notif, navigate }: NotifElemProps) {
 
 function NotificationLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-auto grid w-[1150px] grid-cols-[350px_1fr_350px]">
+    <div className="mx-auto grid w-[1200px]  grid-cols-[335px_1fr_375px]">
       {children}
     </div>
   );

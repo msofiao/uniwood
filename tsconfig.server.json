@@ -2,13 +2,15 @@
   "compilerOptions": {
     "target": "ESNext",
     "experimentalDecorators": true,
-    "module": "ESNext",
-    "moduleResolution": "NodeNext",
+    "module": "CommonJS",
+    "outDir": "serverJs",
+    "moduleResolution": "Node16",
     "baseUrl": "./",
     "types": [
-      "server/types/fastify.ts"
+      "./server/types/fastify.d.ts",
+      "./server/types/global.d.ts",
+      "./server/types/mongodb.d.ts"
     ],
-    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "allowArbitraryExtensions": true,
     "allowSyntheticDefaultImports": true,

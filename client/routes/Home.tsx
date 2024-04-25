@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { useState } from "react";
 import { Tab } from "@mui/material";
@@ -6,29 +6,32 @@ import Post from "../components/Post.tsx";
 import Poster, { PosterModal } from "../components/Poster";
 import axiosClient from "../utils/axios";
 import { useFetcher } from "react-router-dom";
+import { UserInfoContext } from "../providers/UserInfoProvider.tsx";
 export default function Main() {
+  const { userInfo } = useContext(UserInfoContext)!;
   const [tabTarget, setTabTarget] = useState("forYou");
   const [postModalView, setPostModalView] = useState(false);
   const [initialPostData, setInitialPostData] = useState([]);
   const rootLoaderFetch = useFetcher();
 
-  
-
   const handleTabChange = (_event: React.SyntheticEvent, newValue: string) => {
     setTabTarget(newValue);
   };
 
-  // handle initial post data
-  useEffect(() => {
+  const initializePostData = () => {
+    if (!userInfo) return;
     axiosClient
-      .get("/posts", {
+      .get("/posts/recommended", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
       })
       .then((res) => setInitialPostData(res.data.data))
       .catch(console.error);
-  }, [rootLoaderFetch]);
+  };
+
+  // handle initial post data
+  useEffect(initializePostData, [userInfo, rootLoaderFetch]);
 
   return (
     <div className="home">

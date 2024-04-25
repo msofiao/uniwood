@@ -13,6 +13,7 @@ import {
   sendRefreshToken,
 } from "../utils";
 import { isValidObjectId } from "../utils/checker";
+import { recommendPosts } from "../utils/recomAlgo";
 
 const createUser = async (
   req: FastifyRequest<{ Body: UserPostBody }>,
@@ -444,7 +445,7 @@ const getRecommendedAccountsForNewUser = async (
   res: FastifyReply,
 ) => {
   // TODO add algorithm to get recommended accounts for new Users
-  const recommendedAccountsDocs = await req.prisma.user.findMany({
+  let recommendedAccountsDocs = await req.prisma.user.findMany({
     take: parseInt("5"),
     select: {
       id: true,
@@ -460,6 +461,10 @@ const getRecommendedAccountsForNewUser = async (
       affiliation: true,
     },
   });
+
+  recommendedAccountsDocs = recommendedAccountsDocs.filter(
+    (rmAccount) => rmAccount.id !== req.userId,
+  );
 
   const recommendedAccounts = recommendedAccountsDocs.map((user) => ({
     id: user.id,
@@ -803,7 +808,7 @@ const getFollowings = async (
     };
   });
 
-  console.log({parsedFollowersData});
+  console.log({ parsedFollowersData });
 
   return res.code(200).send({ status: "success", data: parsedFollowersData });
 };

@@ -4,7 +4,7 @@ import { createWriteStream } from "fs";
 import { rename, unlink } from "fs/promises";
 import { randomBytes } from "crypto";
 import path from "path";
-import { FileInfo } from "../types/global";
+import type { FileInfo } from "../types/global.d.ts";
 /**
  * Stores a file a the server folder
  *
@@ -14,14 +14,14 @@ import { FileInfo } from "../types/global";
  */
 export async function storeFile(
   multFile: MultipartFile | undefined,
-  location: "public" | "private" | "tmp" = "public"
+  location: "public" | "private" | "tmp" = "public",
 ): Promise<FileInfo> {
   if (multFile == undefined) {
     throw Error("undefined argument");
   }
 
   const extension: string = multFile.filename.substring(
-    multFile.filename.lastIndexOf(".") + 1
+    multFile.filename.lastIndexOf(".") + 1,
   );
 
   // If file is empty
@@ -33,8 +33,11 @@ export async function storeFile(
     await pipeline(
       multFile.file,
       createWriteStream(
-        path.join(import.meta.dirname, `../${location}/${filename}.${extension}`)
-      )
+        path.join(
+          import.meta.dirname,
+          `../${location}/${filename}.${extension}`,
+        ),
+      ),
     );
   } catch (error) {
     throw error;
@@ -58,14 +61,18 @@ export async function storeFile(
  */
 export function removeFiles(
   filesInfo: (FileInfo | undefined | string)[] = [],
-  folder: "public" | "private" | "tmp" = "tmp"
+  folder: "public" | "private" | "tmp" = "tmp",
 ) {
   filesInfo.forEach((filesInfo) => {
     console.log({ filesInfo });
     if (filesInfo === undefined) return;
     if (typeof filesInfo === "string")
-      return unlink(path.resolve(import.meta.dirname, `../${folder}/${filesInfo}`));
-    unlink(path.resolve(import.meta.dirname, `../${folder}/${filesInfo.filename}`));
+      return unlink(
+        path.resolve(import.meta.dirname, `../${folder}/${filesInfo}`),
+      );
+    unlink(
+      path.resolve(import.meta.dirname, `../${folder}/${filesInfo.filename}`),
+    );
   });
 }
 
@@ -78,20 +85,26 @@ export function removeFiles(
 export async function moveFile(
   filesInfo: (FileInfo | undefined | string)[],
   currentFolder: "public" | "private" | "tmp" = "tmp",
-  targetFolder: "public" | "private" = "public"
+  targetFolder: "public" | "private" = "public",
 ) {
   filesInfo.forEach(async (fileInfo) => {
     console.log({ fileInfo });
     if (!fileInfo) return;
     if (typeof fileInfo !== "string") {
       await rename(
-        path.resolve(import.meta.dirname, `../${currentFolder}/${fileInfo.filename}`),
-        path.resolve(import.meta.dirname, `../${targetFolder}/${fileInfo.filename}`)
+        path.resolve(
+          import.meta.dirname,
+          `../${currentFolder}/${fileInfo.filename}`,
+        ),
+        path.resolve(
+          import.meta.dirname,
+          `../${targetFolder}/${fileInfo.filename}`,
+        ),
       );
     } else {
       await rename(
         path.resolve(import.meta.dirname, `../${currentFolder}/${fileInfo}`),
-        path.resolve(import.meta.dirname, `../${targetFolder}/${fileInfo}`)
+        path.resolve(import.meta.dirname, `../${targetFolder}/${fileInfo}`),
       );
     }
   });

@@ -18,6 +18,7 @@ import {
 import React, {
   createContext,
   Dispatch,
+  SetStateAction,
   useContext,
   useEffect,
   useState,
@@ -51,6 +52,7 @@ export default function Profile() {
   const [userProfileInfo, setUserProfileInfo] =
     useState<UserProfileInfo | null>(null);
   const [userPosts, setUserPosts] = useState<Post[]>([]);
+  const [tabIndex, setTabIndex] = useState("1");
 
   const loaderData = useLoaderData() as any;
 
@@ -65,15 +67,20 @@ export default function Profile() {
       value={{ userProfileInfo, setUserProfileInfo, userPosts, setUserPosts }}
     >
       <div className="profile">
-        <UserProfileContent />
-        <Section />
+        <UserProfileContent setTabIndex={setTabIndex} />
+        <Section tabIndex={tabIndex} setTabIndex={setTabIndex} />
       </div>
     </ProfileContext.Provider>
   );
 }
-function Section() {
+function Section({
+  tabIndex,
+  setTabIndex,
+}: {
+  tabIndex: string;
+  setTabIndex: Dispatch<SetStateAction<string>>;
+}) {
   const { userPosts, userProfileInfo } = useContext(ProfileContext)!;
-  const [tabIndex, setTabIndex] = useState("3");
   const [postModalView, setPostModalView] = useState(false);
   const handleTabChange = (_event: React.SyntheticEvent, newValue: string) => {
     setTabIndex(newValue);
@@ -95,7 +102,9 @@ function Section() {
           </TabList>
         </Box>
         <TabPanel value="1">
-          <Poster setPostModalView={setPostModalView} />
+          {userProfileInfo?.id === localStorage.getItem("id") && (
+            <Poster setPostModalView={setPostModalView} />
+          )}
           {userPosts.map((post) => {
             return <Post postParam={post} />;
           })}
@@ -106,7 +115,7 @@ function Section() {
         <TabPanel className="min-h-100%" value="3">
           <FollowerList />
         </TabPanel>
-        <TabPanel value="4">
+        <TabPanel value="4" className="flex flex-col gap-4">
           <FollowingList />
         </TabPanel>
       </TabContext>
@@ -161,13 +170,20 @@ function UserDetail() {
     </Paper>
   );
 }
-function UserProfileContent() {
+function UserProfileContent({
+  setTabIndex,
+}: {
+  setTabIndex: Dispatch<SetStateAction<string>>;
+}) {
   const navigate = useNavigate();
   const [followed, setFollowed] = useState<boolean | null>(null);
   const [editProfileModalView, setEditProfileModalView] = useState(false);
 
   const { userProfileInfo, setUserProfileInfo } = useContext(ProfileContext)!;
   const { accessToken } = useContext(TokenContext)!;
+
+  const moveToFollowingTab = () => setTabIndex("4");
+  const moveToFollowerTab = () => setTabIndex("3");
 
   const checkIfUserIsFollowed = () => {
     if (!accessToken || !userProfileInfo) return;
@@ -311,13 +327,19 @@ function UserProfileContent() {
         <p className="mt-1 text-base text-slate-800">{userProfileInfo?.bio}</p>
         <div></div>
         <div className="mt-2 flex gap-3">
-          <p className="text-base text-slate-600 hover:cursor-pointer hover:underline">
+          <p
+            className="text-base text-slate-600 hover:cursor-pointer hover:underline"
+            onClick={moveToFollowerTab}
+          >
             <span className="text-base font-bold text-slate-800">
               {userProfileInfo?.followersCount}
             </span>{" "}
             Followers
           </p>
-          <p className="font-bodt text-base text-slate-600 hover:cursor-pointer hover:underline">
+          <p
+            className="font-bodt text-base text-slate-600 hover:cursor-pointer hover:underline"
+            onClick={moveToFollowingTab}
+          >
             <span className="text-base font-bold text-slate-800">
               {userProfileInfo?.followingCount}
             </span>{" "}

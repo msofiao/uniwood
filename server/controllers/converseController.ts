@@ -1,12 +1,12 @@
 import { ObjectId } from "mongodb";
-import { IMessage } from "../types";
-import {
-  FastifyInstance,
+import type { IMessage } from "../types/mongodb.d.ts";
+import type {
   FastifyReply,
   FastifyRequest,
-} from "../types/fastify";
-import { converseDocExistByMessengersId } from "../models";
-import { capitalize, moveFile, removeFiles } from "../utils";
+} from "../types/fastify.d.ts";
+import { converseDocExistByMessengersId } from "../models/converseOperations.js";
+import { capitalize } from "../utils/stringFormatter.ts";
+import { moveFile, removeFiles } from "../utils/fileManager.ts";
 
 export const sendMessage = async (
   req: FastifyRequest<{ Body: ICreateConverseBody }>,

@@ -394,13 +394,13 @@ function ModalHeader({ setRegisterModalView }: ModalHeaderProps) {
       <p className="name block w-full text-center font-header text-lg font-semibold">
         Create Account
       </p>
-      <Button
+      {/* <Button
         type="submit"
         className="bg-primary-400D absolute right-3 rounded-full px-4 py-1 font-bold normal-case text-white"
         variant="contained"
       >
         Skip
-      </Button>
+      </Button> */}
     </div>
   );
 }

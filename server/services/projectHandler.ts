@@ -1,5 +1,5 @@
-import { FastifyRequest, FastifyReply } from "../types/fastify";
-import { removeFiles, storeFile } from "../utils/fileManager";
+import type { FastifyRequest, FastifyReply } from "../types/fastify.d.ts";
+import { removeFiles, storeFile } from "../utils/fileManager.ts";
 import {
   ProjectPostBody,
   ProjectPutBody,
@@ -16,7 +16,7 @@ import {
  */
 export async function projectsCustomMultipartConsumer(
   req: FastifyRequest<{ Body: Record<string, any> }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) {
   // console.log({ body: req.body });
   if (!req.isMultipart() || req.isMultipart() === undefined) return;
@@ -74,7 +74,7 @@ export async function projectsCustomMultipartConsumer(
 
 export async function projectPostOnresponseHander(
   req: FastifyRequest<{ Body: ProjectPostBody }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) {
   // Remove Files From Temp Folder
   if (res.statusCode === 201) return;
@@ -88,7 +88,7 @@ export async function projectPostOnresponseHander(
  */
 export async function projectPutOnResponeseHandler(
   req: FastifyRequest<{ Body: ProjectPutBody }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) {
   // Remove Files From Temp Folder
   if (res.statusCode === 200) return;

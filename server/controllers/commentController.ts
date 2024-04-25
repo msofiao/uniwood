@@ -1,12 +1,12 @@
 import { Comment } from "@prisma/client";
-import { FastifyRequest, FastifyReply } from "../types/fastify";
+import type { FastifyRequest, FastifyReply } from "../types/fastify.d.ts";
 import {
   commentExist,
   upVoteToggle as upVoteToggleQuery,
   downVoteToggle as downVoteToggleQuery,
   replyComment as replyCommentFc,
   testCommentQuery,
-} from "../models/commentsQuery";
+} from "../models/commentsQuery.js";
 import { ObjectId } from "mongodb";
 
 const createComment = async (

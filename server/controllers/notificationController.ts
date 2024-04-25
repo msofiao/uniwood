@@ -2,7 +2,13 @@ import { INotificationDocument } from "../types";
 import { FastifyRequest, FastifyReply } from "../types/fastify";
 import { capitalize } from "../utils";
 
-const getNotifications = async (req: FastifyRequest, res: FastifyReply) => {
+const getNotifications = async (
+  req: FastifyRequest<{
+    Querystring: { fromFollowedUsers: string | undefined };
+    Body: any;
+  }>,
+  res: FastifyReply,
+) => {
   const notifDocument = await req.prisma.notification.findMany({
     where: {
       notifTo_id: req.userId,
@@ -22,6 +28,7 @@ const getNotifications = async (req: FastifyRequest, res: FastifyReply) => {
           lastname: true,
           user_image: true,
           username: true,
+          follower_ids: true,
         },
       },
     },
@@ -36,7 +43,8 @@ const getNotifications = async (req: FastifyRequest, res: FastifyReply) => {
       .send({ status: "fail", message: "Notification not Found" });
 
   let parsedNotifDoc: Omit<
-    INotificationDocument & AdditionalProps,
+    INotificationDocument &
+      AdditionalProps & { NotifFrom: { followers_ids: string[] } },
     "_id" | "updatedAt"
   >[] = notifDocument.map((notif) => {
     return {
@@ -55,9 +63,18 @@ const getNotifications = async (req: FastifyRequest, res: FastifyReply) => {
         username: notif.NotifFrom.username,
         pfp: notif.NotifFrom.user_image.pfp_name,
       },
+      NotifFrom: {
+        followers_ids: notif.NotifFrom.follower_ids,
+      },
     };
   });
 
+  if (req.query.fromFollowedUsers === "true") {
+    console.log("fromFollowedUsers=================");
+    parsedNotifDoc = parsedNotifDoc.filter((pNotif) =>
+      pNotif.NotifFrom.followers_ids.includes(req.userId),
+    );
+  }
   return res.send({
     status: "success",
     message: "Successfully fetched notification",

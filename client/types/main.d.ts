@@ -36,7 +36,7 @@ declare interface Author {
   cover: string;
   address: string;
   affiliation: string;
-}
+}W
 
 declare interface Post {
   id: string;

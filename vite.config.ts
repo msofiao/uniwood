@@ -17,6 +17,7 @@ export default defineConfig(({ mode }) => {
         input: {
           main: resolve(__dirname, "client/index.html"),
         },
+        outDir: resolve(__dirname, "client/public"),
       },
       commonjsOptions: {
         transformMixedEsModules: true,

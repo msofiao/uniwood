@@ -127,21 +127,16 @@ function AvatarNav() {
         }}
       />
       <div className="avatar-details">
-        <Typography
-          color={theme.palette.text.primary}
-          fontSize="14px"
-          fontWeight="bold"
-          className="name"
-        >
+        <p className="text-base text-slate-800 font-body">
           {userInfo.fullname}
-        </Typography>
+        </p>
         <Typography
-          fontSize="16px"
+          fontSize="14px"
           color={theme.palette.text.secondary}
           className="username"
           variant="body2"
         >
-          {userInfo.username}
+          @{userInfo.username}
         </Typography>
       </div>
       {open ? (

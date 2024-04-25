@@ -1,18 +1,18 @@
 import { Credential, User } from "@prisma/client";
-import { FastifyRequest, FastifyReply } from "../types/fastify";
+import type { FastifyRequest, FastifyReply } from "../types/fastify.d.ts";
 import { compare } from "bcrypt";
 import {
   createAccessToken,
   createRefreshToken,
   sendAccessToken,
   sendRefreshToken,
-} from "../utils/tokens";
+} from "../utils/tokens.ts";
 
 export const login = async (
   req: FastifyRequest<{
     Body: { usernameOrEmail: string | undefined; password: string | undefined };
   }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) => {
   // TODO add validation
 
@@ -85,7 +85,7 @@ export const login = async (
       id: userExist.id,
     },
     accessToken,
-    res
+    res,
   );
 };
 

@@ -36,6 +36,7 @@ import { TokenContext } from "../providers/TokenProvider";
 import { sendRefreshTokenRequest, sendUserInfoRequest } from "../utils";
 import { UserInfoContext } from "../providers/UserInfoProvider";
 import axiosClient from "../utils/axios";
+import Nav from "../components/Nav";
 
 export async function loader() {
   const refreshTokenResponse = await sendRefreshTokenRequest();
@@ -94,149 +95,149 @@ export default function Root() {
   );
 }
 
-function Nav() {
-  const [focusState, setFocusState] = useState({
-    home: true,
-    messages: false,
-    notifications: false,
-    profile: false,
-  });
-  const [posterModalView, setPosterModalView] = useState(false);
-  const { userInfo } = useContext(UserInfoContext)!;
-  const navigate = useNavigate();
-  const location = useLocation();
+// function Nav() {
+//   const [focusState, setFocusState] = useState({
+//     home: true,
+//     messages: false,
+//     notifications: false,
+//     profile: false,
+//   });
+//   const [posterModalView, setPosterModalView] = useState(false);
+//   const { userInfo } = useContext(UserInfoContext)!;
+//   const navigate = useNavigate();
+//   const location = useLocation();
 
-  const handleUrlParamsChange = () => {
-    if (location.pathname.startsWith("/message")) {
-      handleFocus("messages");
-    } else if (location.pathname.startsWith("/notification")) {
-      handleFocus("notifications");
-    } else if (location.pathname.startsWith("/profile")) {
-      handleFocus("profile");
-    } else if (location.pathname === "/") {
-      handleFocus("home");
-    } else {
-      setFocusState({
-        home: false,
-        messages: false,
-        notifications: false,
-        profile: false,
-      });
-    }
-  };
-  console.log("Root Rendered");
-  useEffect(handleUrlParamsChange, [location]);
+//   const handleUrlParamsChange = () => {
+//     if (location.pathname.startsWith("/message")) {
+//       handleFocus("messages");
+//     } else if (location.pathname.startsWith("/notification")) {
+//       handleFocus("notifications");
+//     } else if (location.pathname.startsWith("/profile")) {
+//       handleFocus("profile");
+//     } else if (location.pathname === "/") {
+//       handleFocus("home");
+//     } else {
+//       setFocusState({
+//         home: false,
+//         messages: false,
+//         notifications: false,
+//         profile: false,
+//       });
+//     }
+//   };
+//   console.log("Root Rendered");
+//   useEffect(handleUrlParamsChange, [location]);
 
-  // utilities
-  const handleFocus = (buttonName: string) => {
-    let newFocusState: any = {};
-    for (let key in focusState) {
-      if (key === buttonName) {
-        newFocusState[key] = true;
-      } else {
-        newFocusState[key] = false;
-      }
-    }
-    setFocusState(newFocusState);
-  };
+//   // utilities
+//   const handleFocus = (buttonName: string) => {
+//     let newFocusState: any = {};
+//     for (let key in focusState) {
+//       if (key === buttonName) {
+//         newFocusState[key] = true;
+//       } else {
+//         newFocusState[key] = false;
+//       }
+//     }
+//     setFocusState(newFocusState);
+//   };
 
-  return (
-    <nav>
-      <img
-        className="logo"
-        src={`${process.env.SERVER_PUBLIC}/assets/logo_label.svg`}
-        alt="logo"
-      />
-      <div className="nav-container">
-        <MenuItem
-          className="nav-item"
-          onClick={() => {
-            navigate("/");
-          }}
-          selected={focusState.home ? true : false}
-        >
-          <ListItemIcon className="icon">
-            {focusState.home ? <HomeRounded /> : <HomeOutlined />}
-          </ListItemIcon>
-          <Typography
-            fontWeight={focusState.home ? "900" : "normal"}
-            variant="body1"
-          >
-            Home
-          </Typography>
-        </MenuItem>
-        <MenuItem
-          className="nav-item"
-          onClick={() => {
-            navigate("/message");
-          }}
-          selected={focusState.messages ? true : false}
-        >
-          <ListItemIcon className="icon">
-            {focusState.messages ? <MessageRounded /> : <MessageOutlined />}
-          </ListItemIcon>
-          <Typography
-            variant="body1"
-            fontWeight={focusState.messages ? "900" : "normal"}
-          >
-            Messages
-          </Typography>
-        </MenuItem>
-        <MenuItem
-          className="nav-item"
-          onClick={() => {
-            navigate("/notification");
-          }}
-          selected={focusState.notifications ? true : false}
-        >
-          <ListItemIcon className="icon">
-            {focusState.notifications ? (
-              <NotificationsRounded />
-            ) : (
-              <NotificationsOutlined />
-            )}
-          </ListItemIcon>
-          <Typography
-            variant="body1"
-            fontWeight={focusState.notifications ? "900" : "normal"}
-          >
-            Notifications
-          </Typography>
-        </MenuItem>
-        <MenuItem
-          className="nav-item"
-          onClick={() => {
-            navigate(`/profile/${userInfo.username}`);
-          }}
-          selected={focusState.profile ? true : false}
-        >
-          <ListItemIcon className="icon">
-            {focusState.profile ? <PersonRounded /> : <PersonOutline />}
-          </ListItemIcon>
-          <Typography
-            variant="body1"
-            fontWeight={focusState.profile ? "900" : "normal"}
-          >
-            Profile
-          </Typography>
-        </MenuItem>
-      </div>
-      <Button
-        className="button"
-        variant="contained"
-        fullWidth
-        onClick={() => setPosterModalView(true)}
-      >
-        Post
-      </Button>
-      <AvatarNav />
-      <PosterModal
-        postModalView={posterModalView}
-        setPostModalView={setPosterModalView}
-      />
-    </nav>
-  );
-}
+//   return (
+//     <nav>
+//       <img
+//         className="logo"
+//         src={`${process.env.SERVER_PUBLIC}/assets/logo_label.svg`}
+//         alt="logo"
+//       />
+//       <div className="nav-container">
+//         <MenuItem
+//           className="nav-item"
+//           onClick={() => {
+//             navigate("/");
+//           }}
+//           selected={focusState.home ? true : false}
+//         >
+//           <ListItemIcon className="icon">
+//             {focusState.home ? <HomeRounded /> : <HomeOutlined />}
+//           </ListItemIcon>
+//           <Typography
+//             fontWeight={focusState.home ? "900" : "normal"}
+//             variant="body1"
+//           >
+//             Home
+//           </Typography>
+//         </MenuItem>
+//         <MenuItem
+//           className="nav-item"
+//           onClick={() => {
+//             navigate("/message");
+//           }}
+//           selected={focusState.messages ? true : false}
+//         >
+//           <ListItemIcon className="icon">
+//             {focusState.messages ? <MessageRounded /> : <MessageOutlined />}
+//           </ListItemIcon>
+//           <Typography
+//             variant="body1"
+//             fontWeight={focusState.messages ? "900" : "normal"}
+//           >
+//             Messages
+//           </Typography>
+//         </MenuItem>
+//         <MenuItem
+//           className="nav-item"
+//           onClick={() => {
+//             navigate("/notification");
+//           }}
+//           selected={focusState.notifications ? true : false}
+//         >
+//           <ListItemIcon className="icon">
+//             {focusState.notifications ? (
+//               <NotificationsRounded />
+//             ) : (
+//               <NotificationsOutlined />
+//             )}
+//           </ListItemIcon>
+//           <Typography
+//             variant="body1"
+//             fontWeight={focusState.notifications ? "900" : "normal"}
+//           >
+//             Notifications
+//           </Typography>
+//         </MenuItem>
+//         <MenuItem
+//           className="nav-item"
+//           onClick={() => {
+//             navigate(`/profile/${userInfo.username}`);
+//           }}
+//           selected={focusState.profile ? true : false}
+//         >
+//           <ListItemIcon className="icon">
+//             {focusState.profile ? <PersonRounded /> : <PersonOutline />}
+//           </ListItemIcon>
+//           <Typography
+//             variant="body1"
+//             fontWeight={focusState.profile ? "900" : "normal"}
+//           >
+//             Profile
+//           </Typography>
+//         </MenuItem>
+//       </div>
+//       <Button
+//         className="button"
+//         variant="contained"
+//         fullWidth
+//         onClick={() => setPosterModalView(true)}
+//       >
+//         Post
+//       </Button>
+//       <AvatarNav />
+//       <PosterModal
+//         postModalView={posterModalView}
+//         setPostModalView={setPosterModalView}
+//       />
+//     </nav>
+//   );
+// }
 function RightSection({ theme: theme }: { theme: Theme }) {
   const [, setSearch] = useState("");
   const navigate = useNavigate();

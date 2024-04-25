@@ -34,7 +34,7 @@ export default function Poster({
   const { userInfo } = useContext(UserInfoContext)!;
 
   return (
-    <Paper elevation={1} className="poster">
+    <Paper elevation={1} className="poster ">
       <div className="pane1">
         <Avatar
           className="avatar"
@@ -57,13 +57,12 @@ export default function Poster({
           Share your Knowlge or Idea
         </Typography>
       </div>
-      <Button
-        className="button"
-        color={"secondary"}
+      <button
+        className="mt-5 w-full rounded-full bg-primary-400 py-2 normal-case text-white hover:shadow-md"
         onClick={() => setPostModalView(true)}
       >
         Post
-      </Button>
+      </button>
     </Paper>
   );
 }

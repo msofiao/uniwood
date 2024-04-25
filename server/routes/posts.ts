@@ -10,19 +10,23 @@ import {
 export function PostsRoute(
   instance: FastifyInstance,
   _option: any,
-  done: () => void
+  done: () => void,
 ) {
   instance.get(
     "/",
     { preValidation: [authorize("ANY")] },
-    postController.getAllPosts
+    postController.getAllPosts,
   );
-  instance.get('/:postId', {preValidation: [authorize("ANY")]}, postController.getPostById)
+  instance.get(
+    "/:postId",
+    { preValidation: [authorize("ANY")] },
+    postController.getPostById,
+  );
 
   instance.get(
     "/user/:usernameOrId",
     { preValidation: [authorize("ANY")] },
-    postController.getAllUserPost
+    postController.getAllUserPost,
   );
   // instance.get(
   //   "/:postId",
@@ -35,7 +39,7 @@ export function PostsRoute(
       preValidation: [authorize("ANY"), postsCustomMultipartConsumer],
       onResponse: postPostOnresponseHander,
     },
-    postController.createPost
+    postController.createPost,
   );
   instance.put(
     "/",
@@ -43,18 +47,24 @@ export function PostsRoute(
       preValidation: [authorize("ANY"), postsCustomMultipartConsumer],
       onResponse: postPutOnresponseHander,
     },
-    postController.updatePost
+    postController.updatePost,
   );
   instance.delete(
     "/",
     { preValidation: [authorize("ANY")] },
-    postController.deletePost
+    postController.deletePost,
   );
   instance.patch(
     "/likeToggle",
     { preValidation: [authorize("ANY")] },
-    postController.likePostToggle
+    postController.likePostToggle,
   );
   instance.get("/topTags", postController.getTopTags);
   done();
+
+  instance.get(
+    "/recommended",
+    { preValidation: [authorize("ANY")] },
+    postController.getRecommendedPosts,
+  );
 }
