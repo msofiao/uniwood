@@ -20,7 +20,6 @@ export default function Post() {
         },
       })
       .then((res) => {
-        console.log({ data: res.data.data });
         setPost(res.data.data);
       });
   };

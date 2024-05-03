@@ -76,9 +76,9 @@ export default function Project({
           <div className="post-details">
             <Typography className="name" variant="body1">
               {`${postData.author.firstname[0].toUpperCase()}${postData.author.firstname.slice(
-                1
+                1,
               )} ${postData.author.lastname[0].toUpperCase()}${postData.author.lastname.slice(
-                1
+                1,
               )}`}
             </Typography>
             <Typography
@@ -281,10 +281,10 @@ function PostActions({
               {
                 headers: {
                   Authorization: `Bearer ${localStorage.getItem(
-                    "accessToken"
+                    "accessToken",
                   )}`,
                 },
-              }
+              },
             );
             setLikeCountState(likeCountState + (fillHeart ? -1 : 1));
             setFillHeart(!fillHeart);
@@ -353,7 +353,6 @@ function CommentModal({
       };
     }[]
   >([]);
-  console.log({ newComment });
   return (
     <Modal
       className="root-modals"
@@ -394,7 +393,7 @@ function CommentModal({
             <Avatar
               className="avatar"
               src={`${process.env.SERVER_PUBLIC}/${localStorage.getItem(
-                "user_pfp"
+                "user_pfp",
               )}`}
             />
             <form style={{ width: "100%" }}>
@@ -439,10 +438,10 @@ function CommentModal({
                     {
                       headers: {
                         Authorization: `Bearer ${localStorage.getItem(
-                          "accessToken"
+                          "accessToken",
                         )}`,
                       },
-                    }
+                    },
                   );
                   newComment.push({
                     author: {

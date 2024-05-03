@@ -136,3 +136,5 @@ app.get("/cookie", (req, res) => {
   });
   return res.send({ status: "success", message: "cookie sent" });
 });
+
+export default app;

@@ -66,7 +66,7 @@ export default function Profile() {
     <ProfileContext.Provider
       value={{ userProfileInfo, setUserProfileInfo, userPosts, setUserPosts }}
     >
-      <div className="profile">
+      <div className="profile ">
         <UserProfileContent setTabIndex={setTabIndex} />
         <Section tabIndex={tabIndex} setTabIndex={setTabIndex} />
       </div>
@@ -101,7 +101,7 @@ function Section({
             <Tab label="Following" value="4" />
           </TabList>
         </Box>
-        <TabPanel value="1">
+        <TabPanel value="1" className="">
           {userProfileInfo?.id === localStorage.getItem("id") && (
             <Poster setPostModalView={setPostModalView} />
           )}
@@ -112,10 +112,13 @@ function Section({
         <TabPanel value="2">
           <UserDetail />
         </TabPanel>
-        <TabPanel className="min-h-100%" value="3">
+        <TabPanel className="min-h-100% flex flex-col gap-3" value="3">
           <FollowerList />
         </TabPanel>
-        <TabPanel value="4" className="flex flex-col gap-4">
+        <TabPanel
+          value="4"
+          className="relative bottom-[48px] flex flex-col gap-3"
+        >
           <FollowingList />
         </TabPanel>
       </TabContext>
@@ -199,7 +202,6 @@ function UserProfileContent({
       .catch((err) => {
         if (err.response.status === 404) setFollowed(false);
       });
-    console.log({ followed });
   };
   const followToggle = () => {
     if (!userProfileInfo || !accessToken) return;
@@ -235,7 +237,6 @@ function UserProfileContent({
           },
         )
         .then((res) => {
-          console.log({ userProfileInfo });
           if (res.status === 200) {
             setFollowed(true);
             setUserProfileInfo({
@@ -255,11 +256,10 @@ function UserProfileContent({
         },
       })
       .then((res) => {
-        console.log(res.data);
         navigate(`/message/${res.data.data.converseId}`); //
       })
       .catch((err) => {
-        console.log(err.response);
+        console.error(err.response);
 
         navigate(`/message/new/${userProfileInfo?.id}`); //
       });
@@ -700,27 +700,6 @@ function EditProfileModal({
   );
 }
 
-// function FollwerListTab({ modalView, setModalView }: ModalViewProps) {
-//   const [followers, setFollowers] = useState<PostAuthor[]>([]);
-//   const { userProfileInfo } = useContext(ProfileContext)!;
-//   const { accessToken } = useContext(TokenContext)!;
-
-//   const initializeFollowersData = () => {
-//     if (!accessToken || !userProfileInfo) return;
-//     axiosClient
-//       .get(`/users/followers?targetUserId=${userProfileInfo}`, {
-//         headers: { Authorization: `Bearer ${accessToken}` },
-//       })
-//       .then((res) => {
-//         console.log(res.data);
-//         setFollowers(res.data.data);
-//       });
-//   };
-
-//   useEffect(initializeFollowersData, [accessToken]);
-//   return <div></div>;
-// }
-
 function FollowerElement({
   follow,
   navigate,
@@ -731,9 +710,14 @@ function FollowerElement({
   const navigateToProfile = () => {
     navigate(`/profile/${follow.id}`);
   };
+
+  // const followToggle = () => {}
   return (
-    <Paper className="flex items-center gap-4 px-5 py-2">
-      <Avatar className="size-[50px]" src={`${follow.pfp}`} />
+    <Paper className="flex items-center gap-4 rounded-lg px-5 py-2">
+      <Avatar
+        className="size-[50px]"
+        src={`${process.env.SERVER_PUBLIC}/${follow.pfp}`}
+      />
       <div className="">
         <p
           className="font-body font-bold text-slate-800 hover:cursor-pointer hover:underline"
@@ -751,8 +735,13 @@ function FollowerElement({
           </p>
         </div>
       </div>
-      <Button variant="contained" className=" ml-auto normal-case text-white ">
-        {follow.followedByTheUser ? "Unfollow" : "Follow"}
+
+      <Button
+        variant="contained"
+        className=" ml-auto normal-case text-white"
+        onClick={navigateToProfile}
+      >
+        {/* {follow.followedByTheUser ? "Unfollow" : "Follow"} */} View Profile
       </Button>
     </Paper>
   );

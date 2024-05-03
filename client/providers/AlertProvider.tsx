@@ -22,7 +22,6 @@ export default function AlertProvider({
   });
 
   const removeAlert = () => {
-    console.log("remove alert");
     setTimeout(() => {
       setAlert({ ...alert, visible: false });
     }, 4000);

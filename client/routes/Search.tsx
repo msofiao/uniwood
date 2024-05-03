@@ -27,9 +27,8 @@ export default function Search() {
     <div className="search">
       <TabContext value={tabIndex}>
         <TabList className="tab-list" onChange={handletTabChange}>
-          <Tab className="tab" label="Posts" value="1" />
-          <Tab className="tab" label="Projects" value="2" />
-          <Tab className="tab" label="Users" value="3" />
+          <Tab className="tab w-1/2" label="Posts" value="1" />
+          <Tab className="tab w-1/2" label="Users" value="3" />
         </TabList>
         <TabPanel value="1">
           {resData?.posts &&
@@ -39,7 +38,7 @@ export default function Search() {
           <Project />
         </TabPanel> */}
         <TabPanel value="3">
-          <div className="flex justify-center gap-3 flex-col">
+          <div className="flex flex-col justify-center gap-3">
             {resData?.users &&
               resData.users.map((user) => <Users user={user} />)}
           </div>

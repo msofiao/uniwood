@@ -18,7 +18,7 @@ import { postsAction, postsLoader } from "./api/posts.ts";
 import { loginAction } from "./api/login.ts";
 import { profileLoader } from "./api/loaders/profile.ts";
 import { loader as messageLoader } from "./api/loaders/message.ts";
-import {loader as notificationLoader} from "./api/loaders/notification.ts";
+import { loader as notificationLoader } from "./api/loaders/notification.ts";
 
 // Misc
 import "./styles.scss";
@@ -26,6 +26,7 @@ import { profileAction } from "./api/actions/profile.ts";
 import Conversation from "./components/Conversation.tsx";
 import MessageIndex from "./components/MessageIndex.tsx";
 import Post from "./routes/Post.tsx";
+import Test2 from "./routes/Test2.tsx";
 
 const router = createBrowserRouter([
   {
@@ -53,8 +54,8 @@ const router = createBrowserRouter([
       },
       {
         path: "/post/:postId",
-        element: <Post />
-      }
+        element: <Post />,
+      },
     ],
   },
   {
@@ -92,6 +93,10 @@ const router = createBrowserRouter([
     path: "/notification",
     element: <Notification />,
     loader: notificationLoader,
+  },
+  {
+    path: "/test2",
+    element: <Test2 />,
   },
 ]);
 

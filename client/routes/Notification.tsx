@@ -44,7 +44,7 @@ export default function Notification() {
   return (
     <NotificationLayout>
       <Nav />
-      <div className="border-x-solid border-2 ">
+      <div className="border-x-solid max-h-screen overflow-y-auto border-2">
         <Header />
         <NotifTab />
       </div>
@@ -118,7 +118,7 @@ function NotifTab() {
     }
 
     const dateDiffByHours = dateUtil
-      .subtract(new Date(notifDate), latestDate)
+      .subtract(latestDate, new Date(notifDate))
       .toHours();
 
     if (dateDiffByHours < 24 && dateReference !== "TODAY") {
@@ -424,7 +424,7 @@ function FollowedYou({ notif, navigate }: NotifElemProps) {
 
 function NotificationLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-auto grid w-[1200px]  grid-cols-[335px_1fr_375px]">
+    <div className="mx-auto grid max-h-screen  w-[1200px] grid-cols-[335px_1fr_375px]">
       {children}
     </div>
   );

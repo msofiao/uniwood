@@ -7,6 +7,7 @@ import Poster, { PosterModal } from "../components/Poster";
 import axiosClient from "../utils/axios";
 import { useFetcher } from "react-router-dom";
 import { UserInfoContext } from "../providers/UserInfoProvider.tsx";
+import { TokenContext } from "../providers/TokenProvider.tsx";
 export default function Main() {
   const { userInfo } = useContext(UserInfoContext)!;
   const [tabTarget, setTabTarget] = useState("forYou");
@@ -57,8 +58,42 @@ export default function Main() {
             setPostModalView={setPostModalView}
           />
         </TabPanel>
-        <TabPanel value="following">Following</TabPanel>
+        <TabPanel value="following">
+          <FollowingpPostsTab />
+        </TabPanel>
       </TabContext>
     </div>
+  );
+}
+
+function FollowingpPostsTab() {
+  const { userInfo } = useContext(UserInfoContext)!;
+  const [initialPostData, setInitialPostData] = useState([]);
+  const { accessToken } = useContext(TokenContext)!;
+
+  const initializePostData = () => {
+    if (!userInfo || !accessToken) return;
+    axiosClient
+      .get("/posts/recommended?fromFollowedUsersOnly=true", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      })
+      .then((res) => setInitialPostData(res.data.data ?? []))
+      .catch(console.error);
+  };
+
+  useEffect(initializePostData, [userInfo, accessToken]);
+
+  return (
+    <TabPanel value="following">
+      {initialPostData.length !== 0 ? (
+        initialPostData.map((post) => <Post postParam={post} />)
+      ) : (
+        <p className="ml-2 mt-2 text-base italic text-slate-400">
+          No posts from followed users
+        </p>
+      )}
+    </TabPanel>
   );
 }

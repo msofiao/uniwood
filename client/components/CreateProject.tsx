@@ -80,7 +80,6 @@ export function CreateProjectModal({
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     if (imageData !== null) {
-      console.log(imageFileData);
       imageData.forEach((image, index) => {
         const imgFile = imageFileData.current?.find(
           (imageFile) => imageFile.id === image.id
@@ -184,7 +183,6 @@ export function CreateProjectModal({
           id="post-image-input"
           multiple
           onChange={(e) => {
-            console.log("fileChanged");
             handlePostImage(e, {
               imageData,
               setImageData,
@@ -219,13 +217,11 @@ function ImagePostSet({
     React.SetStateAction<{ id: string; imgSrc: string; caption: string }[]>
   >;
 }) {
-  console.log("post triggered");
   if (imageData === null) {
     return [];
   }
 
   let imageElementSet: React.JSX.Element[] = [];
-  console.log(imageData);
   imageData.forEach((image) => {
     if (image.imgSrc === "") return;
     imageElementSet.push(

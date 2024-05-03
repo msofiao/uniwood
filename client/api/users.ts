@@ -15,7 +15,7 @@ export async function usersAction({
         try {
           await axiosClient.get("/users").then((res) => (data = res.data));
         } catch (error) {
-          console.log((error as AxiosError).response?.data);
+          console.error((error as AxiosError).response?.data);
         }
       }
       break;

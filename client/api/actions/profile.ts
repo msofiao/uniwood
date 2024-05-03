@@ -8,7 +8,6 @@ export async function profileAction({
   request: Request;
 }) {
   const formData = await request.formData();
-  console.log({ params });
   let data = null;
 
   data = await axiosClient

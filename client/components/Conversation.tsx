@@ -57,9 +57,7 @@ export default function Conversation() {
         .then((res) => {
           if (res.status === 200) setConvo(res.data.data);
         });
-      console.log("get conversation");
     } else if (params.recipientId) {
-      console.log("new conversation");
       setConvo(null);
     }
   };

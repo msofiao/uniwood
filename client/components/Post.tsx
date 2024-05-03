@@ -41,6 +41,9 @@ export default function Post({ postParam }: { postParam: Post }) {
   const initializeContextData = () => {
     setPost(postParam);
   };
+  const navigate = useNavigate();
+
+  const navigatable = post?.author.id !== localStorage.getItem("id");
   const loading = post === null;
 
   useEffect(() => {
@@ -57,8 +60,16 @@ export default function Post({ postParam }: { postParam: Post }) {
             className="avatar"
             src={`${process.env.SERVER_PUBLIC}/${post.author.pfp}`}
           />
-          <div className="post-details">
-            <Typography className="name" variant="body1">
+          <div className={`post-detail`}>
+            <Typography
+              className={`name font-body text-base font-bold ${navigatable ? "hover:cursor-pointer hover:underline" : ""}`}
+              variant="body1"
+              onClick={() => {
+                if (navigatable) {
+                  navigate(`/profile/${post.author.id}`);
+                }
+              }}
+            >
               {post.author.fullname}
             </Typography>
             <Typography variant="subtitle2" sx={{ color: "#536471" }}>
@@ -299,15 +310,16 @@ function CommentModal({
       (comment) => paramsCommentId === comment.id,
     );
 
-    console.log({ highlightedComment });
-
     if (!highlightedComment) return;
 
-    post.comments = [highlightedComment, ...post.comments.filter(comment => comment.id !== paramsCommentId)]
+    post.comments = [
+      highlightedComment,
+      ...post.comments.filter((comment) => comment.id !== paramsCommentId),
+    ];
     setPost(post);
   };
 
-  useEffect(hoistHighlightedComment, );
+  useEffect(hoistHighlightedComment);
 
   return loading ? (
     <div>Loading...</div>
@@ -446,7 +458,7 @@ function Tags({ tags }: { tags: string[] }) {
         return (
           <span
             onClick={handleTagNavigation}
-            className="text-blue-400 hover:cursor-pointer hover:text-blue-700 hover:underline"
+            className="break-words text-blue-400 hover:cursor-pointer hover:text-blue-700 hover:underline"
           >
             #{tag}
           </span>

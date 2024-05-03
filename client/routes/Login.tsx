@@ -55,7 +55,7 @@ const ModalAlertContext = createContext<ModalAlertContextProps | null>(null);
 const steps = [
   "Personal Infortmation",
   "User Credential",
-  "Interest and Recommendation",
+  "Suggested Accounts and Interests",
 ];
 
 const TextField = styled(TextFieldMUI)(() => ({
@@ -174,6 +174,17 @@ function RegisterModal({
     visible: true,
   });
   const formDataRef = useRef<FormData>(new FormData());
+  const initializeRecommendations = () => {
+    axiosClient
+      .get("/posts/topTags?count=30", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+      .then((res: any) => {
+        if (res.status === 200) {
+          setRecommendations(Object.keys(res.data.data));
+        }
+      });
+  };
 
   const autoAlertRemoval = () => {
     setTimeout(() => {
@@ -192,6 +203,7 @@ function RegisterModal({
     navigate("/");
   };
 
+  useEffect(initializeRecommendations, []);
   useEffect(autoAlertRemoval, [alertState.visible]);
 
   return (
@@ -679,7 +691,7 @@ function Account({ account }: { account: UserProfileInfo }) {
         src={`${process.env.SERVER_PUBLIC}/${account.pfp}`}
       />
       <div>
-        <p className="font-body2 text-base font-medium text-slate-700 hover:underline">
+        <p className="font-body2 text-base font-medium text-slate-700 hover:cursor-pointer hover:underline">
           {account.fullname}
         </p>
         <p className="font-body text-sm text-slate-500">
@@ -905,8 +917,6 @@ function CredentialForm({ dispatchStepValue }: CredentialFormProps) {
       [e.target.name]: null,
     });
   const initializeToken = () => {
-    console.log("initializeTokenfnc triggered");
-    console.log({ fetcherData: userFetcher.data?.status });
     if (userFetcher.data?.status === "success") {
       localStorage.setItem("accessToken", userFetcher.data.data.accessToken);
       setAccessToken(userFetcher.data.data.accessToken);

@@ -82,7 +82,7 @@ export default function MessageList() {
     <div className="border-x-solid flex max-h-screen flex-col  gap-4 border-x-2 border-x-slate-300">
       <div className="mt-5 flex flex-col gap-4 px-4">
         <Header />
-        <SearchBar />
+        {/* <SearchBar /> */}
       </div>
 
       <div className="overflow-y-scroll">

@@ -3,7 +3,6 @@ export function fileToString(file: File) {
   reader.readAsDataURL(file);
 
   return (reader.onload = () => {
-    console.log(reader.result);
     return reader.result?.toString();
   });
 }

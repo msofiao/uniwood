@@ -1,78 +1,81 @@
-import { Button, ImageList, ImageListItem } from "@mui/material";
-import { useEffect, useState } from "react";
-import { useFetcher } from "react-router-dom";
-
-const imageSrcSet = [
-  "https://wallpapers.com/images/hd/kimetsu-no-yaiba-hashira-shinobu-close-up-b6vissjhw28rh3b1.jpg",
-  "https://wallpapers.com/images/hd/kimetsu-no-yaiba-hashira-shinobu-close-up-b6vissjhw28rh3b1.jpg",
-  "https://wallpapers.com/images/hd/kimetsu-no-yaiba-hashira-shinobu-close-up-b6vissjhw28rh3b1.jpg",
-  "https://wallpapers.com/images/hd/kimetsu-no-yaiba-hashira-shinobu-close-up-b6vissjhw28rh3b1.jpg",
-  "https://wallpapers.com/images/hd/kimetsu-no-yaiba-hashira-shinobu-close-up-b6vissjhw28rh3b1.jpg",
-  "https://wallpapers.com/images/hd/kimetsu-no-yaiba-hashira-shinobu-close-up-b6vissjhw28rh3b1.jpg",
-  "https://wallpapers.com/images/hd/kimetsu-no-yaiba-hashira-shinobu-close-up-b6vissjhw28rh3b1.jpg",
-  "https://wallpapers.com/images/hd/kimetsu-no-yaiba-hashira-shinobu-close-up-b6vissjhw28rh3b1.jpg",
-  "https://wallpapers.com/images/hd/kimetsu-no-yaiba-hashira-shinobu-close-up-b6vissjhw28rh3b1.jpg",
-];
-
-import { Peer } from "peerjs";
-import React from "react";
-
-const remotePeerId = "testCall";
+import { Button } from "@mui/material";
+import { useEffect, useRef, useState } from "react";
+import { MediaConnection, Peer } from "peerjs";
 
 export default function Test() {
-  const peer = new Peer("id2");
+  const peerRef = useRef<Peer>();
+  const inVideoRef = useRef<HTMLVideoElement | null>(null);
+  const outVideoRef = useRef<HTMLVideoElement | null>(null);
+  const callRef = useRef<MediaConnection | null>(null);
+
+  const [inStream, setInStream] = useState<MediaStream | null>(null);
+  const [outStream, setOutStream] = useState<MediaStream | null>(null);
+
+  const initalizePeer = () => {
+    peerRef.current = new Peer("user1");
+    peerRef.current.on("open", (id) => {
+      console.log("peer id", id);
+    });
+  };
+
+  const callUser2 = async () => {
+    if (!peerRef.current) return;
+
+    const user1MediaStream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: true,
+    });
+
+    console.log({ user1MediaStream });
+
+    setInStream(user1MediaStream);
+
+    if (inVideoRef.current) {
+      inVideoRef.current.srcObject = inStream;
+    }
+
+    const call = peerRef.current.call("user2", user1MediaStream);
+
+    call.on("stream", (stream) => {
+      if (outVideoRef.current) {
+        outVideoRef.current.srcObject = stream;
+      }
+    });
+  };
+
+  useEffect(initalizePeer, []);
+  useEffect;
 
   return (
-    <div className="flex h-screen w-screen items-center justify-center gap-10">
-      <div className="h-[450px] w-[600px] bg-gray-300">
-        <VideoStream peer={peer} remotePeerId={remotePeerId} />
+    <div className="flex h-screen w-screen items-center  justify-center gap-10">
+      <h1 className="absolute mt-5 self-start text-center text-3xl font-bold text-slate-800">
+        User1
+      </h1>
+      <div className="h-[400px] w-[650px] bg-green-300 ">
+        <video className="h-full w-full" autoPlay playsInline></video>
+        <div className="mt-4 flex w-full justify-evenly">
+          <Button
+            className="bg-primary-300 normal-case text-white "
+            variant="contained"
+            onClick={callUser2}
+          >
+            Call
+          </Button>
+          <Button
+            className="bg-primary-300 normal-case text-white "
+            variant="contained"
+          >
+            Anwer
+          </Button>
+        </div>
       </div>
-      <div className="h-[450px] w-[600px] bg-red-300"></div>
+      <video
+        ref={inVideoRef}
+        className="h-[300px] w-[185px] bg-blue-300"
+        autoPlay
+        playsInline
+        muted
+      ></video>
     </div>
   );
 }
-function VideoStream({
-  peer,
-  remotePeerId,
-}: {
-  peer: Peer;
-  remotePeerId: string;
-}) {
-  const [stream, setStream] = useState<MediaStream | null>(null);
-
-  useEffect(() => {
-    const getStream = async () => {
-      try {
-        const userStream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-        });
-        setStream(userStream);
-        const call = peer.call(remotePeerId, userStream);
-        call.on("stream", setStream); // Update state with remote stream
-        return () => call.close(); // Cleanup function for call on unmount
-      } catch (err) {
-        console.error("Failed to get local stream", err);
-      }
-    };
-
-    getStream();
-
-    // Cleanup function to stop the stream and call when component unmounts
-    return () => {
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
-      }
-    };
-  }, [peer, remotePeerId]); // Re-run on peer or remotePeerId changes
-
-  if (!stream) {
-    return <div>Loading...</div>;
-  }
-
-  return (
-    <video autoPlay muted playsInline ref={videoRef}>
-      Your browser does not support the video tag.
-    </video>
-  );
-}
-const videoRef = React.createRef<HTMLVideoElement>();

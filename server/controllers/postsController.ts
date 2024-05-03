@@ -148,7 +148,10 @@ const getPosts = async (req: FastifyRequest, res: FastifyReply) => {
 };
 
 const getAllUserPost = async (
-  req: FastifyRequest<{ Params: { usernameOrId: string }; Body: any }>,
+  req: FastifyRequest<{
+    Params: { usernameOrId: string };
+    Body: any;
+  }>,
   res: FastifyReply,
 ) => {
   let posts = await req.prisma.post.findMany({
@@ -166,6 +169,7 @@ const getAllUserPost = async (
       title: true,
       tags: true,
       liked_by_users_id: true,
+
       comments: {
         select: {
           id: true,
@@ -197,8 +201,12 @@ const getAllUserPost = async (
           user_image: true,
           address: true,
           username: true,
+          follower_ids: true,
         },
       },
+    },
+    orderBy: {
+      createdAt: "desc",
     },
   });
 
@@ -247,6 +255,7 @@ const getAllUserPost = async (
             user_image: true,
             address: true,
             username: true,
+            follower_ids: true,
           },
         },
       },
@@ -668,7 +677,10 @@ const getPostById = async (
 };
 
 const getRecommendedPosts = async (
-  req: FastifyRequest<{ Body: any }>,
+  req: FastifyRequest<{
+    Body: any;
+    Querystring: { fromFollowedUsersOnly: string | null };
+  }>,
   res: FastifyReply,
 ) => {
   const allPosts = await req.prisma.post.findMany({
@@ -676,48 +688,105 @@ const getRecommendedPosts = async (
     select: {
       id: true,
       context: true,
-      title: true,
-      tags: true,
       media: true,
       createdAt: true,
+      title: true,
+      tags: true,
       liked_by_users_id: true,
-      author: {
+      comments: {
         select: {
-          firstname: true,
-          lastname: true,
-          proffeciency: true,
-          affiliation: true,
-          user_image: {
+          id: true,
+          content: true,
+          createdAt: true,
+          up_voted_by_users_id: true,
+          down_voted_by_users_id: true,
+          author: {
             select: {
-              pfp_name: true,
-              cover_name: true,
+              id: true,
+              firstname: true,
+              lastname: true,
+              bio: true,
+              affiliation: true,
+              user_image: true,
+              address: true,
+              username: true,
             },
           },
         },
       },
-      comments: {
+      author: {
         select: {
-          content: true,
-          createdAt: true,
-          up_voted_by_users_id: true,
-          author: {
-            select: {
-              firstname: true,
-              lastname: true,
-              proffeciency: true,
-              affiliation: true,
-              user_image: {
-                select: {
-                  pfp_name: true,
-                  cover_name: true,
-                },
-              },
-            },
-          },
+          id: true,
+          firstname: true,
+          lastname: true,
+          bio: true,
+          affiliation: true,
+          user_image: true,
+          address: true,
+          username: true,
+          follower_ids: true,
         },
       },
     },
   });
+
+  let postParsedData = allPosts.map((post) => {
+    return {
+      id: post.id,
+      title: post.title,
+      context: post.context,
+      media: post.media,
+      liked_by_users_id: post.liked_by_users_id,
+      createdAt: post.createdAt,
+      tags: post.tags,
+      comments: post.comments.map((comment) => {
+        return {
+          id: comment.id, // Fix: Access the 'id' property from the 'comment' object
+          content: comment.content,
+          createdAt: comment.createdAt,
+          up_voted_by_users_id: comment.up_voted_by_users_id,
+          down_voted_by_users_id: comment.down_voted_by_users_id,
+          author: {
+            id: comment.author.id,
+            fullname: capitalize(
+              `${comment.author.firstname} ${comment.author.lastname}`,
+            ),
+            bio: comment.author.bio,
+            affiliation: comment.author.affiliation,
+            cover: comment.author.user_image.cover_name,
+            pfp: comment.author.user_image.pfp_name,
+            address: comment.author.address,
+            username: comment.author.username,
+          },
+        };
+      }),
+      author: {
+        id: post.author.id,
+        fullname: capitalize(
+          `${post.author.firstname} ${post.author.lastname}`,
+        ),
+        bio: post.author.bio,
+        affiliation: post.author.affiliation,
+        cover: post.author.user_image.cover_name,
+        pfp: post.author.user_image.pfp_name,
+        address: capitalize(
+          `${post.author.address.barangay}, ${post.author.address.municipality}, ${post.author.address.province}`,
+        ),
+        username: post.author.username,
+        follower_ids: post.author.follower_ids,
+      },
+    };
+  });
+
+  if (req.query.fromFollowedUsersOnly)
+    postParsedData = postParsedData.filter((post) => {
+      console.log({
+        authorFollwoer: post.author.follower_ids,
+        userId: req.userId,
+      });
+
+      return post.author.follower_ids.includes(req.userId);
+    });
 
   const user = await req.prisma.user.findUnique({
     where: { id: req.userId },
@@ -731,7 +800,7 @@ const getRecommendedPosts = async (
   if (!user)
     return res.code(404).send({ status: "fail", message: "User not found" });
 
-  const recomPost = await recommendPosts(user, allPosts);
+  const recomPost = await recommendPosts(user, postParsedData);
 
   return res.code(200).send({ status: "success", data: recomPost ?? [] });
 };
