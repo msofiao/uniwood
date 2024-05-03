@@ -12,7 +12,7 @@ import {
   NotificationRoute,
 } from "./routes";
 import ConverseRoute from "./routes/converse";
-import { messageChangeHandler } from "./mongodb/sockets/messageHandler";
+import { messageChangeHandler } from "./mongodb/sockets";
 import fastifyCookie from "@fastify/cookie";
 import fastifyCors from "@fastify/cors";
 import fastifyMultipart from "@fastify/multipart";
