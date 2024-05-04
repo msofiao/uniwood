@@ -1,4 +1,4 @@
-import { PrismaClient, Role, User } from "@prisma/client";
+import { PrismaClient, Role } from "@prisma/client";
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { Server } from "socket.io";
 // Add decorators

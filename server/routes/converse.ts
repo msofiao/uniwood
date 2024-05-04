@@ -3,7 +3,7 @@ import { authorize } from "../middlewares/authorize.ts";
 import { arbitraryMultipartConsumer } from "../middlewares/multipartConsumer.ts";
 import { FastifyInstance } from "../types/fastify";
 
-export default function ConverseRoute(
+export  function ConverseRoute(
   instance: FastifyInstance,
   option: any,
   done: () => void,

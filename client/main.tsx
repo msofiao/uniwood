@@ -23,10 +23,10 @@ import { loader as notificationLoader } from "./api/loaders/notification.ts";
 // Misc
 import "./styles.scss";
 import { profileAction } from "./api/actions/profile.ts";
-import Conversation from "./components/Conversation.tsx";
-import MessageIndex from "./components/MessageIndex.tsx";
+
 import Post from "./routes/Post.tsx";
 import Test2 from "./routes/Test2.tsx";
+import Landing from "./routes/Landing.tsx";
 
 const router = createBrowserRouter([
   {
@@ -97,6 +97,10 @@ const router = createBrowserRouter([
   {
     path: "/test2",
     element: <Test2 />,
+  },
+  {
+    path: "/welcome",
+    element: <Landing />,
   },
 ]);
 

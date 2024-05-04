@@ -6,7 +6,7 @@ import {
   createRefreshToken,
   sendAccessToken,
   sendRefreshToken,
-} from "../utils/tokens.ts";
+} from "../utils/tokens";
 
 export const login = async (
   req: FastifyRequest<{

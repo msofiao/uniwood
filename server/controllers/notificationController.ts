@@ -1,6 +1,6 @@
-import { INotificationDocument } from "../types";
-import { FastifyRequest, FastifyReply } from "../types/fastify";
-import { capitalize } from "../utils";
+import type { INotificationDocument } from "../types/index.d";
+import type { FastifyRequest, FastifyReply } from "../types/fastify.d";
+import { capitalize } from "../utils/index";
 
 const getNotifications = async (
   req: FastifyRequest<{

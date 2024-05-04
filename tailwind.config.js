@@ -9,14 +9,6 @@ module.exports = {
     "./client/providers/*.tsx",
   ],
   theme: {
-    screens: {
-      sm: { max: "640px" },
-      md: { max: "768px" },
-      lg: { max: "1024px" },
-      xl: { max: "1280px" },
-      "2xl": { max: "1536px" },
-      "3xl": "1920px",
-    },
     extend: {
       colors: {
         primary: {
@@ -45,6 +37,8 @@ module.exports = {
           900: "#2d414c",
           950: "#1a2932",
         },
+        tertiary: "#F1EFEE",
+        fourth: "#BA4A4A",
       },
       fontFamily: {
         default: ["Segoe UI Historic", "sans-serif", "system-ui"],
@@ -59,6 +53,7 @@ module.exports = {
           "Apple Color Emoji",
           "Segoe UI Emoji",
         ],
+        poppins: ["Poppins", "sans-serif"],
       },
     },
   },

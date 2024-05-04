@@ -1,4 +1,4 @@
-import { FastifyInstance, FastifyPluginCallback } from "fastify";
+import { FastifyInstance } from "fastify";
 import {
   UsersRoute,
   TestRoute,
@@ -10,9 +10,9 @@ import {
   ProjectsRoute,
   SearchRoute,
   NotificationRoute,
-} from "./routes";
-import ConverseRoute from "./routes/converse";
-import { messageChangeHandler } from "./mongodb/sockets";
+  ConverseRoute,
+} from "./routes/index";
+import { messageChangeHandler } from "./mongodb/sockets/index";
 import fastifyCookie from "@fastify/cookie";
 import fastifyCors from "@fastify/cors";
 import fastifyMultipart from "@fastify/multipart";
@@ -26,7 +26,7 @@ import {
   statisCoption,
   socketIOOption,
 } from "./config";
-import { onRequestHook } from "./hooks";
+import { onRequestHook } from "./hooks/index";
 import { NotificationChangeHandler } from "./mongodb/sockets/notificationHandler";
 
 export default function App(

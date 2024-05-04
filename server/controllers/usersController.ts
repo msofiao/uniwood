@@ -1,9 +1,12 @@
 import { Affiliation, Proffeciency, Role, Gender } from "@prisma/client";
 import { FastifyReply } from "fastify";
-import { FastifyRequest } from "../types/fastify";
 import { hash } from "bcrypt";
 import { ObjectId } from "mongodb";
-import { FileInfo, UserProfileInfo } from "../types/global";
+import type {
+  FileInfo,
+  UserProfileInfo,
+  FastifyRequest,
+} from "../types/index.d.ts";
 import {
   moveFile,
   capitalize,
@@ -13,7 +16,6 @@ import {
   sendRefreshToken,
 } from "../utils";
 import { isValidObjectId } from "../utils/checker";
-import { recommendPosts } from "../utils/recomAlgo";
 
 const createUser = async (
   req: FastifyRequest<{ Body: UserPostBody }>,
@@ -224,11 +226,15 @@ const deleteUser = async (
   // Delete User
   const deleteUser = await req.prisma.user.delete({
     where: { id: req.body.id },
+    select: {id: true}
   });
 
   return res.send({
     status: "success",
     message: "User Successfully Deleted",
+    data: {
+      id: deleteUser.id,
+    }
   });
 };
 

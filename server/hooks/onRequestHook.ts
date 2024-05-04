@@ -1,10 +1,10 @@
 import { PrismaClient } from "@prisma/client";
-import { FastifyRequest, FastifyReply } from "../types/fastify";
+import type { FastifyRequest, FastifyReply } from "../types/fastify.d.ts";
 
 export function onRequestHook(
   req: FastifyRequest,
   _res: FastifyReply,
-  done: () => void
+  done: () => void,
 ) {
   // Decorators
   req.prisma = new PrismaClient();

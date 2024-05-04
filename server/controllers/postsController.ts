@@ -1,11 +1,11 @@
 import { PostMedia } from "@prisma/client";
-import { FastifyReply, FastifyRequest } from "../types/fastify";
-import { createPost as createPostQuery } from "../models/postQuery";
+import type { FastifyReply, FastifyRequest } from "../types/fastify.d.ts";
+import { createPost as createPostQuery } from "../models/postQuery.ts";
 import { moveFile } from "../utils/fileManager";
-import { likePostTogggle as likePostToggleFnc } from "../models/postQuery";
-import { isValidObjectId } from "../utils/checker";
-import { capitalize } from "../utils";
-import { recommendPosts } from "../utils/recomAlgo";
+import { likePostTogggle as likePostToggleFnc } from "../models/postQuery.ts";
+import { isValidObjectId } from "../utils/checker.ts";
+import { capitalize } from "../utils/index.ts";
+import { recommendPosts } from "../utils/recomAlgo.ts";
 
 const createPost = async (
   req: FastifyRequest<{ Body: PostPostBody }>,

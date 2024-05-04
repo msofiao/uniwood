@@ -7,17 +7,17 @@ import fastifyMultipart from "@fastify/multipart";
 import fastifyStatic from "@fastify/static";
 import fastifyCors from "@fastify/cors";
 import fastifySocketIO from "fastify-socket.io";
-import { FastifyInstance } from "./types/fastify";
+import type { FastifyInstance } from "./types/fastify.d.ts";
 import { Socket } from "socket.io";
-import { parse } from "cookie";
 import {
   corsOption,
   multipartOption,
   statisCoption,
   socketIOOption,
   cookieOption,
-} from "./config";
+} from "./config/index";
 import {
+  ConverseRoute,
   UsersRoute,
   PostsRoute,
   NotificationRoute,
@@ -28,10 +28,9 @@ import {
   ProjectsRoute,
   CommentsRoute,
   TestRoute,
-} from "./routes";
-import { onRequestHook } from "./hooks";
-import ConverseRoute from "./routes/converse";
-import { messageChangeHandler } from "./mongodb/sockets";
+} from "./routes/index";
+import { onRequestHook } from "./hooks/index";
+import { messageChangeHandler } from "./mongodb/sockets/index";
 import { NotificationChangeHandler } from "./mongodb/sockets/notificationHandler";
 
 // import { authorizeWS } from "./middlewares/authorize";

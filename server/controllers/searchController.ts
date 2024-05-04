@@ -1,5 +1,5 @@
-import { FastifyRequest, FastifyReply } from "../types/fastify";
-import { capitalize } from "../utils";
+import type { FastifyRequest, FastifyReply } from "../types/fastify.d.ts";
+import { capitalize } from "../utils/index";
 
 const search = async (
   req: FastifyRequest<{ Body: any; Params: { search: string | undefined } }>,

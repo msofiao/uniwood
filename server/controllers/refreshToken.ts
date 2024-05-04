@@ -1,11 +1,11 @@
-import { FastifyRequest, FastifyReply } from "../types/fastify";
+import type { FastifyRequest, FastifyReply } from "../types/fastify.d.ts";
 import jwt from "jsonwebtoken";
 import {
   createAccessToken,
   createRefreshToken,
   sendAccessToken,
   sendRefreshToken,
-} from "../utils/tokens";
+} from "../utils/index.ts";
 import dotenv from "dotenv";
 import path from "node:path";
 dotenv.config({

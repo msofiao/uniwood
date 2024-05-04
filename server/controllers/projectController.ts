@@ -7,7 +7,7 @@ import {
   projectLikeToggle as projectLikeToggleFn,
 } from "../models/projectQuery";
 
-import { FastifyReply, FastifyRequest } from "../types/fastify";
+import type { FastifyReply, FastifyRequest } from "../types/fastify.d";
 import { requestFieldChecker } from "../utils/reqTools";
 import { moveFile } from "../utils/fileManager";
 
@@ -17,12 +17,12 @@ const createProject = async (
   req: FastifyRequest<{
     Body: ProjectPostBody;
   }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) => {
   // Check if required fields are present
   const missingFields = requestFieldChecker(
     ["title", "context", "tags", "media"],
-    req
+    req,
   );
 
   if (missingFields.length > 0)
@@ -38,7 +38,7 @@ const createProject = async (
       media: req.body.media,
       tags: req.body.tags,
     },
-    req.prisma
+    req.prisma,
   );
 
   // Move file to public folder
@@ -53,7 +53,7 @@ const createProject = async (
 
 const getProjectById = async (
   req: FastifyRequest<{ Params: { projectId: string }; Body: any }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) => {
   if (!req.params.projectId)
     return res
@@ -70,7 +70,7 @@ const getProjects = async (req: FastifyRequest, res: FastifyReply) => {
 
 const deleteProject = async (
   req: FastifyRequest<{ Params: { projectId?: string }; Body: any }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) => {
   if (!req.params.projectId)
     return res
@@ -85,13 +85,13 @@ const updateProject = async (
   req: FastifyRequest<{
     Body: ProjectPutBody;
   }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) => {
   // Check if project exist
 
   const missingFields = requestFieldChecker(
     ["projectId", "title", "tags", "context", "media"],
-    req
+    req,
   );
 
   if (missingFields.length > 0)
@@ -110,7 +110,7 @@ const updateProject = async (
         context: req.body.context,
         media: req.body.media,
       },
-      req.prisma
+      req.prisma,
     );
   } catch (error) {
     return res
@@ -126,12 +126,12 @@ const updateProject = async (
 
 const projectLikeToggle = async (
   req: FastifyRequest<{ Body: any; Params: { projectId: string } }>,
-  res: FastifyReply
+  res: FastifyReply,
 ) => {
   try {
     await projectLikeToggleFn(
       { userId: req.userId, projectId: req.params.projectId },
-      req.prisma
+      req.prisma,
     );
   } catch (error) {
     console.log(error);
