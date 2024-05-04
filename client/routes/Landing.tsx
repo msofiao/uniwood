@@ -3,6 +3,7 @@ import post from "../assets/images/post.svg";
 import view from "../assets/images/view-photo.svg";
 import logo from "../assets/images/logo_label.svg";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export default function Landing() {
   return (
@@ -114,12 +115,12 @@ function Semifooter() {
         <p className="text-center font-semibold md:text-xl lg:text-3xl">
           Register to learn and be more engage within the community.
         </p>
-        <a
-          href="#"
+        <Link
+          to={"/login"}
           className="md:text-md border-pr rounded-full border-2 px-5 py-2 lg:text-xl"
         >
           Register
-        </a>
+        </Link>
       </div>
     </>
   );
@@ -144,18 +145,18 @@ const Navbar = () => {
             />
           </div>
           <div className="item-center sm: mx-10 flex flex flex-wrap space-x-10">
-            <a
-              href="#"
+            <Link
+              to={"/login"}
               className="outline-primary mb-24 mt-3 rounded-md px-7 py-2 outline outline-2 sm:text-xs lg:text-base"
             >
               Sign
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              to={"/login"}
               className="to-fourth text-tertiary mb-24 mt-3 rounded-md bg-gradient-to-r from-primary-400 px-7 py-2 sm:text-xs lg:text-base"
             >
               Register
-            </a>
+            </Link>
           </div>
         </div>
       </div>
