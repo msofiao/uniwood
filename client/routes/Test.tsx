@@ -34,7 +34,12 @@ export default function Test() {
       inVideoRef.current.srcObject = inStream;
     }
 
-    const call = peerRef.current.call("user2", user1MediaStream);
+    const call = peerRef.current.call(
+      "662af39e0b4db6ceda8b273a",
+      new MediaStream(),
+    );
+
+    console.log({ testPeer: peerRef.current, testCall: call });
 
     call.on("stream", (stream) => {
       if (outVideoRef.current) {
@@ -44,7 +49,6 @@ export default function Test() {
   };
 
   useEffect(initalizePeer, []);
-  useEffect;
 
   return (
     <div className="flex h-screen w-screen items-center  justify-center gap-10">

@@ -1,10 +1,8 @@
-import React, {
-  createContext,
-  useState,
-} from "react";
+import React, { createContext, useState } from "react";
+import type { TokenContextProps } from "../types/providers";
 
 export const TokenContext = createContext<TokenContextProps | undefined>(
-  undefined
+  undefined,
 );
 
 export default function TokenProvider({

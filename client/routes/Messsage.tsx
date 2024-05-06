@@ -56,6 +56,7 @@ export default function Message() {
         });
     }
   };
+  
   const navigateToMostRecentConvo = () => {
     if (!accessToken || (params.converseId && params.recipientId)) return;
     axiosClient

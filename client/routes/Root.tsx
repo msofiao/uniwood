@@ -1,42 +1,21 @@
 import {
   Avatar,
   Box,
-  Button,
-  ListItemIcon,
   MenuItem,
   Paper,
   TextField,
   Typography,
 } from "@mui/material";
-import {
-  HomeOutlined,
-  PersonOutline,
-  HomeRounded,
-  NotificationsRounded,
-  MessageOutlined,
-  SearchRounded,
-  MessageRounded,
-  NotificationsOutlined,
-  PersonRounded,
-  LogoutRounded,
-} from "@mui/icons-material";
+import { SearchRounded } from "@mui/icons-material";
 import { useContext, useEffect, useState } from "react";
 import { Theme, useTheme } from "@mui/material/styles";
-import {
-  Outlet,
-  redirect,
-  useActionData,
-  useLoaderData,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
-import { PosterModal } from "../components/Poster";
-import Cookie from "js-cookie";
+import { Outlet, redirect, useLoaderData, useNavigate } from "react-router-dom";
 import { TokenContext } from "../providers/TokenProvider";
 import { sendRefreshTokenRequest, sendUserInfoRequest } from "../utils";
 import { UserInfoContext } from "../providers/UserInfoProvider";
 import axiosClient from "../utils/axios";
 import Nav from "../components/Nav";
+import { TokenContextProps, UserInfoContextProps } from "../types/providers";
 
 export async function loader() {
   const refreshTokenResponse = await sendRefreshTokenRequest();
@@ -52,7 +31,7 @@ export async function loader() {
     localStorage.setItem("accessToken", refreshTokenResponse.accessToken);
   } else {
     console.error({ userInfoResponse, refreshTokenResponse });
-    return redirect("/login");
+    return redirect("/welcome");
   }
   return { userInfoResponse: userInfoResponse.data, refreshTokenResponse };
 }
@@ -94,7 +73,6 @@ export default function Root() {
     </div>
   );
 }
-
 
 function RightSection({ theme: theme }: { theme: Theme }) {
   const [, setSearch] = useState("");
@@ -242,79 +220,5 @@ function SuggestedAccount({ theme: theme }: { theme: Theme }) {
           </MenuItem>
         ))}
     </div>
-  );
-}
-function AvatarNav() {
-  const theme = useTheme();
-  const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
-  const { userInfo } = useContext(UserInfoContext)!;
-
-  // utilities
-  const handleToggleOpen = () => {
-    setOpen(!open);
-  };
-  return (
-    <MenuItem
-      className="avatar-nav-container"
-      selected={open}
-      onClick={handleToggleOpen}
-    >
-      <Avatar
-        className="avatar"
-        src={`${process.env.SERVER_PUBLIC}/${userInfo.pfp}`}
-        sx={{
-          display: "inline-block",
-          marginRight: "10px",
-          border: "2px solid red ",
-        }}
-      />
-      <div className="avatar-details">
-        <Typography
-          color={theme.palette.text.primary}
-          fontSize="14px"
-          fontWeight="bold"
-          className="name"
-        >
-          {userInfo.fullname}
-        </Typography>
-        <Typography
-          fontSize="16px"
-          color={theme.palette.text.secondary}
-          className="username"
-          variant="body2"
-        >
-          {userInfo.username}
-        </Typography>
-      </div>
-      {open ? (
-        <MenuItem
-          className="pop-up"
-          sx={{ borderRadius: "15px" }}
-          onClick={() => {
-            Cookie.remove("refresh_token");
-            localStorage.clear();
-            navigate("/login");
-          }}
-        >
-          <Paper
-            elevation={5}
-            className="paper-shadow"
-            sx={{
-              ":hover": {
-                backgroundColor: theme.palette.action.hover,
-                cursor: "pointer",
-              },
-            }}
-          >
-            <Typography>Logout</Typography>
-          </Paper>
-          <LogoutRounded
-            className="logout-icon"
-            sx={{ color: theme.palette.text.primary }}
-          />
-        </MenuItem>
-      ) : null}
-    </MenuItem>
   );
 }

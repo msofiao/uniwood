@@ -1,3 +1,6 @@
+import Peer, { MediaConnection } from "peerjs";
+import { MutableRefObject } from "react";
+
 declare interface UserInfoContextProps {
   userInfo: {
     id: string;
@@ -47,4 +50,12 @@ declare interface IMessageComponentContext {
   setRecipientInfo: React.Dispatch<
     React.SetStateAction<IRecipientInfo | undefined>
   >;
+}
+
+declare interface PeerProviderContext {
+  peer: Peer | null;
+  incomingCall: boolean;
+  setIncomingCall: Dispatch<SetStateAction<boolean>>;
+  mediaConnection: MediaConnection | null
+
 }

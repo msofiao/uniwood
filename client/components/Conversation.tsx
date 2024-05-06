@@ -35,6 +35,8 @@ import { UserInfoContext } from "../providers/UserInfoProvider";
 import { socketClient } from "../utils/socketIO";
 import { messageSender } from "../api/converse";
 import dateTool from "date-and-time";
+import Peer from "peerjs";
+import { PeerContext } from "../providers/PeerProvider";
 
 export default function Conversation() {
   const params = useParams<{
@@ -117,6 +119,7 @@ function Header({
     [],
   );
   const { accessToken } = useContext(TokenContext)!;
+  const { peer } = useContext(PeerContext)!;
 
   const handleSearchUserBlur = () => {
     setSearchNewUserFocus(false);
@@ -138,10 +141,22 @@ function Header({
   };
 
   const handleSearchUserChange = (
-    e: React.SyntheticEvent<Element, Event>,
+    _e: React.SyntheticEvent<Element, Event>,
     value: string,
   ) => {
     setSearchNewUser(value);
+  };
+
+  const openVideoCallWindow = () => {
+    if (peer) {
+      // peer.call(recipientInfo?.id as string, new MediaStream());
+    }
+    if (!recipientInfo) return;
+    window.open(
+      `/videoCall/${recipientInfo.id}`,
+      "_blank",
+      "height: 80%, width: 80%",
+    );
   };
 
   useEffect(requestSearchedUser, [searchNewUser]);
@@ -187,7 +202,7 @@ function Header({
       </div>
       <div className="ml-auto flex items-center gap-1 text-primary-400">
         <IconButton className="text-primary-400" disabled={searchNewUserFocus}>
-          <VideocamRounded className="size-7" />
+          <VideocamRounded className="size-7" onClick={openVideoCallWindow} />
         </IconButton>
         <IconButton className="text-primary-400" disabled={searchNewUserFocus}>
           <InfoRounded className="size-7" />

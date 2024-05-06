@@ -4,6 +4,7 @@ import TokenProvider from "./TokenProvider";
 import UserProvider from "./UserInfoProvider";
 import { Box } from "@mui/material";
 import AlertProvider from "./AlertProvider";
+import PeerProvider from "./PeerProvider";
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     // <StrictMode>
@@ -11,7 +12,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     <ThemeProvider>
       <TokenProvider>
         <AlertProvider>
-          <UserProvider>{children}</UserProvider>
+          <UserProvider>
+            <PeerProvider>{children}</PeerProvider>
+          </UserProvider>
         </AlertProvider>
       </TokenProvider>
     </ThemeProvider>

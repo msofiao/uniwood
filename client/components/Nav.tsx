@@ -8,6 +8,8 @@ import {
   PersonRounded,
   PersonOutline,
   LogoutRounded,
+  ArticleRounded,
+  ArticleOutlined,
 } from "@mui/icons-material";
 import {
   MenuItem,
@@ -30,6 +32,7 @@ export default function Nav() {
     messages: false,
     notifications: false,
     profile: false,
+    uniVault: false,
   });
 
   const [posterModalView, setPosterModalView] = useState(false);
@@ -45,12 +48,15 @@ export default function Nav() {
       handleFocus("profile");
     } else if (location.pathname === "/") {
       handleFocus("home");
+    } else if (location.pathname.startsWith("/univault")) {
+      handleFocus("uniVault");
     } else {
       setFocusState({
         home: false,
         messages: false,
         notifications: false,
         profile: false,
+        uniVault: false,
       });
     }
   };
@@ -127,7 +133,7 @@ function AvatarNav() {
         }}
       />
       <div className="avatar-details">
-        <p className="text-base text-slate-800 font-body">
+        <p className="font-body text-base text-slate-800">
           {userInfo.fullname}
         </p>
         <Typography
@@ -164,6 +170,7 @@ function Links({ focusState }: { focusState: FocustStateProps }) {
   const goToMessages = () => navigate("/message");
   const goToNotifications = () => navigate("/notification");
   const goToProfile = () => navigate(`/profile/${userInfo.username}`);
+  const goToUniVault = () => navigate("/univault");
 
   return (
     <div className="mt-12">
@@ -194,6 +201,20 @@ function Links({ focusState }: { focusState: FocustStateProps }) {
           className={`${focusState.messages ? "font-bold" : "font-normal"} font-body text-lg text-slate-800`}
         >
           Messages
+        </p>
+      </MenuItem>
+      <MenuItem
+        className="flex w-fit items-center rounded-full px-9 py-5"
+        onClick={goToUniVault}
+        selected={focusState.uniVault ? true : false}
+      >
+        <ListItemIcon className="text-slate-800">
+          {focusState.uniVault ? <ArticleRounded /> : <ArticleOutlined />}
+        </ListItemIcon>
+        <p
+          className={`${focusState.uniVault ? "font-bold" : "font-normal"} font-body text-lg text-slate-800`}
+        >
+          UniVault
         </p>
       </MenuItem>
       <MenuItem
@@ -237,6 +258,7 @@ interface FocustStateProps {
   messages: boolean;
   notifications: boolean;
   profile: boolean;
+  uniVault: boolean;
 }
 
 type PosterModalViewAction = SetStateAction<boolean>;

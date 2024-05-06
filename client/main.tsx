@@ -19,6 +19,7 @@ import { loginAction } from "./api/login.ts";
 import { profileLoader } from "./api/loaders/profile.ts";
 import { loader as messageLoader } from "./api/loaders/message.ts";
 import { loader as notificationLoader } from "./api/loaders/notification.ts";
+import { loader as videoCallLoader } from "./api/loaders/videoCall.ts";
 
 // Misc
 import "./styles.scss";
@@ -27,6 +28,9 @@ import { profileAction } from "./api/actions/profile.ts";
 import Post from "./routes/Post.tsx";
 import Test2 from "./routes/Test2.tsx";
 import Landing from "./routes/Landing.tsx";
+import UniVault from "./routes/UniVault.tsx";
+import VideoCall from "./routes/VideoCall.tsx";
+import { Test3 } from "./routes/Test3.tsx";
 
 const router = createBrowserRouter([
   {
@@ -38,6 +42,10 @@ const router = createBrowserRouter([
     element: <Root />,
     loader: rootLoader,
     children: [
+      {
+        path: "/univault",
+        element: <UniVault />,
+      },
       {
         index: true,
         element: <Home />,
@@ -101,6 +109,15 @@ const router = createBrowserRouter([
   {
     path: "/welcome",
     element: <Landing />,
+  },
+  {
+    path: "/videoCall/:recipientId",
+    element: <VideoCall />,
+    loader: videoCallLoader,
+  },
+  {
+    path: "test3",
+    element: <Test3 />,
   },
 ]);
 

@@ -15,7 +15,7 @@ export async function loader() {
     localStorage.setItem("accessToken", refreshTokenResponse.accessToken);
   } else {
     console.error({ userInfoResponse, refreshTokenResponse });
-    return redirect("/login");
+    return redirect("/welcome");
   }
   return { userInfoResponse: userInfoResponse.data, refreshTokenResponse };
 }

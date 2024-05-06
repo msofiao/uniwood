@@ -1,1 +1,0 @@
-const PostViewContext = createContext<PostViewContextProps>;
