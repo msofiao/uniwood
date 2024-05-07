@@ -18,15 +18,14 @@ export default function Landing() {
 function Body() {
   return (
     <>
-      <div className="m-10">
-        <div className="flex flex-wrap">
-          <div className="flex items-center justify-around sm:mx-10 lg:mx-24">
-            <div className="flex-1 text-center font-semibold sm:text-2xl md:text-4xl lg:text-5xl">
+       <div className="lg:m-10">
+          <div className="flex lg:flex-row sm:flex-col justify-center items-center lg:mx-20 sm:mx-10 sm:mt-10">
+            <div className="flex-1 text-center font-semibold lg:text-5xl sm:text-3xl">
               <p>
                 Connect within the
                 <p> Woodworking Community</p>
               </p>
-              <p className="mt-10 text-center font-normal sm:text-xs md:text-sm lg:text-base">
+              <p className="text-center lg:text-base sm:text-sm font-normal lg:mt-10 sm:mt-5">
                 A central space for Woodworkers, Woodcrafters, and Woodworking
                 Enthusiasts to engage and share knowledge. Helps the users to
                 interact in real-time messaging and video calling, creating a
@@ -34,19 +33,18 @@ function Body() {
                 build connections, and work on projects together.
               </p>
             </div>
-            <div className="flex flex-1">
-              <img src={chat} alt="" className="size-auto" />
+            <div className="flex-1">
+              <img src={chat} alt="" className="size-auto my-10" />
             </div>
           </div>
-          <div className="my-36">
-            <div className="mx-24 mt-10 flex items-center justify-around">
-              <div className="flex flex-1">
+          <div className="lg:my-36">
+            <div className="flex lg:flex-row sm:flex-col justify-center items-center mt-10 lg:mx-24 sm:mx-10">
+              <div className="flex-1">
                 <img src={view} alt="" className="size-auto" />
               </div>
-
-              <div className="flex-1 text-center font-semibold md:text-4xl lg:text-5xl">
+              <div className="flex-1 text-center font-semibold lg:text-5xl sm:text-3xl">
                 <p>Share your expertise and works.</p>
-                <p className="mt-10 text-center font-normal md:text-sm lg:text-base">
+                <p className="text-center lg:text-base sm:text-sm font-normal lg:mt-10 sm:mt-5">
                   Designed to encourage members of woodworking community to
                   showcase their knowledge, skills, and projects. Aims to foster
                   a culture of knowledge sharing within the woodworking
@@ -56,11 +54,11 @@ function Body() {
               </div>
             </div>
           </div>
-          <div className="my-30">
-            <div className="mx-24 mt-10 flex items-center justify-around">
-              <div className="mr-24 flex-1 text-center font-semibold md:text-4xl lg:text-5xl">
+          <div className="lg:my-30 sm:mt-20">
+            <div className="flex lg:flex-row sm:flex-col justify-center items-center mt-10 lg:mx-24 sm:mx-10">
+              <div className="flex-1 text-center font-semibold lg:text-5xl sm:text-3xl lg:mr-24">
                 <p>Let's enhance your skills.</p>
-                <p className="mt-10 text-center font-normal md:text-sm lg:text-base">
+                <p className="text-center lg:text-base sm:text-sm font-normal lg:mt-10 sm:mt-5">
                   Provides users with resources and opportunities to improve
                   their woodworking skills. By encouraging skill enhancement, it
                   contributes to a more knowledgeable and competent community,
@@ -73,7 +71,6 @@ function Body() {
               </div>
             </div>
           </div>
-        </div>
       </div>
     </>
   );
@@ -83,41 +80,35 @@ function Semifooter() {
   return (
     <>
       <div className="m-10">
-        <div className="item-center mt-32 flex justify-center">
-          <img src={logo} alt="" className=" md:h-40 lg:h-64" />
+        <div className="flex justify-center item-center mt-28">
+          <img src={logo} alt="" className="lg:h-64 sm:h-44"/>
         </div>
-        <div className="mx-36 my-20 flex flex-wrap items-center justify-center">
-          <div className="mx-20 flex-1">
-            <p className="mb-5 text-center font-semibold md:text-xl lg:text-2xl">
+        <div className="flex lg:flex-row sm:flex-col justify-center items-center lg:mx-36 lg:my-20">
+          <div className="flex-1 mx-20 my-10 sm:w-full">
+            <p className="text-center font-semibold text-2xl lg:mb-5">
               About UniWood
             </p>
-            <p className="text-center md:text-xs lg:text-sm">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Nemo
-              eaque laboriosam fugiat repudiandae earum. Fuga assumenda
-              consequuntur cupiditate minus quidem voluptate aliquam ea quam
-              asperiores, placeat magnam, dolor, exercitationem corporis!
+            <p className="text-center lg:text-based sm:text-sm">
+            UniWood is a platform designed to connect, support, and empower the woodworking community. It serves as a comprehensive online space where woodworkers, woodcrafters, and woodworking enthusiasts can engage, share their projects, and learn from one another.
             </p>
           </div>
-          <div className="mx-20 flex-1">
-            <p className="mb-5 text-center font-semibold md:text-xl lg:text-2xl">
+          <div className="flex-1 mx-20 sm:w-full">
+            <p className="text-center font-semibold text-2xl lg:mb-5">
               What We Do
             </p>
-            <p className=" text-center md:text-xs lg:text-sm">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempore
-              quo laboriosam deleniti, sequi expedita harum neque. Maxime
-              nesciunt, assumenda obcaecati quo laboriosam delectus aperiam.
-              Illo sequi eos temporibus quia magnam.
+            <p className="text-center text-based sm:text-sm">
+            An online platform designed for the woodworking community, enabling users to connect, and share projects. Offers features like community posts, real-time messaging, and educational resources to foster learning and knowledge sharing, creating a vibrant space for growth and connection.
             </p>
           </div>
         </div>
       </div>
-      <div className="flex w-full items-center justify-center space-x-7 bg-secondary-400 p-10">
-        <p className="text-center font-semibold md:text-xl lg:text-3xl">
+      <div className="flex justify-center items-center space-x-7 bg-secondary-400 p-10">
+        <p className="font-semibold lg:text-3xl text-center sm:text-lg">
           Register to learn and be more engage within the community.
         </p>
         <Link
           to={"/login"}
-          className="md:text-md border-pr rounded-full border-2 px-5 py-2 lg:text-xl"
+          className="lg:text-xl sm:text-based border-2 border-prima px-5 py-2 rounded-full"
         >
           Register
         </Link>
@@ -126,40 +117,28 @@ function Semifooter() {
   );
 }
 
-const Navbar = () => {
-  const [mobileOpen, setMobileOpen] = useState(false);
-
-  const toggleNavBar = () => {
-    setMobileOpen(!mobileOpen);
-  };
-
+ function Navbar() {
   return (
-    <nav className="sticky top-0 z-50 py-3">
-      <div className="container relative mx-auto">
-        <div className="item-center mx-14 flex justify-between px-14">
+    <nav className="sticky top-0 z-50">
+      <div className="container relative mx-auto py-3">
+        <div className="flex justify-between item-center px-14 mx-14">
           <div className="flex-shrink-0">
             <img
               src={logo}
               alt="logo"
-              className="md:size-14sm:size-8 lg:size-36"
+              className="lg:size-28 sm:size-16"
             />
           </div>
-          <div className="item-center sm: mx-10 flex flex flex-wrap space-x-10">
+          <div className="flex ml-12 item-center">
             <Link
               to={"/login"}
-              className="outline-primary mb-24 mt-3 rounded-md px-7 py-2 outline outline-2 sm:text-xs lg:text-base"
+              className="lg:px-7 lg:py-2 sm:py-1 mt-3 mb-24 bg-gradient-to-r from-prima to-fourth text-tertiary rounded-md lg:text-base lg:h-10 lg:mx-5 sm:text-xs sm:h-6 lg:w-28 sm:w-16 sm:px-3"
             >
-              Sign
-            </Link>
-            <Link
-              to={"/login"}
-              className="to-fourth text-tertiary mb-24 mt-3 rounded-md bg-gradient-to-r from-primary-400 px-7 py-2 sm:text-xs lg:text-base"
-            >
-              Register
+             Sign in
             </Link>
           </div>
         </div>
       </div>
     </nav>
   );
-};
+}

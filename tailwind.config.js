@@ -39,6 +39,7 @@ module.exports = {
         },
         tertiary: "#F1EFEE",
         fourth: "#BA4A4A",
+        prima: "#EF6D53",
       },
       fontFamily: {
         default: ["Segoe UI Historic", "sans-serif", "system-ui"],
@@ -54,6 +55,9 @@ module.exports = {
           "Segoe UI Emoji",
         ],
         poppins: ["Poppins", "sans-serif"],
+      },
+      screens: {
+        sm : "300px",
       },
     },
   },
