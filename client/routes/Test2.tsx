@@ -1,7 +1,18 @@
-import { Avatar, Button, IconButton } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import {
+  Avatar,
+  Button,
+  Dialog,
+  DialogTitle,
+  IconButton,
+  Modal,
+} from "@mui/material";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { MediaConnection, Peer } from "peerjs";
-import { CallEndRounded, CallRounded } from "@mui/icons-material";
+import {
+  CallEndRounded,
+  CallRounded,
+  PriorityHighRounded,
+} from "@mui/icons-material";
 
 // export default function Test2() {
 //   const peerRef = useRef<Peer | null>();
@@ -108,52 +119,47 @@ import { CallEndRounded, CallRounded } from "@mui/icons-material";
 // }
 
 export default function Test2() {
-  const dummyPeer = new Peer("user2");
-  const dummyCallerInfo = "dfdf" as any;
+  const [dialogOpen, setDialogOpen] = useState(true);
   return (
     <div className="relative h-screen w-screen">
-      <CallAlert peer={dummyPeer} callerInfo={dummyCallerInfo} />
+      Hello
+      <PostDeleteDialog dialogOpen={dialogOpen} setDialogOpen={setDialogOpen} />
+      hello
     </div>
   );
 }
 
-function CallAlert({ callerInfo, peer }: CallAlertProps) {
-  const [incomingCall, setIncomingCall] = useState(true);
-
-  const listenToCalls = () => {
-    if (!peer) return;
-    peer.on("call", (call) => {
-      
-      setIncomingCall(true);
-    });
+function PostDeleteDialog({
+  dialogOpen,
+  setDialogOpen,
+}: PostDeleteDialogProps) {
+  const closeDialog = () => {
+    setDialogOpen(false);
   };
 
-  useEffect(listenToCalls, [peer]);
   return (
-    <>
-      {incomingCall && (
-        <div className="absolute bottom-7 right-10 flex  w-96 items-center gap-4 rounded-xl border-2 border-solid border-primary-300  bg-primary-50 px-3 py-5 shadow-lg">
-          <Avatar src={""} className="size-14" />
-          <div className="-center ml flex flex-col justify-center">
-            <p className="text-slate text-xs">Incoming Call:</p>
-            <p className="font-body text-lg font-bold text-slate-700">
-              Bryan Gonzales
-            </p>
-            <p className="text-sm italic text-slate-500">@brynrgnzls</p>
-          </div>
-          <IconButton className="ml-auto size-12 bg-green-300 hover:bg-green-400">
-            <CallRounded />
-          </IconButton>
-          <IconButton className=" size-12 bg-red-300 hover:bg-red-400">
-            <CallEndRounded />
-          </IconButton>
-        </div>
-      )}
-    </>
+    <Modal open={dialogOpen} onClose={closeDialog}>
+      <div className="position absolute left-[50%] top-[50%] flex h-[300px] w-[450px] translate-x-[-50%] translate-y-[-50%] flex-col items-center justify-center rounded-xl bg-white px-5 shadow-lg">
+        <PriorityHighRounded className="rounded-full bg-red-200 p-2 text-[50px] text-red-400" />
+        <p className="text my-3 text-lg font-bold text-slate-800">
+          Are you sure ?
+        </p>
+        <p className="mb-7 text-center text-slate-600">
+          This action cannot be undone. All values associated with the post will
+          be lost
+        </p>
+        <button className="w-full rounded-lg bg-red-400  py-2 font-bold text-white ">
+          Delete Post
+        </button>
+        <button className="mt-4 w-full rounded-lg border-[3px] border-solid border-slate-300 py-2">
+          Cancel
+        </button>
+      </div>
+    </Modal>
   );
 }
 
-interface CallAlertProps {
-  peer: Peer | null;
-  callerInfo: Author;
+interface PostDeleteDialogProps {
+  dialogOpen: boolean;
+  setDialogOpen: Dispatch<SetStateAction<boolean>>;
 }

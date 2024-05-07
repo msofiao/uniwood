@@ -152,11 +152,7 @@ function Header({
       // peer.call(recipientInfo?.id as string, new MediaStream());
     }
     if (!recipientInfo) return;
-    window.open(
-      `/videoCall/${recipientInfo.id}`,
-      "_blank",
-      "height: 80%, width: 80%",
-    );
+    window.open(`/videoCall/${recipientInfo.id}`, "_blank");
   };
 
   useEffect(requestSearchedUser, [searchNewUser]);

@@ -21,9 +21,9 @@ export default function PeerProvider({ children }: PeerProviderProps) {
   const listenToCalls = () => {
     if (!peer) return;
     peer.on("call", (call) => {
+      console.log("Someone is calling you");
       setIncomingCall(true);
       setMediaConnection(call);
-      console.log("Someone is calling you");
     });
 
     peer.on("connection", (conn) => {

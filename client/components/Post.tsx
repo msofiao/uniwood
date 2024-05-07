@@ -5,6 +5,8 @@ import {
   ChatBubbleOutlineRounded,
   CloseRounded,
   SendRounded,
+  DeleteRounded,
+  EditRounded,
 } from "@mui/icons-material";
 import {
   Paper,
@@ -17,6 +19,7 @@ import {
   Modal,
   TextField,
   IconButton,
+  Tooltip,
 } from "@mui/material";
 import React, {
   MouseEvent,
@@ -32,6 +35,7 @@ import { dateWhenFormat } from "../utils/dateTools";
 import { UserInfoContext } from "../providers/UserInfoProvider";
 import axiosClient from "../utils/axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { PostContext } from "../types/providers";
 
 const PostProvider = createContext<PostContext | null>(null);
 
@@ -43,38 +47,51 @@ export default function Post({ postParam }: { postParam: Post }) {
   };
   const navigate = useNavigate();
 
-  const navigatable = post?.author.id !== localStorage.getItem("id");
+  const postNotFromUser = post?.author.id !== localStorage.getItem("id");
+
+  const navigateToProfile = () => {
+    if (!post) return;
+    if (postNotFromUser) navigate(`/profile/${post.author.id}`);
+  };
+
   const loading = post === null;
 
   useEffect(() => {
     initializeContextData();
-  }, []);
+  }, [postParam]);
 
   return loading ? (
     <p>loading...</p>
   ) : (
     <PostProvider.Provider value={{ post, setPost }}>
       <Paper className="post">
-        <div className="user-profile">
+        <div className="flex gap-3">
           <Avatar
-            className="avatar"
+            className="size-[50px] border-[3px]  border-solid border-primary-400"
             src={`${process.env.SERVER_PUBLIC}/${post.author.pfp}`}
           />
           <div className={`post-detail`}>
-            <Typography
-              className={`name font-body text-base font-bold ${navigatable ? "hover:cursor-pointer hover:underline" : ""}`}
-              variant="body1"
-              onClick={() => {
-                if (navigatable) {
-                  navigate(`/profile/${post.author.id}`);
-                }
-              }}
+            <p
+              className={` font-body text-base font-bold text-slate-800 ${postNotFromUser ? "hover:cursor-pointer hover:underline" : ""}`}
+              onClick={navigateToProfile}
             >
               {post.author.fullname}
-            </Typography>
+            </p>
             <Typography variant="subtitle2" sx={{ color: "#536471" }}>
               {dateWhenFormat(new Date(post.createdAt))}
             </Typography>
+          </div>
+          <div className="ml-auto self-start rounded-full px-3 py-1 bg-primary-50">
+            <Tooltip title="Edit Post">
+              <IconButton>
+                <EditRounded className="text-secondary-400" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Delete Post">
+              <IconButton>
+                <DeleteRounded className="text-red-600" />
+              </IconButton>
+            </Tooltip>
           </div>
         </div>
         <div className="line line__1"></div>

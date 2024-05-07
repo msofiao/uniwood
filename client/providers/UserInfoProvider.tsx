@@ -1,9 +1,10 @@
 import React, { Dispatch, SetStateAction } from "react"; // Import the 'React' module
 
 import { createContext, useState } from "react";
+import { UserInfoContextProps } from "../types/providers";
 
 export const UserInfoContext = createContext<UserInfoContextProps | undefined>(
-  undefined
+  undefined,
 );
 
 export default function UserInfoProvier({

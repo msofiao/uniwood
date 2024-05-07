@@ -135,3 +135,4 @@ dist
 index.test.ts
 server/public
 !server/public/*/
+stash

@@ -18,13 +18,14 @@ export default function Search() {
   }>();
 
   useEffect(() => {
-    axiosClient
-      .get(`/search/${query.get("q")}`)
-      .then((res) => setResData(res.data.data));
+    axiosClient.get(`/search/${query.get("q")}`).then((res) => {
+      setResData(res.data.data);
+    });
   }, [query]);
 
   return (
     <div className="search">
+      <p>{}</p>
       <TabContext value={tabIndex}>
         <TabList className="tab-list" onChange={handletTabChange}>
           <Tab className="tab w-1/2" label="Posts" value="1" />
@@ -32,7 +33,7 @@ export default function Search() {
         </TabList>
         <TabPanel value="1">
           {resData?.posts &&
-            resData.posts.map((post) => <Post postParam={post as any} />)}
+            resData?.posts.map((post) => <Post postParam={post as any} />)}
         </TabPanel>
         {/* <TabPanel value="2">
           <Project />

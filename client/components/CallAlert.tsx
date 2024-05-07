@@ -13,12 +13,11 @@ export default function CallAlert({
 }: CallAlertProps) {
   const { setIncomingCall } = useContext(PeerContext)!;
   const answerCall = () => {
+    console.log("In Answer fUNCTION", { mediaConnection });
     if (!mediaConnection) return;
-    window.open(
-      `/videoCall/${mediaConnection.peer}`,
-      "_blank",
-      "width=800,height=600",
-    );
+    //   window.open(`/videoCall/662af75a0b4db6ceda8b273b
+    // `, "_blank");
+    // navigate("/videoCall/662af75a0b4db6ceda8b273b"); // ! Dummy
 
     setIncomingCall(false);
   };
@@ -60,11 +59,4 @@ interface CallAlertProps {
   mediaConnection: MediaConnection | null;
   setMediaConnection: Dispatch<SetStateAction<MediaConnection | null>>;
   callerInfo: Author;
-}
-function useState(arg0: boolean): [any, any] {
-  throw new Error("Function not implemented.");
-}
-
-function useEffect(listenToCalls: () => void, arg1: any[]) {
-  throw new Error("Function not implemented.");
 }

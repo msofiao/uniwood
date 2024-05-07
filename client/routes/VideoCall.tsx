@@ -21,7 +21,7 @@ export default function VideoCall() {
   };
   const { userInfo, setUserInfo } = useContext(UserInfoContext)!;
   const { accessToken, setAccessToken } = useContext(TokenContext)!;
-  const { peer, incomingCall, setIncomingCall, mediaConnection } =
+  const { peer, incomingCall, setIncomingCall,  mediaConnection } =
     useContext(PeerContext)!;
   const params = useParams<{ recipientId: string }>();
 
@@ -34,13 +34,9 @@ export default function VideoCall() {
   const outVideoRef = useRef<HTMLVideoElement | null>(null);
   const inVideoRef = useRef<HTMLVideoElement | null>(null);
 
-  const [callState, setCallState] = useState<
-    "idle" | "outCall" | "inCall" | "onCall"
-  >("idle");
-
   const initializeUserIdentity = () => {
+    console.log({ userInfoResponse, refreshTokenResponse });
     setAccessToken(refreshTokenResponse.accessToken);
-    // setCallMedia({ audio: true, video: true });
   };
   const initializeRecipientInfo = () => {
     if (!accessToken || !params.recipientId) return;
@@ -64,18 +60,18 @@ export default function VideoCall() {
   };
 
   const displayOutStream = () => {
+    console.log("outstrem");
     if (!outVideoRef.current) return;
     outVideoRef.current.srcObject = outStream;
   };
 
   const callUser = () => {
-    if (!peer || incomingCall || !inStream) return;
+    if (!peer || incomingCall || !inStream || !userInfo) return;
 
     if (!params.recipientId) return;
     const mediaConnection = peer.call(params.recipientId, inStream);
 
     mediaConnection.on("stream", (stream) => {
-      console.log("Stream received");
       setOutStream(stream);
     });
   };
@@ -83,7 +79,6 @@ export default function VideoCall() {
   const anwerCall = () => {
     console.log({ inStream, mediaConnection, incomingCall });
     if (incomingCall || !mediaConnection || !inStream) return;
-    console.log(`Answered call by ${userInfo.id}`);
 
     mediaConnection.answer(inStream);
     mediaConnection.on("stream", (stream) => {
@@ -93,14 +88,15 @@ export default function VideoCall() {
   };
 
   const tester = () => {
-    console.log("tester ", { mediaConnection });
+    console.log(userInfo.id);
+    console.log(`tester from ${userInfo.fullname} `, { mediaConnection });
   };
 
   useEffect(initializeUserIdentity, []);
   useEffect(initializeRecipientInfo, [accessToken, params.recipientId]);
-  useEffect(openVideo, []);
-  useEffect(displayInStream, [inStream]);
-  useEffect(displayOutStream, [outStream]);
+  useEffect(openVideo, [inVideoRef.current]);
+  useEffect(displayInStream, [inStream, inVideoRef.current]);
+  useEffect(displayOutStream, [outStream, outVideoRef.current]);
 
   useEffect(anwerCall, [incomingCall, inStream, mediaConnection]);
   useEffect(tester, [mediaConnection]);
@@ -132,6 +128,8 @@ function OutCall({ videoRef, recipientInfo, callMedia }: OutCallProps) {
       <video
         ref={videoRef}
         className=" h-[70%] max-w-[80%] rounded-xl bg-red-400"
+        autoPlay
+        playsInline
       ></video>
     </div>
   );
