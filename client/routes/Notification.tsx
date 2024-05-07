@@ -21,35 +21,14 @@ import { convoDateFormat } from "../utils/dateTools";
 import dateUtil from "date-and-time";
 
 export default function Notification() {
-  const theme = useTheme();
-  const { userInfoResponse, refreshTokenResponse } = useLoaderData() as {
-    userInfoResponse: UserInfoResponseData;
-    refreshTokenResponse: RefreshTokenResponseData;
-  };
-  const { setUserInfo } = useContext(UserInfoContext)!;
-  const { accessToken, setAccessToken } = useContext(TokenContext)!;
 
-  const initializeUserIdentity = () => {
-    setUserInfo(userInfoResponse);
-    setAccessToken(refreshTokenResponse.accessToken);
-    localStorage.setItem("accessToken", refreshTokenResponse.accessToken);
-    localStorage.setItem("id", refreshTokenResponse.id);
-  };
-
-  useEffect(initializeUserIdentity, [
-    userInfoResponse,
-    refreshTokenResponse,
-    accessToken,
-  ]);
   return (
-    <NotificationLayout>
-      <Nav />
-      <div className="border-x-solid max-h-screen overflow-y-auto border-2">
+
+      <div className=" max-h-screen overflow-y-auto">
         <Header />
         <NotifTab />
       </div>
-      <RightSection theme={theme} />
-    </NotificationLayout>
+
   );
 }
 
@@ -399,186 +378,186 @@ function CommentedPost({ notif, navigate }: NotifElemProps) {
   );
 }
 
-function FollowedYou({ notif, navigate }: NotifElemProps) {
-  const navToFollower = () => {
-    navigate(`/user/${notif.notifFrom_id}`);
-  };
-  return (
-    <div
-      onClick={navToFollower}
-      className="flex items-center gap-4 px-10 py-4 hover:cursor-pointer hover:bg-gray-200"
-    >
-      <Avatar src={notif.notifBy.pfp} className="size-12 " />
-      <div className="flex flex-col justify-center gap-1">
-        <p className="font-body text-base text-slate-800">
-          <span className="font-bold">{notif.notifBy.fullname}</span>
-          Started folllowing you
-        </p>
-        <p className="font-body text-xs text-slate-600">
-          {convoDateFormat(notif.createdAt)}
-        </p>
-      </div>
-    </div>
-  );
-}
+// function FollowedYou({ notif, navigate }: NotifElemProps) {
+//   const navToFollower = () => {
+//     navigate(`/user/${notif.notifFrom_id}`);
+//   };
+//   return (
+//     <div
+//       onClick={navToFollower}
+//       className="flex items-center gap-4 px-10 py-4 hover:cursor-pointer hover:bg-gray-200"
+//     >
+//       <Avatar src={notif.notifBy.pfp} className="size-12 " />
+//       <div className="flex flex-col justify-center gap-1">
+//         <p className="font-body text-base text-slate-800">
+//           <span className="font-bold">{notif.notifBy.fullname}</span>
+//           Started folllowing you
+//         </p>
+//         <p className="font-body text-xs text-slate-600">
+//           {convoDateFormat(notif.createdAt)}
+//         </p>
+//       </div>
+//     </div>
+//   );
+// }
 
-function NotificationLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="mx-auto grid max-h-screen  w-[1200px] grid-cols-[335px_1fr_375px]">
-      {children}
-    </div>
-  );
-}
+// function NotificationLayout({ children }: { children: React.ReactNode }) {
+//   return (
+//     <div className="mx-auto grid max-h-screen  w-[1200px] grid-cols-[335px_1fr_375px]">
+//       {children}
+//     </div>
+//   );
+// }
 
-function RightSection({ theme: theme }: { theme: Theme }) {
-  const [, setSearch] = useState("");
-  const navigate = useNavigate();
-  return (
-    <section className="relative flex flex-col justify-center gap-7 px-5">
-      <TextField
-        className="justify-start rounded-full bg-white"
-        placeholder="Search"
-        fullWidth
-        InputProps={{
-          startAdornment: <SearchRounded sx={{ marginRight: "15px" }} />,
-          sx: { borderRadius: "25px", height: "45px", paddingLeft: "20px" },
-          onKeyDown: (e) => {
-            if (e.key === "Enter") {
-              navigate(`/search?q=${e.currentTarget.value}`);
-            }
-          },
-        }}
-        onChange={(e) => setSearch(e.target.value)}
-        variant="outlined"
-        name="search"
-      />
-      <SuggestedAccount theme={theme} />
-      <Trends theme={theme} />
-    </section>
-  );
-}
+// function RightSection({ theme: theme }: { theme: Theme }) {
+//   const [, setSearch] = useState("");
+//   const navigate = useNavigate();
+//   return (
+//     <section className="relative flex flex-col justify-center gap-7 px-5">
+//       <TextField
+//         className="justify-start rounded-full bg-white"
+//         placeholder="Search"
+//         fullWidth
+//         InputProps={{
+//           startAdornment: <SearchRounded sx={{ marginRight: "15px" }} />,
+//           sx: { borderRadius: "25px", height: "45px", paddingLeft: "20px" },
+//           onKeyDown: (e) => {
+//             if (e.key === "Enter") {
+//               navigate(`/search?q=${e.currentTarget.value}`);
+//             }
+//           },
+//         }}
+//         onChange={(e) => setSearch(e.target.value)}
+//         variant="outlined"
+//         name="search"
+//       />
+//       <SuggestedAccount theme={theme} />
+//       <Trends theme={theme} />
+//     </section>
+//   );
+// }
 
-function Trends({ theme: theme }: { theme: Theme }) {
-  const [tags, setTags] = useState<Record<string, number> | null>(null);
-  const loaderData = useLoaderData();
-  const navigate = useNavigate();
+// function Trends({ theme: theme }: { theme: Theme }) {
+//   const [tags, setTags] = useState<Record<string, number> | null>(null);
+//   const loaderData = useLoaderData();
+//   const navigate = useNavigate();
 
-  const handleDataInitialization = () => {
-    axiosClient
-      .get("/posts/topTags?count=5", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      })
-      .then((res) => setTags(res.data.data));
-  };
-  const handleNavigate = (e: React.MouseEvent<HTMLLIElement, MouseEvent>) => {
-    return navigate(`/search?q=${e.currentTarget.id}`);
-  };
-  useEffect(handleDataInitialization, [loaderData]);
+//   const handleDataInitialization = () => {
+//     axiosClient
+//       .get("/posts/topTags?count=5", {
+//         headers: {
+//           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+//         },
+//       })
+//       .then((res) => setTags(res.data.data));
+//   };
+//   const handleNavigate = (e: React.MouseEvent<HTMLLIElement, MouseEvent>) => {
+//     return navigate(`/search?q=${e.currentTarget.id}`);
+//   };
+//   useEffect(handleDataInitialization, [loaderData]);
 
-  return (
-    <div className="rounded-xl border-2 border-solid border-slate-200 bg-white pb-4">
-      <Typography
-        variant="h5"
-        fontFamily={"Montserrat"}
-        fontWeight={"900"}
-        color={theme.palette.text.primary}
-        paddingTop={"18px"}
-        paddingLeft={"18px"}
-        marginBottom={"10px"}
-      >
-        Top Trends
-      </Typography>
+//   return (
+//     <div className="rounded-xl border-2 border-solid border-slate-200 bg-white pb-4">
+//       <Typography
+//         variant="h5"
+//         fontFamily={"Montserrat"}
+//         fontWeight={"900"}
+//         color={theme.palette.text.primary}
+//         paddingTop={"18px"}
+//         paddingLeft={"18px"}
+//         marginBottom={"10px"}
+//       >
+//         Top Trends
+//       </Typography>
 
-      {tags &&
-        Object.entries(tags).map(([tag, count]) => (
-          <MenuItem
-            id={tag}
-            className="trends"
-            onClick={handleNavigate}
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "flex-start",
-            }}
-          >
-            <Typography className="header" variant="body1">
-              #{tag}
-            </Typography>
-            <Typography
-              variant="body2"
-              sx={{ color: theme.palette.text.secondary }}
-            >
-              {count} posts
-            </Typography>
-          </MenuItem>
-        ))}
-    </div>
-  );
-}
-function SuggestedAccount({ theme: theme }: { theme: Theme }) {
-  const loaderData = useLoaderData();
-  const [newUsers, setNewUses] = useState<Author[] | null>(null);
-  const navigate = useNavigate();
+//       {tags &&
+//         Object.entries(tags).map(([tag, count]) => (
+//           <MenuItem
+//             id={tag}
+//             className="trends"
+//             onClick={handleNavigate}
+//             sx={{
+//               display: "flex",
+//               flexDirection: "column",
+//               alignItems: "flex-start",
+//             }}
+//           >
+//             <Typography className="header" variant="body1">
+//               #{tag}
+//             </Typography>
+//             <Typography
+//               variant="body2"
+//               sx={{ color: theme.palette.text.secondary }}
+//             >
+//               {count} posts
+//             </Typography>
+//           </MenuItem>
+//         ))}
+//     </div>
+//   );
+// }
+// function SuggestedAccount({ theme: theme }: { theme: Theme }) {
+//   const loaderData = useLoaderData();
+//   const [newUsers, setNewUses] = useState<Author[] | null>(null);
+//   const navigate = useNavigate();
 
-  const handleDataInitialization = () => {
-    axiosClient
-      .get("/users/newUsers?count=3", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      })
-      .then((res) => {
-        setNewUses(res.data.data);
-      });
-  };
-  const handleNavigate = (e: React.MouseEvent<HTMLLIElement, MouseEvent>) =>
-    navigate(`/profile/${e.currentTarget.id}`);
+//   const handleDataInitialization = () => {
+//     axiosClient
+//       .get("/users/newUsers?count=3", {
+//         headers: {
+//           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+//         },
+//       })
+//       .then((res) => {
+//         setNewUses(res.data.data);
+//       });
+//   };
+//   const handleNavigate = (e: React.MouseEvent<HTMLLIElement, MouseEvent>) =>
+//     navigate(`/profile/${e.currentTarget.id}`);
 
-  useEffect(handleDataInitialization, [loaderData]);
-  return (
-    <div className="rounded-lg border-2 border-solid border-slate-200 bg-white">
-      <Typography
-        variant="h5"
-        fontFamily={"Montserrat"}
-        fontWeight={"900"}
-        color={theme.palette.text.primary}
-        paddingTop={"18px"}
-        paddingLeft={"18px"}
-        marginBottom={"10px"}
-      >
-        New Users
-      </Typography>
+//   useEffect(handleDataInitialization, [loaderData]);
+//   return (
+//     <div className="rounded-lg border-2 border-solid border-slate-200 bg-white">
+//       <Typography
+//         variant="h5"
+//         fontFamily={"Montserrat"}
+//         fontWeight={"900"}
+//         color={theme.palette.text.primary}
+//         paddingTop={"18px"}
+//         paddingLeft={"18px"}
+//         marginBottom={"10px"}
+//       >
+//         New Users
+//       </Typography>
 
-      {newUsers &&
-        newUsers.map((user) => (
-          <MenuItem
-            className="suggested-account"
-            id={user.id}
-            onClick={handleNavigate}
-          >
-            <Avatar
-              className="avatar"
-              src={`${process.env.SERVER_PUBLIC}/${user.pfp}`}
-              sx={{ display: "inline-block", marginRight: "10px" }}
-            />
-            <Box sx={{ display: "flex", flexDirection: "column" }}>
-              <Typography className="body1" variant="body1" fontSize={"15px"}>
-                {user.fullname}
-              </Typography>
-              <Typography
-                className="subtitle1"
-                sx={{ color: theme.palette.text.secondary }}
-              >
-                @{user.username}
-              </Typography>
-            </Box>
-          </MenuItem>
-        ))}
-    </div>
-  );
-}
+//       {newUsers &&
+//         newUsers.map((user) => (
+//           <MenuItem
+//             className="suggested-account"
+//             id={user.id}
+//             onClick={handleNavigate}
+//           >
+//             <Avatar
+//               className="avatar"
+//               src={`${process.env.SERVER_PUBLIC}/${user.pfp}`}
+//               sx={{ display: "inline-block", marginRight: "10px" }}
+//             />
+//             <Box sx={{ display: "flex", flexDirection: "column" }}>
+//               <Typography className="body1" variant="body1" fontSize={"15px"}>
+//                 {user.fullname}
+//               </Typography>
+//               <Typography
+//                 className="subtitle1"
+//                 sx={{ color: theme.palette.text.secondary }}
+//               >
+//                 @{user.username}
+//               </Typography>
+//             </Box>
+//           </MenuItem>
+//         ))}
+//     </div>
+//   );
+// }
 
 interface NotifElemProps {
   notif: INotifSocketPayload;

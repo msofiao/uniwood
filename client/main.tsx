@@ -64,6 +64,10 @@ const router = createBrowserRouter([
         path: "/post/:postId",
         element: <Post />,
       },
+      {
+        path: "/notification",
+        element: <Notification />,
+      },
     ],
   },
   {
@@ -97,11 +101,7 @@ const router = createBrowserRouter([
     element: <Message />,
     loader: messageLoader,
   },
-  {
-    path: "/notification",
-    element: <Notification />,
-    loader: notificationLoader,
-  },
+
   {
     path: "/test2",
     element: <Test2 />,
