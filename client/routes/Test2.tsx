@@ -139,7 +139,7 @@ function PostDeleteDialog({
 
   return (
     <Modal open={dialogOpen} onClose={closeDialog}>
-      <div className="position absolute left-[50%] top-[50%] flex h-[300px] w-[450px] translate-x-[-50%] translate-y-[-50%] flex-col items-center justify-center rounded-xl bg-white px-5 shadow-lg">
+      <div className="position absolute left-[50%] top-[50%] flex h-[300px] w-[450px] translate-x-[-50%] translate-y-[-50%] flex-col items-center justify-center rounded-xl bg-white px-5 py-8 shadow-lg">
         <PriorityHighRounded className="rounded-full bg-red-200 p-2 text-[50px] text-red-400" />
         <p className="text my-3 text-lg font-bold text-slate-800">
           Are you sure ?
@@ -148,10 +148,10 @@ function PostDeleteDialog({
           This action cannot be undone. All values associated with the post will
           be lost
         </p>
-        <button className="w-full rounded-lg bg-red-400  py-2 font-bold text-white ">
+        <button className="w-full rounded-lg bg-red-400  py-2 font-bold text-white hover:bg-red-500 ">
           Delete Post
         </button>
-        <button className="mt-4 w-full rounded-lg border-[3px] border-solid border-slate-300 py-2">
+        <button className="font-bold font-body mt-4 w-full rounded-lg border-[3px] border-solid border-slate-300 py-2 text-slate-700 hover:text-white hover:bg-slate-300">
           Cancel
         </button>
       </div>

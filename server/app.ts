@@ -11,6 +11,7 @@ import {
   SearchRoute,
   NotificationRoute,
   ConverseRoute,
+  OtpRoute,
 } from "./routes/index";
 import { messageChangeHandler } from "./mongodb/sockets/index";
 import fastifyCookie from "@fastify/cookie";
@@ -75,6 +76,7 @@ export default function App(
   instance.register(NotificationRoute, {
     prefix: "/notifications",
   });
+  instance.register(OtpRoute, { prefix: "/otp" });
 
   const onConnection = (socket: Socket) => {
     socket.on("test", (message, cb) => {

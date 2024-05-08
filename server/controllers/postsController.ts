@@ -340,7 +340,7 @@ const getAllUserPost = async (
 };
 
 const deletePost = async (
-  req: FastifyRequest<{ Params: { postId: string | undefined } }>,
+  req: FastifyRequest<{ Params: { postId: string | undefined }; Body: any }>,
   res: FastifyReply,
 ) => {
   // TODO add validation
@@ -692,7 +692,7 @@ const getPostById = async (
     }),
   };
 
-  return res.code(200).send({ status: "ok", data: parsedDoc });
+  return res.code(200).send({ status: "success", data: parsedDoc });
 };
 
 const getRecommendedPosts = async (

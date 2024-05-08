@@ -7,6 +7,8 @@ import {
   sendAccessToken,
   sendRefreshToken,
 } from "../utils/tokens";
+import { randomInt } from "node:crypto";
+import { sendRegistrationOTP } from "../utils/mailer.ts";
 
 export const login = async (
   req: FastifyRequest<{

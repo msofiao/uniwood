@@ -28,6 +28,7 @@ import {
   ProjectsRoute,
   CommentsRoute,
   TestRoute,
+  OtpRoute,
 } from "./routes/index";
 import { onRequestHook } from "./hooks/index";
 import { messageChangeHandler } from "./mongodb/sockets/index";
@@ -83,6 +84,7 @@ app.register(ConverseRoute, { prefix: "/converse" });
 app.register(NotificationRoute, {
   prefix: "/notifications",
 });
+app.register(OtpRoute, { prefix: "/otp" });
 
 app.ready((err) => {
   if (err) throw err;
