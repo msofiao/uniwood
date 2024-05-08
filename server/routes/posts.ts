@@ -50,7 +50,7 @@ export function PostsRoute(
     postController.updatePost,
   );
   instance.delete(
-    "/",
+    "/:postId",
     { preValidation: [authorize("ANY")] },
     postController.deletePost,
   );
