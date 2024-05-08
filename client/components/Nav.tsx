@@ -78,14 +78,14 @@ export default function Nav() {
   const openPosterModal = () => setPosterModalView(true);
 
   return (
-    <nav className="sticky top-0 h-screen w-full flex-col justify-center px-5 md:flex sm:hidden">
+
+    <nav className="sticky top-0 flex h-screen w-full flex-col justify-center custom2:block sm:hidden  px-5">
       <img
         className="absolute -top-4 left-1/2 mx-auto aspect-square w-[225px] -translate-x-1/2 "
         src={`${process.env.SERVER_PUBLIC}/assets/logo_label.svg`}
         alt="logo"
       />
       <Links focusState={focusState} />
-      {/* <ButtonNav openPosterModal={openPosterModal} /> */}
       <AvatarNav />
       <PosterModal
         postModalView={posterModalView}
@@ -96,17 +96,6 @@ export default function Nav() {
 }
 
 // function ButtonNav({ openPosterModal }: { openPosterModal: VoidFunc }) {
-//   return (
-//     <Button
-//       className="mt-5 rounded-full  bg-primary-400 py-3 normal-case text-white"
-//       variant="contained"
-//       fullWidth
-//       onClick={openPosterModal}
-//     >
-//       Post
-//     </Button>
-//   );
-// }
 
 function AvatarNav() {
   const theme = useTheme();

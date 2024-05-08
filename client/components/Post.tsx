@@ -5,6 +5,10 @@ import {
   ChatBubbleOutlineRounded,
   CloseRounded,
   SendRounded,
+  DeleteRounded,
+  EditRounded,
+  PriorityHighRounded,
+  LocationOn,
 } from "@mui/icons-material";
 import {
   Paper,
@@ -19,7 +23,9 @@ import {
   IconButton,
 } from "@mui/material";
 import React, {
+  Dispatch,
   MouseEvent,
+  SetStateAction,
   createContext,
   useContext,
   useEffect,
@@ -31,9 +37,14 @@ import React, {
 import { dateWhenFormat } from "../utils/dateTools";
 import { UserInfoContext } from "../providers/UserInfoProvider";
 import axiosClient from "../utils/axios";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { PostContextProps } from "../types/providers";
+import { PostEditor } from "./PostEditor";
+import { TokenContext } from "../providers/TokenProvider";
+import { AlertContext } from "../providers/AlertProvider";
 
-const PostProvider = createContext<PostContext | null>(null);
+
+export const PostContext = createContext<PostContextProps | null>(null);
 
 export default function Post({ postParam }: { postParam: Post }) {
   const [post, setPost] = useState<Post | null>(null);
@@ -42,20 +53,31 @@ export default function Post({ postParam }: { postParam: Post }) {
     setPost(postParam);
   };
   const navigate = useNavigate();
+  const [deleteAlert, setDeleteAlert] = useState(false);
+  const [postEditor, setPostEditor] = useState(false);
+  const location = useLocation();
 
   const navigatable = post?.author.id !== localStorage.getItem("id");
   const loading = post === null;
+  const openDeleteAlert = () => {
+    setDeleteAlert(true);
+  };
+  const openPostEditor = () => {
+    setPostEditor(true);
+  };
 
   useEffect(() => {
     initializeContextData();
   }, []);
 
   return loading ? (
-    <p>loading...</p>
+    <></>
   ) : (
+
     <PostProvider.Provider value={{ post, setPost }}>
       <Paper className="post md:w-full sm:w-11/12">
-        <div className="user-profile">
+        <div className="flex gap-3">
+
           <Avatar
             className="avatar md:size-12 sm:size-24"
             src={`${process.env.SERVER_PUBLIC}/${post.author.pfp}`}
@@ -76,6 +98,21 @@ export default function Post({ postParam }: { postParam: Post }) {
               {dateWhenFormat(new Date(post.createdAt))}
             </Typography>
           </div>
+          {location.pathname.includes("/profile/") && (
+            <div className="ml-auto self-start rounded-full bg-primary-50 px-3 py-1">
+              <Tooltip title="Edit Post">
+                <IconButton onClick={openPostEditor}>
+                  <EditRounded className="text-secondary-400" />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title="Delete Post">
+                <IconButton onClick={openDeleteAlert}>
+                  <DeleteRounded className="text-red-600" />
+                </IconButton>
+              </Tooltip>
+            </div>
+          )}
         </div>
         <div className="line line__1"></div>
         <Typography className="md:text-lg sm:text-3xl my-2 font-bold" variant="h5">
@@ -105,7 +142,21 @@ export default function Post({ postParam }: { postParam: Post }) {
         <ImageList medias={post.media} />
         <PostActions />
       </Paper>
-    </PostProvider.Provider>
+      {deleteAlert && (
+        <PostDeleteAlert
+          dialogOpen={deleteAlert}
+          setDialogOpen={setDeleteAlert}
+        />
+      )}
+      {postEditor && (
+        <PostEditor
+          postModalView={postEditor}
+          setPostModalView={setPostEditor}
+          post={post}
+          setPost={setPost}
+        />
+      )}
+    </PostContext.Provider>
   );
 }
 function ImageList({
@@ -200,7 +251,7 @@ function ImageList({
 }
 
 function PostActions() {
-  const { post } = useContext(PostProvider)!;
+  const { post } = useContext(PostContext)!;
   const theme = useTheme();
   const [fillHeart, setFillHeart] = useState(
     post?.liked_by_users_id.includes(
@@ -289,7 +340,7 @@ function CommentModal({
   setCommentModalView: React.Dispatch<React.SetStateAction<boolean>>;
   commentModalView: boolean;
 }) {
-  const { post, setPost } = useContext(PostProvider)!;
+  const { post, setPost } = useContext(PostContext)!;
   const commentRef = useRef<HTMLInputElement>(null);
   const [newComment, setNewComment] = useState<CommentProps[]>([]);
   const { userInfo } = useContext(UserInfoContext)!;
@@ -504,4 +555,73 @@ function Comment({
       </div>
     </div>
   );
+}
+
+function PostDeleteAlert({ dialogOpen, setDialogOpen }: PostDeleteDialogProps) {
+  const { accessToken } = useContext(TokenContext)!;
+  const { post, setPost } = useContext(PostContext)!;
+  const { setAlert } = useContext(AlertContext)!;
+
+  const closeDialog = () => {
+    setDialogOpen(false);
+  };
+
+  const deletePost = () => {
+    if (!post) return;
+    axiosClient
+      .delete(`/posts/${post.id}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+      .then(() => {
+        setAlert({
+          message: "Post Deleted",
+          severity: "success",
+          visible: true,
+        });
+        setPost(null);
+      })
+      .catch(() => {
+        setAlert({
+          message: "Failed to delete post",
+          severity: "error",
+          visible: true,
+        });
+      });
+    setDialogOpen(false);
+  };
+
+  return (
+    <Modal open={dialogOpen} onClose={closeDialog}>
+      <div className="position absolute left-[50%] top-[50%] flex h-[300px] w-[450px] translate-x-[-50%] translate-y-[-50%] flex-col items-center justify-center rounded-xl bg-white px-5 py-8 shadow-lg">
+        <PriorityHighRounded className="rounded-full bg-red-200 p-2 text-[50px] text-red-400" />
+        <p className="text my-3 text-lg font-bold text-slate-800">
+          Are you sure ?
+        </p>
+        <p className="mb-7 text-center text-slate-600">
+          This action cannot be undone. All values associated with the post will
+          be lost
+        </p>
+        <button
+          className="w-full rounded-lg bg-red-400  py-2 font-bold text-white hover:bg-red-500 "
+          onClick={deletePost}
+        >
+          Delete Post
+        </button>
+        <button
+          className="mt-4 w-full rounded-lg border-[3px] border-solid border-slate-300 py-2 font-body font-bold text-slate-700 hover:bg-slate-300 hover:text-white"
+          onClick={closeDialog}
+        >
+          Cancel
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
+// Types
+interface PostDeleteDialogProps {
+  dialogOpen: boolean;
+  setDialogOpen: Dispatch<SetStateAction<boolean>>;
 }

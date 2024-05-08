@@ -58,6 +58,8 @@ module.exports = {
       },
       screens: {
         sm : "300px",
+        custom:"450.5px",
+        custom2:"450px"
       },
     },
   },

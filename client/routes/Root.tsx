@@ -15,6 +15,7 @@ import { sendRefreshTokenRequest, sendUserInfoRequest } from "../utils";
 import { UserInfoContext } from "../providers/UserInfoProvider";
 import axiosClient from "../utils/axios";
 import Nav from "../components/Nav";
+import Navmob from "../components/Navmob";
 import { TokenContextProps, UserInfoContextProps } from "../types/providers";
 
 export async function loader() {
@@ -65,7 +66,9 @@ export default function Root() {
   useEffect(handleUserAuthentication, [userInfoResponse, refreshTokenResponse]);
   return (
     <div className="root">
+      <Navmob />
       <main>
+      <Navmob />
         <Outlet />
       </main>
       <Nav />
@@ -78,7 +81,8 @@ function RightSection({ theme: theme }: { theme: Theme }) {
   const [, setSearch] = useState("");
   const navigate = useNavigate();
   return (
-    <section className="md:block sm:hidden">
+
+    <section className="custom2:block sm:hidden">
       <TextField
         className="search-bar"
         placeholder="Search"

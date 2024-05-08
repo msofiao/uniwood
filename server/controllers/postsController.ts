@@ -39,6 +39,10 @@ const updatePost = async (
   req: FastifyRequest<{ Body: PostPutBody }>,
   res: FastifyReply,
 ) => {
+  let savedMedia: { filename: string; caption: string }[] = [];
+
+  if (req.body.savedMedia) savedMedia = JSON.parse(req.body.savedMedia) ?? [];
+
   if (!req.userId)
     return res
       .code(401)
@@ -57,16 +61,26 @@ const updatePost = async (
       .code(403)
       .send({ status: "fail", message: "User is not authorize" });
 
+  // Process Data
+  let fileterSavedMedia = postExist.media.filter((media) =>
+    savedMedia.find((saved) => saved.filename === media.filename),
+  );
+  if (req.body.media)
+    fileterSavedMedia = [...fileterSavedMedia, ...req.body.media];
+  const postData = {
+    tags: req.body.tags ?? postExist.tags,
+    context: req.body.context ?? postExist.context,
+    title: req.body.title ?? postExist.title,
+    media: fileterSavedMedia,
+  };
+
   // Update post
   try {
-    await req.prisma.post.update({
+    const updateData = await req.prisma.post.update({
       where: { id: req.body.postId },
-      data: {
-        tags: req.body.tags ?? postExist.tags,
-        media: req.body.media ?? postExist.media ?? [],
-        context: req.body.context ?? postExist.context,
-      },
+      data: postData,
     });
+    console.log(updateData);
   } catch (error) {
     console.error(error);
     return res.code(500).send({ status: "fail", message: "Internal Error" });
@@ -77,7 +91,11 @@ const updatePost = async (
     req.body.media.forEach(
       async (elem) => await moveFile([elem.filename], "tmp", "public"),
     );
-  return res.code(200).send({ status: "success", message: "Post updated" });
+  return res.code(200).send({
+    status: "success",
+    message: "Post updated",
+    data: { updatedMedia: fileterSavedMedia },
+  });
 };
 
 const getPosts = async (req: FastifyRequest, res: FastifyReply) => {
@@ -322,11 +340,11 @@ const getAllUserPost = async (
 };
 
 const deletePost = async (
-  req: FastifyRequest<{ Body: { postId: string | undefined } }>,
+  req: FastifyRequest<{ Params: { postId: string | undefined } }>,
   res: FastifyReply,
 ) => {
   // TODO add validation
-  if (req.body.postId === undefined)
+  if (req.params.postId === undefined)
     return res
       .code(400)
       .send({ status: "fail", message: "Post id is required" });
@@ -338,14 +356,14 @@ const deletePost = async (
   // Check if post exist
   const postExist = await req.prisma.post.findUnique({
     where: {
-      id: req.body.postId,
+      id: req.params.postId,
     },
   });
   if (!postExist)
     return res.code(404).send({ status: "fail", message: "Post is not exist" });
 
   // Check if post is belong to user
-  if (postExist.author_id !== req.userId)
+  if (postExist.author_id !== req.userId && req.role !== "ADMIN")
     return res
       .code(403)
       .send({ status: "fail", message: "User is not authorize" });
@@ -353,7 +371,7 @@ const deletePost = async (
   // delete post
   const deleteStatus = await req.prisma.post.update({
     where: {
-      id: req.body.postId,
+      id: req.params.postId,
     },
     data: {
       status: "ARCHIVED",
@@ -475,6 +493,7 @@ const getPost = async (
   const postExist = await req.prisma.post.findUnique({
     where: {
       id: req.params.postId,
+      status: "ACTIVE",
     },
     select: {
       author: {
@@ -812,6 +831,7 @@ export type PostPostBody = {
 };
 
 export type PostPutBody = {
+  title: string;
   postId: string;
   tags?: string[];
   context?: string;
@@ -819,6 +839,7 @@ export type PostPutBody = {
     caption: string | null;
     filename: string;
   }[];
+  savedMedia?: string;
 };
 
 const postController = {
