@@ -13,6 +13,7 @@
     grid-row: 1/2;
     max-height: 100vh;
   }
+
   main {
     grid-column: 2/3;
     grid-row: 1/2;
@@ -20,6 +21,13 @@
     border-left: 1px solid map-get($borderColor, primary);
     margin: 0 45px;
   }
+  @media (max-width: 450px) {
+    main {
+      grid-column: 1/-1;
+      margin: 0;
+    }
+  }
+  
   section {
     grid-column: 3/4;
     grid-row: 1/2;
