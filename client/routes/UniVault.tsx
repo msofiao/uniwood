@@ -24,7 +24,7 @@ export default function UniVault() {
         title: "The Artisans from Bataan Peninsula",
         description:
           "Discover the skilled artisans and their craftsmanship in Bataan Peninsula. Explore their traditional techniques and the cultural heritage they preserve.",
-        author: "Tatler Asia",
+        author: "Maritess Garcia Reyes",
         link: "https://www.tatlerasia.com/homes/architecture-design/the-artisans-from-bataan-peninsula",
       },
       {
@@ -33,7 +33,7 @@ export default function UniVault() {
           "Staying in Heritage: Revisiting the Las Casas Filipinas de Acuzar in Bagac, Bataan",
         description:
           "Experience the charm and history of Las Casas Filipinas de Acuzar in Bagac, Bataan. Immerse yourself in the rich cultural tapestry of this heritage site.",
-        author: "Bluprint One Mega",
+        author: "Reuben Cañete",
         link: "https://bluprint-onemega.com/staying-in-heritage-revisiting-the-las-casas-filipinas-de-acuzar-in-bagac-bataan/",
       },
       {
@@ -49,7 +49,7 @@ export default function UniVault() {
         title: "Community Initiatives in Bataan: The Guilds BPSU",
         description:
           "Learn about the community initiatives led by The Guilds BPSU in Bataan. Discover their projects aimed at fostering education and sustainable development.",
-        author: "The Guilds BPSU",
+        author: "Kesia Jamel Corton",
         link: "https://www.facebook.com/theguildsbpsu/posts/pfbid026FMWchAfeJFYNeMw8TzZDDy5bXMdUwBdXMZGL7UwRdanJPVwHpqF2Nf8JhQyhD8Xl",
       },
       {
@@ -57,7 +57,7 @@ export default function UniVault() {
         title: "Empowering Women through Wood Mosaic Making in Bataan",
         description:
           "Explore the empowering journey of women in Bataan through wood mosaic making. Learn about their skills, creativity, and contribution to the community.",
-        author: "1Bataan",
+        author: "Loi Balbaloza",
         link: "https://1bataan.com/wood-mosaic-making-an-epitome-of-women-empowerment/",
       },
       // Add more articles as needed
@@ -88,12 +88,12 @@ export default function UniVault() {
 
   return (
     <div className="container mx-auto px-4">
-      <h1 className="mb-4 mt-8 text-center text-3xl font-bold">UniVault</h1>
+      <h1 className="mb-4 mt-8 text-center text-3xl font-semibold">UniVault</h1>
       <div className="flex flex-col justify-center md:flex-row">
         <button
           className={`mb-4 mr-4 w-full rounded-md px-4 py-2 transition duration-300 focus:outline-none md:mb-0 md:w-auto ${
             activeTab === "Articles"
-              ? "bg-orange-500 text-white hover:bg-orange-600"
+              ? "bg-prima text-white hover:bg-orange-600"
               : "bg-gray-300 text-gray-700 hover:bg-gray-400"
           }`}
           onClick={() => setActiveTab("Articles")}
@@ -103,7 +103,7 @@ export default function UniVault() {
         <button
           className={`w-full rounded-md px-4 py-2 transition duration-300 focus:outline-none md:w-auto ${
             activeTab === "Trainings"
-              ? "bg-orange-500 text-white hover:bg-orange-600"
+              ? "bg-prima text-white hover:bg-orange-600"
               : "bg-gray-300 text-gray-700 hover:bg-gray-400"
           }`}
           onClick={() => setActiveTab("Trainings")}

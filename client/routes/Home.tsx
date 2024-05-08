@@ -2,6 +2,8 @@ import React, { useContext, useEffect } from "react";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { useState } from "react";
 import { Tab } from "@mui/material";
+import { useMediaQuery, useTheme } from '@mui/material';
+
 import Post from "../components/Post.tsx";
 import Poster, { PosterModal } from "../components/Poster";
 import axiosClient from "../utils/axios";

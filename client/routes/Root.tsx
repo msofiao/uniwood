@@ -78,7 +78,7 @@ function RightSection({ theme: theme }: { theme: Theme }) {
   const [, setSearch] = useState("");
   const navigate = useNavigate();
   return (
-    <section>
+    <section className="md:block sm:hidden">
       <TextField
         className="search-bar"
         placeholder="Search"

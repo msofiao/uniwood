@@ -42,12 +42,12 @@ module.exports = {
         prima: "#EF6D53",
       },
       fontFamily: {
-        default: ["Segoe UI Historic", "sans-serif", "system-ui"],
-        header: ["Inter", "sans-serif", "system-ui"],
-        body: ["Segoe UI Historic", "sans-serif", "system-ui"],
-        body2: ["Roboto", "sans-serif", "system-ui"],
+        default: ["Poppins", "sans-serif", "system-ui"],
+        header: ["Poppins", "sans-serif", "system-ui"],
+        body: ["Roberto", "sans-serif", "system-ui"],
+        body2: ["Poppins", "sans-serif", "system-ui"],
         sans: [
-          "Segoe UI Historic",
+          "Poppins",
           "ui-sans-serif",
           "system-ui",
           "sans-serif",
