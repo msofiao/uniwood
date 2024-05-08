@@ -77,19 +77,16 @@ export default function Login() {
   };
 
   return (
-    <div className="login bg-white">
+    <div className="login bg-white flex flex-col">
       <nav>
         <div className="logo-container">
           <img
-            className="logo"
-            src={`${process.env.SERVER_PUBLIC}/assets/logo.svg`}
+            className="logo size-48 ml-10"
+            src={`${process.env.SERVER_PUBLIC}/assets/logo_label.svg`}
             alt=""
           />
-          <Typography className="logo-text " variant="h3" fontFamily={"Nunito"}>
-            Uniwood
-          </Typography>
         </div>
-        <div className="register-nav">
+        {/* <div className="register-nav">
           <Typography
             className="register-text"
             variant="h6"
@@ -105,24 +102,20 @@ export default function Login() {
           >
             Register
           </Button>
-        </div>
+        </div> */}
       </nav>
       <main>
         <div className="pane1">
           <div className="content-container">
             <img className="content-svg" src={shareProjectsSvg} alt="" />
             <Typography
-              className="content-title"
-              fontFamily={"Nunito"}
-              fontWeight={"bold"}
-              color={theme.palette.text.primary}
+              className="content-title font-poppins font-semibold mb-4"
               variant="h4"
             >
               Share your project
             </Typography>
             <Typography
-              className="content-subtitle"
-              fontFamily={"Roboto"}
+              className="content-subtitle font-poppins text-center text-sm leading-relaxed"
               variant="subtitle1"
             >
               Exhibit creation, seek advice on a challenging project, or simply

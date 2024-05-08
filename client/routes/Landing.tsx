@@ -28,7 +28,7 @@ function Body() {
               <p className="text-center lg:text-base sm:text-sm font-normal lg:mt-10 sm:mt-5">
                 A central space for Woodworkers, Woodcrafters, and Woodworking
                 Enthusiasts to engage and share knowledge. Helps the users to
-                interact in real-time messaging and video calling, creating a
+                interact in real-time messaging, creating a
                 supportive environment where users can learn from each other,
                 build connections, and work on projects together.
               </p>
@@ -81,22 +81,22 @@ function Semifooter() {
     <>
       <div className="m-10">
         <div className="flex justify-center item-center mt-28">
-          <img src={logo} alt="" className="lg:h-64 sm:h-44"/>
+          <img src={logo} alt="" className="lg:h-80 sm:h-44"/>
         </div>
-        <div className="flex lg:flex-row sm:flex-col justify-center items-center lg:mx-36 lg:my-20">
-          <div className="flex-1 mx-20 my-10 sm:w-full">
-            <p className="text-center font-semibold text-2xl lg:mb-5">
+        <div className="flex lg:flex-row sm:flex-col justify-center items-center lg:mx-36 lg:my-10">
+          <div className="flex-1 mx-10 my-10 sm:w-full">
+            <p className="text-center font-semibold text-3xl lg:mb-5">
               About UniWood
             </p>
-            <p className="text-center lg:text-based sm:text-sm">
+            <p className="text-center lg:text-base sm:text-sm">
             UniWood is a platform designed to connect, support, and empower the woodworking community. It serves as a comprehensive online space where woodworkers, woodcrafters, and woodworking enthusiasts can engage, share their projects, and learn from one another.
             </p>
           </div>
-          <div className="flex-1 mx-20 sm:w-full">
-            <p className="text-center font-semibold text-2xl lg:mb-5">
+          <div className="flex-1 mx-10 my-10 sm:w-full">
+            <p className="text-center font-semibold text-3xl lg:mb-5">
               What We Do
             </p>
-            <p className="text-center text-based sm:text-sm">
+            <p className="text-center lg:text-base sm:text-sm">
             An online platform designed for the woodworking community, enabling users to connect, and share projects. Offers features like community posts, real-time messaging, and educational resources to foster learning and knowledge sharing, creating a vibrant space for growth and connection.
             </p>
           </div>
