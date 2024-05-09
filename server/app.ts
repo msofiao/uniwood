@@ -112,5 +112,9 @@ export default function App(
     // Change Stream Handlers
   });
 
+  instance.get("/", async (req, res) => {
+    return { status: "success", message: "Welcome to the API" };
+  });
+
   done();
 }

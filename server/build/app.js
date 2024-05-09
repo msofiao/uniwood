@@ -79,5 +79,8 @@ export default function App(instance, options, done) {
         instance.io.on("connection", onConnection);
         // Change Stream Handlers
     });
+    instance.get("/", async (req, res) => {
+        return { status: "success", message: "Welcome to the API" };
+    });
     done();
 }
