@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "ES2022",
+    "target": "ESNext",
+    "module": "CommonJS",
     "outDir": "./build",
     "rootDir": "./test",
-    "moduleResolution": "Bundler",
+    // "moduleResolution": "Bundler",
     "baseUrl": "./",
     // "types": [
     //   "./server/types/fastify.d.ts",
