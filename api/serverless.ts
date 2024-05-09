@@ -3,7 +3,6 @@ import path from "node:path";
 
 import Fastify, { FastifyReply, FastifyRequest } from "fastify";
 
-dotenv.config({ path: path.resolve(import.meta.url, "../.env") });
 
 const app = Fastify({ logger: true });
 
