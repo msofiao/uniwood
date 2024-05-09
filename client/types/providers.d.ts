@@ -38,7 +38,7 @@ declare interface ProfileContext {
   setUserPosts: Dispatch<SetStateAction<Post[]>>;
 }
 
-declare interface PostContext {
+declare interface PostContextProps {
   post: (Post & { author: PostAuthor }) | null;
   setPost: Dispatch<SetStateAction<Post & { author: PostAuthor }>>;
 }
@@ -54,6 +54,7 @@ declare interface IMessageComponentContext {
 
 declare interface PeerProviderContext {
   peer: Peer | null;
+
   incomingCall: boolean;
   setIncomingCall: Dispatch<SetStateAction<boolean>>;
   mediaConnection: MediaConnection | null
