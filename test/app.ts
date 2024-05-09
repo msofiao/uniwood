@@ -1,8 +1,4 @@
 import { FastifyInstance } from "fastify";
-import dotenv from "dotenv";
-import path from "node:path";
-
-dotenv.config({ path: path.resolve(import.meta.url, "../.env") });
 
 export default function App(
   instance: FastifyInstance,
