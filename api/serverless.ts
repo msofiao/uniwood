@@ -1,8 +1,4 @@
-import dotenv from "dotenv";
-import path from "node:path";
-
 import Fastify, { FastifyReply, FastifyRequest } from "fastify";
-
 
 const app = Fastify({ logger: true });
 
