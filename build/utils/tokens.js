@@ -1,10 +1,10 @@
 import jwt from "jsonwebtoken";
 import path from "node:path";
 import dotenv from "dotenv";
-import { accessTokenOption, refreshTokenOptions } from "../config/jwtOption.ts";
+import { accessTokenOption, refreshTokenOptions } from "../config/jwtOption";
 import "@fastify/cookie";
 dotenv.config({
-    path: path.resolve(import.meta.dirname, "../.env"),
+    path: path.resolve(import.meta.dirname, "../../.env"),
 });
 export const createAccessToken = (userInfo) => {
     return jwt.sign(userInfo, process.env.ACCESS_TOKEN_KEY, accessTokenOption);
@@ -22,7 +22,7 @@ export const sendRefreshToken = (token, res) => {
     });
 };
 export const sendAccessToken = (userInfo, token, res) => {
-    return res.send(Object.assign({ status: "success", accessToken: token }, userInfo));
+    return res.send({ status: "success", accessToken: token, ...userInfo });
 };
 export const verifyAccessToken = (token) => {
     return jwt.verify(token, process.env.ACCESS_TOKEN_KEY);

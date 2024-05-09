@@ -1,21 +1,12 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 import { capitalize } from "../utils/index";
-const search = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const search = async (req, res) => {
     if (req.params.search === undefined)
         return res
             .status(400)
             .send({ status: "fail", message: "No search term provided" });
     const wholeSearchTerm = req.params.search;
     const searchTerms = wholeSearchTerm.split(" ");
-    let posts = yield req.prisma.post.findMany({
+    let posts = await req.prisma.post.findMany({
         where: {
             OR: [
                 ...searchTerms.map((term) => {
@@ -106,7 +97,7 @@ const search = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             },
         },
     });
-    let users = yield req.prisma.user.findMany({
+    let users = await req.prisma.user.findMany({
         where: {
             OR: [
                 ...searchTerms.map((term) => {
@@ -137,7 +128,7 @@ const search = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             address: true,
         },
     });
-    let projects = yield req.prisma.project.findMany({
+    let projects = await req.prisma.project.findMany({
         where: {
             OR: [
                 ...searchTerms.map((term) => {
@@ -324,7 +315,7 @@ const search = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         status: "success",
         data: { posts: postsData, users: usersData, projects: projectData },
     });
-});
+};
 export const searchController = {
     search,
 };

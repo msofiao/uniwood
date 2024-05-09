@@ -1,24 +1,15 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-import { createProject as createProjectFn, getProjectById as getProjectByIdFn, deleteProject as deleteProjectFn, updateProject as updateProjectFn, getProjects as getProjectsFn, projectLikeToggle as projectLikeToggleFn, } from "../models/projectQuery.ts";
-import { requestFieldChecker } from "../utils/reqTools.ts";
-import { moveFile } from "../utils/fileManager.ts";
+import { createProject as createProjectFn, getProjectById as getProjectByIdFn, deleteProject as deleteProjectFn, updateProject as updateProjectFn, getProjects as getProjectsFn, projectLikeToggle as projectLikeToggleFn, } from "../models/projectQuery";
+import { requestFieldChecker } from "../utils/reqTools";
+import { moveFile } from "../utils/fileManager";
 // const createProject = async ({tags: string })
-const createProject = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const createProject = async (req, res) => {
     // Check if required fields are present
     const missingFields = requestFieldChecker(["title", "context", "tags", "media"], req);
     if (missingFields.length > 0)
         return res
             .code(400)
             .send({ status: "error", message: "Missing required fields" });
-    yield createProjectFn({
+    await createProjectFn({
         author_id: req.userId,
         title: req.body.title,
         context: req.body.context,
@@ -26,35 +17,35 @@ const createProject = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         tags: req.body.tags,
     }, req.prisma);
     // Move file to public folder
-    req.body.media.forEach((elem) => __awaiter(void 0, void 0, void 0, function* () {
-        yield moveFile([elem.filename], "tmp", "public");
-    }));
+    req.body.media.forEach(async (elem) => {
+        await moveFile([elem.filename], "tmp", "public");
+    });
     return res.code(201).send({
         status: "success",
         message: "Project created",
     });
-});
-const getProjectById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const getProjectById = async (req, res) => {
     if (!req.params.projectId)
         return res
             .code(400)
             .send({ status: "error", message: "Project id is required" });
-    const project = yield getProjectByIdFn(req.params.projectId, req.prisma);
+    const project = await getProjectByIdFn(req.params.projectId, req.prisma);
     return res.code(200).send({ status: "success", data: project });
-});
-const getProjects = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const projects = yield getProjectsFn(req.prisma);
+};
+const getProjects = async (req, res) => {
+    const projects = await getProjectsFn(req.prisma);
     return res.code(200).send({ status: "success", data: projects });
-});
-const deleteProject = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const deleteProject = async (req, res) => {
     if (!req.params.projectId)
         return res
             .code(404)
             .send({ status: "error", message: "Project id is required" });
-    yield deleteProjectFn(req.params.projectId, req.prisma);
+    await deleteProjectFn(req.params.projectId, req.prisma);
     return res.code(200).send({ status: "success", message: "Project deleted" });
-});
-const updateProject = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const updateProject = async (req, res) => {
     // Check if project exist
     const missingFields = requestFieldChecker(["projectId", "title", "tags", "context", "media"], req);
     if (missingFields.length > 0)
@@ -64,7 +55,7 @@ const updateProject = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             error: missingFields,
         });
     try {
-        yield updateProjectFn({
+        await updateProjectFn({
             projectId: req.body.projectId,
             title: req.body.title,
             tags: req.body.tags || [],
@@ -81,10 +72,10 @@ const updateProject = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         moveFile([elem.filename], "tmp", "public");
     });
     return res.code(200).send({ status: "success", message: "Project updated" });
-});
-const projectLikeToggle = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const projectLikeToggle = async (req, res) => {
     try {
-        yield projectLikeToggleFn({ userId: req.userId, projectId: req.params.projectId }, req.prisma);
+        await projectLikeToggleFn({ userId: req.userId, projectId: req.params.projectId }, req.prisma);
     }
     catch (error) {
         console.log(error);
@@ -95,7 +86,7 @@ const projectLikeToggle = (req, res) => __awaiter(void 0, void 0, void 0, functi
         });
     }
     return res.code(200).send({ status: "success", message: "Project liked" });
-});
+};
 const projectController = {
     createProject,
     getProjectById,

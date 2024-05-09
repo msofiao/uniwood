@@ -18,7 +18,7 @@ export function PostsRoute(instance, _option, done) {
         preValidation: [authorize("ANY"), postsCustomMultipartConsumer],
         onResponse: postPutOnresponseHander,
     }, postController.updatePost);
-    instance.delete("/", { preValidation: [authorize("ANY")] }, postController.deletePost);
+    instance.delete("/:postId", { preValidation: [authorize("ANY")] }, postController.deletePost);
     instance.patch("/likeToggle", { preValidation: [authorize("ANY")] }, postController.likePostToggle);
     instance.get("/topTags", postController.getTopTags);
     done();

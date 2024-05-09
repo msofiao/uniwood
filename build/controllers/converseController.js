@@ -1,18 +1,8 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 import { ObjectId } from "mongodb";
-import { converseDocExistByMessengersId } from "../models/converseOperations.js";
-import { capitalize } from "../utils/stringFormatter.ts";
-import { moveFile, removeFiles } from "../utils/fileManager.ts";
-export const sendMessage = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
+import { converseDocExistByMessengersId } from "../models/converseOperations";
+import { capitalize } from "../utils/stringFormatter";
+import { moveFile, removeFiles } from "../utils/fileManager";
+export const sendMessage = async (req, res) => {
     // Check if body is complete
     if (req.body.recipient_id == undefined ||
         (req.body.chat === undefined && req.body.media === undefined))
@@ -25,7 +15,7 @@ export const sendMessage = (req, res) => __awaiter(void 0, void 0, void 0, funct
             ],
         });
     // unread count
-    const unreadDoc = (yield req.prisma.converse.findFirst({
+    const unreadDoc = (await req.prisma.converse.findFirst({
         where: {
             messengers_id: { hasEvery: [req.userId, req.body.recipient_id] },
         },
@@ -47,13 +37,13 @@ export const sendMessage = (req, res) => __awaiter(void 0, void 0, void 0, funct
     });
     let converseDoc;
     try {
-        const converseDocExist = yield converseDocExistByMessengersId([
+        const converseDocExist = await converseDocExistByMessengersId([
             req.body.recipient_id,
             req.userId,
         ]);
-        converseDoc = yield req.prisma.converse.upsert({
+        converseDoc = await req.prisma.converse.upsert({
             where: {
-                id: (converseDocExist === null || converseDocExist === void 0 ? void 0 : converseDocExist.id) || "111111111111111111111111", // dummy id
+                id: converseDocExist?.id || "111111111111111111111111", // dummy id
             },
             create: {
                 messages: {
@@ -91,23 +81,23 @@ export const sendMessage = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
     catch (error) {
         console.error(error);
-        removeFiles(((_a = req.body.media) === null || _a === void 0 ? void 0 : _a.map((media) => media.filename)) || [], "tmp");
+        removeFiles(req.body.media?.map((media) => media.filename) || [], "tmp");
         return res
             .status(500)
             .send({ status: "fail", message: "Internal Server Error" });
     }
     // Save media to public folder
     if (req.body.type !== "TEXT")
-        moveFile(((_b = req.body.media) === null || _b === void 0 ? void 0 : _b.map((media) => media.filename)) || [], "tmp", "public");
+        moveFile(req.body.media?.map((media) => media.filename) || [], "tmp", "public");
     return res.code(201).send({
         status: "success",
         converseId: converseDoc.id,
         message: "Message Saved",
     });
-});
-export const createConverse = (req, res) => __awaiter(void 0, void 0, void 0, function* () { });
-export const searchConversation = (req, reply) => __awaiter(void 0, void 0, void 0, function* () {
-    const converseDoc = yield req.prisma.converse.findFirst({
+};
+export const createConverse = async (req, res) => { };
+export const searchConversation = async (req, reply) => {
+    const converseDoc = await req.prisma.converse.findFirst({
         where: {
             messengers_id: { hasEvery: [req.query.recipientId, req.userId] },
         },
@@ -118,10 +108,12 @@ export const searchConversation = (req, reply) => __awaiter(void 0, void 0, void
     if (!converseDoc) {
         return reply.code(404).send({ status: "fail", message: "Not Found" });
     }
-    return reply.code(200).send({ stauts: "ok", converseId: converseDoc.id });
-});
-export const getConverse = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const converseDoc = yield req.prisma.converse.findUnique({
+    return reply
+        .code(200)
+        .send({ stauts: "success", converseId: converseDoc.id });
+};
+export const getConverse = async (req, res) => {
+    const converseDoc = await req.prisma.converse.findUnique({
         where: {
             id: req.query.converseId,
         },
@@ -148,18 +140,18 @@ export const getConverse = (req, res) => __awaiter(void 0, void 0, void 0, funct
     let reecipiendInfo = converseDoc.messengers.find((messenger) => messenger.id !== req.userId);
     const parsedConverseDoc = {
         reecipiendInfo: {
-            fullname: capitalize(`${reecipiendInfo === null || reecipiendInfo === void 0 ? void 0 : reecipiendInfo.firstname} ${reecipiendInfo === null || reecipiendInfo === void 0 ? void 0 : reecipiendInfo.lastname}`),
-            username: reecipiendInfo === null || reecipiendInfo === void 0 ? void 0 : reecipiendInfo.username,
-            pfp: reecipiendInfo === null || reecipiendInfo === void 0 ? void 0 : reecipiendInfo.user_image.pfp_name,
-            id: reecipiendInfo === null || reecipiendInfo === void 0 ? void 0 : reecipiendInfo.id,
+            fullname: capitalize(`${reecipiendInfo?.firstname} ${reecipiendInfo?.lastname}`),
+            username: reecipiendInfo?.username,
+            pfp: reecipiendInfo?.user_image.pfp_name,
+            id: reecipiendInfo?.id,
         },
         messages: converseDoc.messages,
     };
-    return res.code(200).send({ status: "ok", data: parsedConverseDoc });
-});
-export const getConverseList = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    return res.code(200).send({ status: "success", data: parsedConverseDoc });
+};
+export const getConverseList = async (req, res) => {
     // Get converse doc list
-    const conversesDoc = yield req.prisma.converse.findMany({
+    const conversesDoc = await req.prisma.converse.findMany({
         where: {
             messengers_id: { has: req.userId },
         },
@@ -207,16 +199,16 @@ export const getConverseList = (req, res) => __awaiter(void 0, void 0, void 0, f
         };
     });
     // set messages status from the recipient to DELIVERED
-    yield req.prisma.converse.updateMany({
+    await req.prisma.converse.updateMany({
         where: {
             messengers_id: { has: req.userId },
         },
         data: {},
     });
-    return res.code(200).send({ status: "ok", data: parseConversesDoc });
-});
-export const getRecipient = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const recipientDoc = yield req.prisma.converse.findUnique({
+    return res.code(200).send({ status: "success", data: parseConversesDoc });
+};
+export const getRecipient = async (req, res) => {
+    const recipientDoc = await req.prisma.converse.findUnique({
         where: {
             id: req.query.converseId,
         },
@@ -243,15 +235,15 @@ export const getRecipient = (req, res) => __awaiter(void 0, void 0, void 0, func
         return res.code(404).send({ status: "fail", message: "Not Found" });
     const pareseReicipientDoc = {
         id: recipientDoc.messengers[0].id,
-        fullname: capitalize(`${recipientDoc === null || recipientDoc === void 0 ? void 0 : recipientDoc.messengers[0].firstname} ${recipientDoc === null || recipientDoc === void 0 ? void 0 : recipientDoc.messengers[0].lastname}`),
+        fullname: capitalize(`${recipientDoc?.messengers[0].firstname} ${recipientDoc?.messengers[0].lastname}`),
         username: recipientDoc.messengers[0].username,
         pfp: recipientDoc.messengers[0].user_image.pfp_name,
     };
-    return res.code(200).send({ status: "ok", data: pareseReicipientDoc });
-});
-const getConverseMedia = (req, reply) => __awaiter(void 0, void 0, void 0, function* () {
+    return res.code(200).send({ status: "success", data: pareseReicipientDoc });
+};
+const getConverseMedia = async (req, reply) => {
     console.log({ query: req.query, tsest: "Hello World" });
-    const mediaList = yield req.prisma.message.findMany({
+    const mediaList = await req.prisma.message.findMany({
         where: {
             converse_id: req.query.converseId,
             type: { in: ["IMAGE", "VIDEO"] },
@@ -269,8 +261,8 @@ const getConverseMedia = (req, reply) => __awaiter(void 0, void 0, void 0, funct
             createdAt: "desc",
         },
     });
-    return reply.code(200).send({ status: "ok", data: mediaList });
-});
+    return reply.code(200).send({ status: "success", data: mediaList });
+};
 export const converseController = {
     sendMessage,
     searchConversation,

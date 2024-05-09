@@ -1,17 +1,7 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 import { commentExist, upVoteToggle as upVoteToggleQuery, downVoteToggle as downVoteToggleQuery, replyComment as replyCommentFc, testCommentQuery, } from "../models/commentsQuery.js";
 import { ObjectId } from "mongodb";
-const createComment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    if (!((_a = req.body) === null || _a === void 0 ? void 0 : _a.comment))
+const createComment = async (req, res) => {
+    if (!req.body?.comment)
         return res.code(400).send({
             status: "fail",
             message: "Missing field",
@@ -27,7 +17,7 @@ const createComment = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             message: "User is unauthorize",
         });
     const commentId = new ObjectId().toHexString();
-    const commentSuccess = yield req.prisma.post.update({
+    const commentSuccess = await req.prisma.post.update({
         where: { id: req.body.postId },
         data: {
             comments: {
@@ -52,7 +42,7 @@ const createComment = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             },
         },
     });
-    const postDoc = yield req.prisma.post.findUnique({
+    const postDoc = await req.prisma.post.findUnique({
         where: { id: req.body.postId },
         select: { author_id: true },
     });
@@ -61,7 +51,7 @@ const createComment = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             .code(404)
             .send({ status: "fail", message: "Post author not found" });
     // Create Notificatoin
-    yield req.prisma.notification.create({
+    await req.prisma.notification.create({
         data: {
             type: "POST_COMMENT",
             Comment: {
@@ -82,10 +72,9 @@ const createComment = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         return res.code(500).send({ status: "fail", message: "Internal Error" });
     return res.code(200).send({ status: "success", message: "User added" });
     // Comment on a post
-});
-const updateComment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _b;
-    if (!((_b = req.body) === null || _b === void 0 ? void 0 : _b.comment))
+};
+const updateComment = async (req, res) => {
+    if (!req.body?.comment)
         return res.code(400).send({
             status: "fail",
             message: "Missing field",
@@ -101,65 +90,64 @@ const updateComment = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             message: "User is unauthorize",
         });
     // Check if the user is teh author of the comment
-    const comment = yield req.prisma.comment.findUnique({
+    const comment = await req.prisma.comment.findUnique({
         where: { id: req.body.commentId },
     });
     if (!comment)
         return res.code(404).send({ status: "fail", message: "Comment not found" });
-    if (comment.author_id !== req.userId && (req === null || req === void 0 ? void 0 : req.role) === "USER")
+    if (comment.author_id !== req.userId && req?.role === "USER")
         return res.code(403).send({
             status: "fail",
             message: "User is not authorize to edit the comment. User is not the author of the comment",
         });
-    const updateStatus = yield req.prisma.comment.update({
+    const updateStatus = await req.prisma.comment.update({
         where: { id: req.body.commentId },
         data: { content: req.body.comment },
     });
     if (!updateStatus)
         return res.code(500).send({ status: "fail", message: "Internal Error" });
     return res.code(200).send({ status: "success", message: "Comment updated" });
-});
-const deleteComment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _c;
-    if (!((_c = req.body) === null || _c === void 0 ? void 0 : _c.commentId))
+};
+const deleteComment = async (req, res) => {
+    if (!req.body?.commentId)
         return res
             .code(400)
             .send({ status: "fail", message: "Comment id is missing" });
     if (!req.userId)
         return res.code(401).send({ status: "fail" });
     // Check if the user is the author of the comment
-    const comment = yield req.prisma.comment.findUnique({
+    const comment = await req.prisma.comment.findUnique({
         where: { id: req.body.commentId },
     });
     if (!comment)
         return res.code(404).send({ status: "fail", message: "Comment not found" });
-    if (comment.author_id !== req.userId && (req === null || req === void 0 ? void 0 : req.role) === "USER")
+    if (comment.author_id !== req.userId && req?.role === "USER")
         return res.code(403).send({
             status: "fail",
             message: "User is not authorize to delete the comment. User is not the author of the comment",
         });
-    const deleteStatus = yield req.prisma.comment.update({
+    const deleteStatus = await req.prisma.comment.update({
         where: { id: req.body.commentId },
         data: { status: "ARCHIVED" },
     });
     if (!deleteStatus)
         return res.code(500).send({ status: "fail", message: "Internal Error" });
     return res.code(200).send({ status: "success", message: "Comment deleted" });
-});
+};
 /**
  * Get All Comments or Comments of a post
  * @param req
  * @param reply
  */
-const getComments = (req, reply) => __awaiter(void 0, void 0, void 0, function* () {
+const getComments = async (req, reply) => {
     // Filter Params
     let comments = [];
     if (req.query.postId)
-        comments = yield req.prisma.comment.findMany({
+        comments = await req.prisma.comment.findMany({
             where: { post_id: req.query.postId },
         });
     else
-        comments = yield req.prisma.comment.findMany({
+        comments = await req.prisma.comment.findMany({
             where: {
                 replies: {
                     some: {},
@@ -168,14 +156,14 @@ const getComments = (req, reply) => __awaiter(void 0, void 0, void 0, function* 
             include: { replies: true },
         });
     return reply.code(200).send({ status: "success", comments });
-});
-const getComment = (req, reply) => __awaiter(void 0, void 0, void 0, function* () {
-    const comment = yield req.prisma.comment.findUnique({
+};
+const getComment = async (req, reply) => {
+    const comment = await req.prisma.comment.findUnique({
         where: { id: req.params.commentId },
     });
     return reply.code(200).send({ status: "success", comment });
-});
-const upVoteToggle = (req, reply) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const upVoteToggle = async (req, reply) => {
     if (!req.body.commentId)
         return reply.code(400).send({
             status: "fail",
@@ -186,17 +174,16 @@ const upVoteToggle = (req, reply) => __awaiter(void 0, void 0, void 0, function*
         return reply
             .code(401)
             .send({ status: "fail", message: "User is unauthorize" });
-    const isCommentExist = yield commentExist({ commentId: req.body.commentId }, req.prisma);
+    const isCommentExist = await commentExist({ commentId: req.body.commentId }, req.prisma);
     if (!isCommentExist)
         return reply
             .code(404)
             .send({ status: "fail", message: "Comment not found" });
-    yield upVoteToggleQuery({ commentId: req.body.commentId, userId: req.userId }, req.prisma);
+    await upVoteToggleQuery({ commentId: req.body.commentId, userId: req.userId }, req.prisma);
     return reply.code(200).send({ status: "success" });
-});
-const downVoteToggle = (req, reply) => __awaiter(void 0, void 0, void 0, function* () {
-    var _d;
-    if (!((_d = req.body) === null || _d === void 0 ? void 0 : _d.commentId))
+};
+const downVoteToggle = async (req, reply) => {
+    if (!req.body?.commentId)
         return reply
             .code(400)
             .send({ status: "fail", message: "Comment id is missing" });
@@ -204,15 +191,15 @@ const downVoteToggle = (req, reply) => __awaiter(void 0, void 0, void 0, functio
         return reply
             .code(401)
             .send({ status: "fail", message: "User is unauthorize" });
-    const isCommentExist = yield commentExist({ commentId: req.body.commentId }, req.prisma);
+    const isCommentExist = await commentExist({ commentId: req.body.commentId }, req.prisma);
     if (!isCommentExist)
         return reply
             .code(404)
             .send({ status: "fail", message: "Comment not found" });
-    yield downVoteToggleQuery({ userId: req.userId, commentId: req.body.commentId }, req.prisma);
+    await downVoteToggleQuery({ userId: req.userId, commentId: req.body.commentId }, req.prisma);
     return reply.code(200).send({ status: "success" });
-});
-const replyComment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const replyComment = async (req, res) => {
     if (req.body.type === null ||
         req.body.type === undefined ||
         !req.body.type.match(/^(project|post)$/i)) {
@@ -228,7 +215,7 @@ const replyComment = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             message: "User is unauthorize",
         });
     }
-    yield replyCommentFc({
+    await replyCommentFc({
         commentId: req.body.commentId,
         targetId: req.body.targetId,
         author_id: req.userId,
@@ -236,7 +223,7 @@ const replyComment = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         type: req.body.type.toUpperCase(),
     }, req.prisma);
     return res.code(200).send({ status: "success", message: "Comment Replied" });
-});
+};
 const commentController = {
     createComment,
     updateComment,
@@ -249,8 +236,8 @@ const commentController = {
 };
 export default commentController;
 // ! Test
-export const test = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+export const test = async (req, res) => {
     if (req.userId)
-        yield testCommentQuery({ userId: req.userId, commentId: req.body.commentId }, req.prisma);
+        await testCommentQuery({ userId: req.userId, commentId: req.body.commentId }, req.prisma);
     res.send({ status: "success" });
-});
+};

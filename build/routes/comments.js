@@ -1,5 +1,5 @@
-import commentController, { test } from "../controllers/commentController.ts";
-import { authorize } from "../middlewares/authorize.ts";
+import commentController, { test } from "../controllers/commentController";
+import { authorize } from "../middlewares/authorize";
 export function CommentsRoute(instance, _option, done) {
     instance.get("/", { preValidation: [authorize("ANY")] }, commentController.getComments);
     instance.get("/:commentId", { preValidation: [authorize("ANY")] }, commentController.getComment);

@@ -1,20 +1,10 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 import { hash } from "bcrypt";
 import { ObjectId } from "mongodb";
 import { moveFile, capitalize, constantToCapitalize, createAccessToken, createRefreshToken, sendRefreshToken, } from "../utils";
 import { isValidObjectId } from "../utils/checker";
-const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+const createUser = async (req, res) => {
     // Check if Email
-    const emailExist = yield req.prisma.user.findUnique({
+    const emailExist = await req.prisma.user.findUnique({
         where: { email: req.body.email },
         include: { credential: true },
     });
@@ -25,7 +15,7 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             errorFields: [{ field: "email", message: "Email already exist" }],
         });
     // Check if username exist
-    const usernameExist = yield req.prisma.user.findUnique({
+    const usernameExist = await req.prisma.user.findUnique({
         where: { username: req.body.username },
     });
     if (usernameExist)
@@ -37,11 +27,11 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     // TODO Add a valition
     // TODO Add a default PFP and Cover image
     // hash Password
-    const hashedPassword = yield hash(req.body.password.replace(" ", ""), 10);
+    const hashedPassword = await hash(req.body.password.replace(" ", ""), 10);
     const userId = new ObjectId().toHexString();
     // Create User & Credential
     try {
-        yield req.prisma.user.create({
+        await req.prisma.user.create({
             data: {
                 id: userId,
                 email: req.body.email.toLowerCase(),
@@ -49,7 +39,7 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                 firstname: req.body.firstname.replace(/w(2, )/, " ").trim(),
                 middlename: req.body.middlename.replace(/w(2, )/, " ").trim(),
                 lastname: req.body.lastname.replace(/w(2, )/, " ").trim(),
-                bio: (_a = req.body.bio) === null || _a === void 0 ? void 0 : _a.replace(/w(2, )/, " ").trim(),
+                bio: req.body.bio?.replace(/w(2, )/, " ").trim(),
                 date_of_Birth: new Date(req.body.dateOfBirth),
                 gender: req.body.gender.toUpperCase(),
                 role: "USER",
@@ -62,8 +52,8 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                     .toUpperCase()
                     .replace(" ", "_"),
                 user_image: {
-                    pfp_name: (_d = (_c = (_b = req.body) === null || _b === void 0 ? void 0 : _b.pfp) === null || _c === void 0 ? void 0 : _c.filename) !== null && _d !== void 0 ? _d : "default-pfp.jpg", // TODO add default pfp
-                    cover_name: (_g = (_f = (_e = req.body) === null || _e === void 0 ? void 0 : _e.cover) === null || _f === void 0 ? void 0 : _f.filename) !== null && _g !== void 0 ? _g : "default-cover.jpg", // TODO add default cover
+                    pfp_name: req.body?.pfp?.filename ?? "default-pfp.jpg", // TODO add default pfp
+                    cover_name: req.body?.cover?.filename ?? "default-cover.jpg", // TODO add default cover
                 },
                 credential: {
                     create: {
@@ -82,7 +72,7 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         });
     }
     // Move files to public folder
-    moveFile([(_h = req.body) === null || _h === void 0 ? void 0 : _h.pfp, (_j = req.body) === null || _j === void 0 ? void 0 : _j.cover], "tmp", "public");
+    moveFile([req.body?.pfp, req.body?.cover], "tmp", "public");
     const accessToken = createAccessToken({
         email: req.body.email,
         id: userId,
@@ -102,20 +92,19 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             accessToken: accessToken,
         },
     });
-});
-const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3;
+};
+const updateUser = async (req, res) => {
     // TODO Add authorization if the user is the same as the one updating or an Admin
     // Check if id exist
     if (req.body.id === undefined)
         return res.status(400).send({ status: "fail", message: "Missing User Id" });
     // Check if user exist
-    let userExist = yield req.prisma.user.findUnique({
+    let userExist = await req.prisma.user.findUnique({
         where: { id: req.body.id },
         include: { credential: true },
     });
     if (!userExist) {
-        userExist = yield req.prisma.user.findUnique({
+        userExist = await req.prisma.user.findUnique({
             where: { username: req.body.id },
             include: { credential: true },
         });
@@ -127,34 +116,34 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         });
     // TODO Add validation
     // Update USER
-    const hashedPassword = req.body.password && (yield hash(req.body.password, 10));
+    const hashedPassword = req.body.password && (await hash(req.body.password, 10));
     try {
-        yield req.prisma.user.update({
+        await req.prisma.user.update({
             where: { id: req.body.id },
             data: {
-                username: (_k = req.body.username) !== null && _k !== void 0 ? _k : userExist.username,
-                firstname: (_l = req.body.firstname) !== null && _l !== void 0 ? _l : userExist.firstname,
-                middlename: (_m = req.body.middlename) !== null && _m !== void 0 ? _m : userExist.middlename,
-                lastname: (_o = req.body.lastname) !== null && _o !== void 0 ? _o : userExist.lastname,
-                bio: (_p = req.body.bio) !== null && _p !== void 0 ? _p : userExist.bio,
+                username: req.body.username ?? userExist.username,
+                firstname: req.body.firstname ?? userExist.firstname,
+                middlename: req.body.middlename ?? userExist.middlename,
+                lastname: req.body.lastname ?? userExist.lastname,
+                bio: req.body.bio ?? userExist.bio,
                 date_of_Birth: new Date(req.body.dateOfBirth || userExist.date_of_Birth),
-                gender: (_q = req.body.gender) !== null && _q !== void 0 ? _q : userExist.gender,
+                gender: req.body.gender ?? userExist.gender,
                 address: {
                     update: {
-                        barangay: (_r = req.body.barangay) !== null && _r !== void 0 ? _r : userExist.address.barangay,
-                        municipality: (_s = req.body.municipality) !== null && _s !== void 0 ? _s : userExist.address.municipality,
-                        province: (_t = req.body.province) !== null && _t !== void 0 ? _t : userExist.address.province,
+                        barangay: req.body.barangay ?? userExist.address.barangay,
+                        municipality: req.body.municipality ?? userExist.address.municipality,
+                        province: req.body.province ?? userExist.address.province,
                     },
                 },
-                affiliation: (_u = req.body.affiliation) !== null && _u !== void 0 ? _u : userExist.affiliation,
+                affiliation: req.body.affiliation ?? userExist.affiliation,
                 user_image: {
-                    pfp_name: (_w = (_v = req.body.pfp) === null || _v === void 0 ? void 0 : _v.filename) !== null && _w !== void 0 ? _w : userExist.user_image.pfp_name,
-                    cover_name: (_y = (_x = req.body.cover) === null || _x === void 0 ? void 0 : _x.filename) !== null && _y !== void 0 ? _y : userExist.user_image.cover_name,
+                    pfp_name: req.body.pfp?.filename ?? userExist.user_image.pfp_name,
+                    cover_name: req.body.cover?.filename ?? userExist.user_image.cover_name,
                 },
                 credential: {
                     update: {
-                        email: (_z = req.body.email) !== null && _z !== void 0 ? _z : (_0 = userExist === null || userExist === void 0 ? void 0 : userExist.credential) === null || _0 === void 0 ? void 0 : _0.email,
-                        password: hashedPassword !== null && hashedPassword !== void 0 ? hashedPassword : (_1 = userExist === null || userExist === void 0 ? void 0 : userExist.credential) === null || _1 === void 0 ? void 0 : _1.password,
+                        email: req.body.email ?? userExist?.credential?.email,
+                        password: hashedPassword ?? userExist?.credential?.password,
                     },
                 },
             },
@@ -172,16 +161,16 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     // if (req.body.pfp) removeFiles([userExist.user_image.pfp_name], "public");
     // if (req.body.cover) removeFiles([userExist.user_image.cover_name], "public");
     // Move files to public folder
-    moveFile([(_2 = req.body) === null || _2 === void 0 ? void 0 : _2.pfp, (_3 = req.body) === null || _3 === void 0 ? void 0 : _3.cover], "tmp", "public");
+    moveFile([req.body?.pfp, req.body?.cover], "tmp", "public");
     return res.send({ status: "success", message: "User Successfully Updated" });
-});
-const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const deleteUser = async (req, res) => {
     // TODO Add authorization if the user is the same as the one deleting or an Admin
     // Check if id exist
     if (req.body.id == null)
         return res.status(400).send({ status: "fail", message: "Missing User Id" });
     // Check if user exist
-    const userExist = yield req.prisma.user.findUnique({
+    const userExist = await req.prisma.user.findUnique({
         where: { id: req.body.id },
     });
     if (!userExist)
@@ -190,7 +179,7 @@ const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             message: "User not found",
         });
     // Delete User
-    const deleteUser = yield req.prisma.user.delete({
+    const deleteUser = await req.prisma.user.delete({
         where: { id: req.body.id },
         select: { id: true }
     });
@@ -201,19 +190,19 @@ const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             id: deleteUser.id,
         }
     });
-});
-const getAllusers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const getAllusers = async (req, res) => {
     // TODO Add authorization if the user is the same as the one deleting or an Admin
-    const allusers = yield req.prisma.user.findMany({});
+    const allusers = await req.prisma.user.findMany({});
     return res.send({
         status: "success",
         message: "Successfully fetched all users",
         data: allusers,
     });
-});
-const getNewUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const getNewUsers = async (req, res) => {
     // TODO Add authorization if the user is the same as the one deleting or an Admin
-    const allusers = yield req.prisma.user.findMany({
+    const allusers = await req.prisma.user.findMany({
         take: parseInt(req.query.count),
         orderBy: { date_joined: "desc" },
         select: {
@@ -244,8 +233,8 @@ const getNewUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         message: "Successfully fetched all users",
         data: data,
     });
-});
-const getUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const getUser = async (req, res) => {
     // TODO Add authorization if the user is logged
     // Check if id exist
     if (req.params.id == null)
@@ -254,7 +243,7 @@ const getUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let user;
     try {
         if (isValidObjectId(req.params.id)) {
-            user = yield req.prisma.user.findFirst({
+            user = await req.prisma.user.findFirst({
                 where: {
                     id: req.params.id,
                 },
@@ -274,7 +263,7 @@ const getUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         }
         else {
             console.log("Finding by username");
-            user = yield req.prisma.user.findFirst({
+            user = await req.prisma.user.findFirst({
                 where: {
                     username: req.params.id,
                 },
@@ -325,9 +314,9 @@ const getUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             followingCount: user.following.length,
         },
     });
-});
-const getUserRawData = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    let user = yield req.prisma.user.findUnique({
+};
+const getUserRawData = async (req, res) => {
+    let user = await req.prisma.user.findUnique({
         where: { username: req.params.usernameOrId },
         select: {
             id: true,
@@ -344,7 +333,7 @@ const getUserRawData = (req, res) => __awaiter(void 0, void 0, void 0, function*
         },
     });
     if (isValidObjectId(req.params.usernameOrId) && !user) {
-        user = yield req.prisma.user.findUnique({
+        user = await req.prisma.user.findUnique({
             where: { id: req.params.usernameOrId },
             select: {
                 id: true,
@@ -387,10 +376,10 @@ const getUserRawData = (req, res) => __awaiter(void 0, void 0, void 0, function*
         message: "Successfully fetched user",
         data: userdata,
     });
-});
-const getRecommendedAccountsForNewUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const getRecommendedAccountsForNewUser = async (req, res) => {
     // TODO add algorithm to get recommended accounts for new Users
-    let recommendedAccountsDocs = yield req.prisma.user.findMany({
+    let recommendedAccountsDocs = await req.prisma.user.findMany({
         take: parseInt("5"),
         select: {
             id: true,
@@ -421,10 +410,10 @@ const getRecommendedAccountsForNewUser = (req, res) => __awaiter(void 0, void 0,
         dateOfBirth: user.date_of_Birth,
     }));
     return res.code(200).send({ status: "success", recommendedAccounts });
-});
-const followUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const followUser = async (req, res) => {
     try {
-        yield req.prisma.user.update({
+        await req.prisma.user.update({
             where: { id: req.userId },
             data: {
                 following: {
@@ -444,10 +433,10 @@ const followUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     return res
         .code(200)
         .send({ status: "success", message: "Successfully followed" });
-});
-const unfollowUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const unfollowUser = async (req, res) => {
     try {
-        yield req.prisma.user.update({
+        await req.prisma.user.update({
             where: { id: req.userId },
             data: {
                 following: {
@@ -467,12 +456,12 @@ const unfollowUser = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     return res
         .code(200)
         .send({ status: "success", message: "Successfully unfollowed" });
-});
-const addInterests = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const addInterests = async (req, res) => {
     // To lowercase
     req.body.interests = req.body.interests.map((interest) => interest.toLowerCase());
     try {
-        let eInterestDoc = yield req.prisma.user.findUnique({
+        let eInterestDoc = await req.prisma.user.findUnique({
             where: { id: req.userId },
             select: {
                 interests: true,
@@ -486,7 +475,7 @@ const addInterests = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             }
         });
         // Save Interest
-        yield req.prisma.user.update({
+        await req.prisma.user.update({
             where: { id: req.userId },
             data: {
                 interests: {
@@ -506,9 +495,9 @@ const addInterests = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     return res
         .code(200)
         .send({ status: "success", message: "Successfully added interests" });
-});
-const searchUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    let usersDoc = yield req.prisma.user.findMany({
+};
+const searchUsers = async (req, res) => {
+    let usersDoc = await req.prisma.user.findMany({
         where: {
             OR: [
                 {
@@ -548,9 +537,9 @@ const searchUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         };
     });
     return res.code(200).send({ status: "success", data: parsedUsersData });
-});
-const verifyUserIfFollowed = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const targetUserDoc = yield req.prisma.user.findFirst({
+};
+const verifyUserIfFollowed = async (req, res) => {
+    const targetUserDoc = await req.prisma.user.findFirst({
         where: {
             id: req.query.targetUser,
         },
@@ -562,7 +551,7 @@ const verifyUserIfFollowed = (req, res) => __awaiter(void 0, void 0, void 0, fun
         return res
             .code(404)
             .send({ status: "success", data: { isFollowed: false } });
-    const isFollowed = yield req.prisma.user.findFirst({
+    const isFollowed = await req.prisma.user.findFirst({
         where: {
             id: req.userId,
             following_ids: {
@@ -578,11 +567,11 @@ const verifyUserIfFollowed = (req, res) => __awaiter(void 0, void 0, void 0, fun
             .code(404)
             .send({ status: "success", data: { isFollowed: false } });
     return res.code(200).send({ status: "success", data: { isFollowed: true } });
-});
-const getFollowers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const getFollowers = async (req, res) => {
     let followersDoc;
     if (isValidObjectId(req.query.targetUserId)) {
-        followersDoc = yield req.prisma.user.findUnique({
+        followersDoc = await req.prisma.user.findUnique({
             where: { id: req.query.targetUserId },
             select: {
                 followers: {
@@ -601,7 +590,7 @@ const getFollowers = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         });
     }
     else {
-        followersDoc = yield req.prisma.user.findUnique({
+        followersDoc = await req.prisma.user.findUnique({
             where: { username: req.query.targetUserId },
             select: {
                 followers: {
@@ -619,7 +608,7 @@ const getFollowers = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             },
         });
     }
-    const userFollowedAccountsDoc = yield req.prisma.user.findUnique({
+    const userFollowedAccountsDoc = await req.prisma.user.findUnique({
         where: { id: req.userId },
         select: {
             following: {
@@ -629,8 +618,7 @@ const getFollowers = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             },
         },
     });
-    const parsedFollowersData = followersDoc === null || followersDoc === void 0 ? void 0 : followersDoc.followers.map((follower) => {
-        var _a;
+    const parsedFollowersData = followersDoc?.followers.map((follower) => {
         return {
             id: follower.id,
             fullname: capitalize(`${follower.firstname} ${follower.lastname}`),
@@ -640,15 +628,15 @@ const getFollowers = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             bio: follower.bio,
             address: capitalize(`${follower.address.barangay}, ${follower.address.municipality}, ${follower.address.province}`),
             affiliation: constantToCapitalize(follower.affiliation),
-            followedByTheUer: (_a = userFollowedAccountsDoc === null || userFollowedAccountsDoc === void 0 ? void 0 : userFollowedAccountsDoc.following.some((userFollowedAcc) => userFollowedAcc.id === follower.id)) !== null && _a !== void 0 ? _a : false,
+            followedByTheUer: userFollowedAccountsDoc?.following.some((userFollowedAcc) => userFollowedAcc.id === follower.id) ?? false,
         };
     });
     return res.code(200).send({ status: "success", data: parsedFollowersData });
-});
-const getFollowings = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const getFollowings = async (req, res) => {
     let followingDoc;
     if (isValidObjectId(req.query.targetUserId)) {
-        followingDoc = yield req.prisma.user.findUnique({
+        followingDoc = await req.prisma.user.findUnique({
             where: { id: req.query.targetUserId },
             select: {
                 following: {
@@ -667,7 +655,7 @@ const getFollowings = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         });
     }
     else {
-        followingDoc = yield req.prisma.user.findUnique({
+        followingDoc = await req.prisma.user.findUnique({
             where: { username: req.query.targetUserId },
             select: {
                 following: {
@@ -685,7 +673,7 @@ const getFollowings = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             },
         });
     }
-    const parsedFollowersData = followingDoc === null || followingDoc === void 0 ? void 0 : followingDoc.following.map((follower) => {
+    const parsedFollowersData = followingDoc?.following.map((follower) => {
         return {
             id: follower.id,
             fullname: capitalize(`${follower.firstname} ${follower.lastname}`),
@@ -699,7 +687,7 @@ const getFollowings = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     });
     console.log({ parsedFollowersData });
     return res.code(200).send({ status: "success", data: parsedFollowersData });
-});
+};
 const userController = {
     createUser,
     updateUser,

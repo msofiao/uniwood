@@ -1,12 +1,3 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 import fastify from "fastify";
 import dotenv from "dotenv";
 import path from "node:path";
@@ -17,7 +8,7 @@ import fastifyStatic from "@fastify/static";
 import fastifyCors from "@fastify/cors";
 import fastifySocketIO from "fastify-socket.io";
 import { corsOption, multipartOption, statisCoption, socketIOOption, cookieOption, } from "./config/index";
-import { ConverseRoute, UsersRoute, PostsRoute, NotificationRoute, LoginRoute, LogoutRoute, RefreshTokenRoute, SearchRoute, ProjectsRoute, CommentsRoute, TestRoute, } from "./routes/index";
+import { ConverseRoute, UsersRoute, PostsRoute, NotificationRoute, LoginRoute, LogoutRoute, RefreshTokenRoute, SearchRoute, ProjectsRoute, CommentsRoute, TestRoute, OtpRoute, } from "./routes/index";
 import { onRequestHook } from "./hooks/index";
 import { messageChangeHandler } from "./mongodb/sockets/index";
 import { NotificationChangeHandler } from "./mongodb/sockets/notificationHandler";
@@ -66,15 +57,16 @@ app.register(ConverseRoute, { prefix: "/converse" });
 app.register(NotificationRoute, {
     prefix: "/notifications",
 });
+app.register(OtpRoute, { prefix: "/otp" });
 app.ready((err) => {
     if (err)
         throw err;
     app.io.on("connection", onConnection);
     // Change Stream Handlers
 });
-app.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.get("/", async (req, res) => {
     return { status: "success", message: "Welcome to the API" };
-}));
+});
 app.listen({
     port: parseInt(process.env.SERVER_PORT),
     host: process.env.SERVER_HOST,

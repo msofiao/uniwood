@@ -1,12 +1,3 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 import { pipeline } from "stream/promises";
 import { createWriteStream } from "fs";
 import { rename, unlink } from "fs/promises";
@@ -19,31 +10,29 @@ import path from "path";
  * @param location  sets the location of the file 'public' (default) for server/public dir and 'private' for server/private dir
  * @returns promise from the pipeline stream
  */
-export function storeFile(multFile_1) {
-    return __awaiter(this, arguments, void 0, function* (multFile, location = "public") {
-        if (multFile == undefined) {
-            throw Error("undefined argument");
-        }
-        const extension = multFile.filename.substring(multFile.filename.lastIndexOf(".") + 1);
-        // If file is empty
-        if (!extension)
-            throw Error("File is empty");
-        const filename = randomBytes(86).toString("base64url");
-        try {
-            yield pipeline(multFile.file, createWriteStream(path.join(import.meta.dirname, `../${location}/${filename}.${extension}`)));
-        }
-        catch (error) {
-            throw error;
-        }
-        return {
-            filename: `${filename}.${extension}`,
-            location,
-            mimetype: multFile.mimetype,
-            fieldname: multFile.fieldname,
-            encoding: multFile.encoding,
-            extension,
-        };
-    });
+export async function storeFile(multFile, location = "public") {
+    if (multFile == undefined) {
+        throw Error("undefined argument");
+    }
+    const extension = multFile.filename.substring(multFile.filename.lastIndexOf(".") + 1);
+    // If file is empty
+    if (!extension)
+        throw Error("File is empty");
+    const filename = randomBytes(86).toString("base64url");
+    try {
+        await pipeline(multFile.file, createWriteStream(path.join(import.meta.dirname, `../${location}/${filename}.${extension}`)));
+    }
+    catch (error) {
+        throw error;
+    }
+    return {
+        filename: `${filename}.${extension}`,
+        location,
+        mimetype: multFile.mimetype,
+        fieldname: multFile.fieldname,
+        encoding: multFile.encoding,
+        extension,
+    };
 }
 /**
  * Cleans a folder by deleting all files in it
@@ -67,18 +56,16 @@ export function removeFiles(filesInfo = [], folder = "tmp") {
  * @param currentFolder folder where the file is currently located
  * @param targetFolder folder where the file will be moved
  */
-export function moveFile(filesInfo_1) {
-    return __awaiter(this, arguments, void 0, function* (filesInfo, currentFolder = "tmp", targetFolder = "public") {
-        filesInfo.forEach((fileInfo) => __awaiter(this, void 0, void 0, function* () {
-            console.log({ fileInfo });
-            if (!fileInfo)
-                return;
-            if (typeof fileInfo !== "string") {
-                yield rename(path.resolve(import.meta.dirname, `../${currentFolder}/${fileInfo.filename}`), path.resolve(import.meta.dirname, `../${targetFolder}/${fileInfo.filename}`));
-            }
-            else {
-                yield rename(path.resolve(import.meta.dirname, `../${currentFolder}/${fileInfo}`), path.resolve(import.meta.dirname, `../${targetFolder}/${fileInfo}`));
-            }
-        }));
+export async function moveFile(filesInfo, currentFolder = "tmp", targetFolder = "public") {
+    filesInfo.forEach(async (fileInfo) => {
+        console.log({ fileInfo });
+        if (!fileInfo)
+            return;
+        if (typeof fileInfo !== "string") {
+            await rename(path.resolve(import.meta.dirname, `../${currentFolder}/${fileInfo.filename}`), path.resolve(import.meta.dirname, `../${targetFolder}/${fileInfo.filename}`));
+        }
+        else {
+            await rename(path.resolve(import.meta.dirname, `../${currentFolder}/${fileInfo}`), path.resolve(import.meta.dirname, `../${targetFolder}/${fileInfo}`));
+        }
     });
 }

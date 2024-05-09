@@ -1,4 +1,4 @@
-import { UsersRoute, TestRoute, LoginRoute, LogoutRoute, RefreshTokenRoute, PostsRoute, CommentsRoute, ProjectsRoute, SearchRoute, NotificationRoute, ConverseRoute } from "./routes/index";
+import { UsersRoute, TestRoute, LoginRoute, LogoutRoute, RefreshTokenRoute, PostsRoute, CommentsRoute, ProjectsRoute, SearchRoute, NotificationRoute, ConverseRoute, OtpRoute, } from "./routes/index";
 import { messageChangeHandler } from "./mongodb/sockets/index";
 import fastifyCookie from "@fastify/cookie";
 import fastifyCors from "@fastify/cors";
@@ -48,6 +48,7 @@ export default function App(instance, options, done) {
     instance.register(NotificationRoute, {
         prefix: "/notifications",
     });
+    instance.register(OtpRoute, { prefix: "/otp" });
     const onConnection = (socket) => {
         socket.on("test", (message, cb) => {
             // const cookies = parse(socket.request.headers.cookie!);

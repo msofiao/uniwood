@@ -1,12 +1,3 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 import { PrismaClient } from "@prisma/client";
 // Function to calculate similarity between two users based on interests and liked posts
 function calculateUserSimilarity(user1, user2) {
@@ -18,65 +9,63 @@ function calculateUserSimilarity(user1, user2) {
     return similarityScore;
 }
 // Function to recommend posts to a user based on similar users' likes
-export function recommendPosts(user, allPosts) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const similarUsers = [];
-        const prisma = new PrismaClient();
-        try {
-            const allUsers = yield prisma.user.findMany({
-                where: {
-                    id: user.id,
-                },
-                select: {
-                    id: true,
-                    interests: true,
-                    liked_posts_id: true,
-                },
-            });
-            if (!allUsers.length) {
-                // User not found, but handle gracefully (e.g., return empty array)
-                return [];
-            }
-            // Find most similar users based on calculateUserSimilarity
-            for (const otherUser of allUsers) {
-                if (otherUser.id !== user.id) {
-                    // Avoid comparing user to themself
-                    const similarity = calculateUserSimilarity(user, otherUser);
-                    if (similarity > 0) {
-                        similarUsers.push(otherUser);
-                    }
-                }
-            }
-            // Sort similar users by similarity score (highest first)
-            similarUsers.sort((a, b) => calculateUserSimilarity(user, b) - calculateUserSimilarity(user, a));
-            // Recommend posts liked by the most similar users that the user hasn't already liked
-            const recommendations = [];
-            for (const similarUser of similarUsers) {
-                for (const likedPostId of similarUser.liked_posts_id) {
-                    if (!user.liked_posts_id.includes(likedPostId)) {
-                        const recommendedPost = allPosts.find((post) => post.id === likedPostId);
-                        if (recommendedPost) {
-                            recommendations.push(recommendedPost);
-                        }
-                    }
-                }
-            }
-            if (recommendations.length === 0) {
-                console.log("No recommendations found using similarity. Using random fallback.");
-                // Sample a random subset of posts (adjust the logic as needed)
-                return rdmzr(allPosts);
-            }
-            return recommendations;
-        }
-        catch (error) {
-            console.error("Error recommending posts:", error);
-            // Handle Prisma or other errors gracefully (e.g., return empty array)
+export async function recommendPosts(user, allPosts) {
+    const similarUsers = [];
+    const prisma = new PrismaClient();
+    try {
+        const allUsers = await prisma.user.findMany({
+            where: {
+                id: user.id,
+            },
+            select: {
+                id: true,
+                interests: true,
+                liked_posts_id: true,
+            },
+        });
+        if (!allUsers.length) {
+            // User not found, but handle gracefully (e.g., return empty array)
             return [];
         }
-        finally {
-            yield prisma.$disconnect();
+        // Find most similar users based on calculateUserSimilarity
+        for (const otherUser of allUsers) {
+            if (otherUser.id !== user.id) {
+                // Avoid comparing user to themself
+                const similarity = calculateUserSimilarity(user, otherUser);
+                if (similarity > 0) {
+                    similarUsers.push(otherUser);
+                }
+            }
         }
-    });
+        // Sort similar users by similarity score (highest first)
+        similarUsers.sort((a, b) => calculateUserSimilarity(user, b) - calculateUserSimilarity(user, a));
+        // Recommend posts liked by the most similar users that the user hasn't already liked
+        const recommendations = [];
+        for (const similarUser of similarUsers) {
+            for (const likedPostId of similarUser.liked_posts_id) {
+                if (!user.liked_posts_id.includes(likedPostId)) {
+                    const recommendedPost = allPosts.find((post) => post.id === likedPostId);
+                    if (recommendedPost) {
+                        recommendations.push(recommendedPost);
+                    }
+                }
+            }
+        }
+        if (recommendations.length === 0) {
+            console.log("No recommendations found using similarity. Using random fallback.");
+            // Sample a random subset of posts (adjust the logic as needed)
+            return rdmzr(allPosts);
+        }
+        return recommendations;
+    }
+    catch (error) {
+        console.error("Error recommending posts:", error);
+        // Handle Prisma or other errors gracefully (e.g., return empty array)
+        return [];
+    }
+    finally {
+        await prisma.$disconnect();
+    }
 }
 function rdmzr(array) {
     let currentIndex = array.length;

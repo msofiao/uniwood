@@ -1,7 +1,7 @@
 import userController from "../controllers/usersController";
 import { multipartConsumer } from "../middlewares/multipartConsumer";
-import { userPutOnResponseHandler, usersPostOnResponseHandler, } from "../services/usersHandler.ts";
-import { authorize } from "../middlewares/authorize.ts";
+import { userPutOnResponseHandler, usersPostOnResponseHandler, } from "../services/usersHandler";
+import { authorize } from "../middlewares/authorize";
 export function UsersRoute(instance, _options, done) {
     instance.get("/newUsers", userController.getNewUsers);
     instance.get("/", userController.getAllusers);

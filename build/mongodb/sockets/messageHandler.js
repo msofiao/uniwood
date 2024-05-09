@@ -1,12 +1,3 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 import { MongodbInstane } from "../dbConnect";
 import { updateUnreadMessagesCount } from "../../models";
 import { PrismaClient } from "@prisma/client";
@@ -41,7 +32,7 @@ export const messageChangeHandler = (io, socket) => {
             socket.emit(`message/${socketEvent}`, payload);
         }
     };
-    const updateConverseList = (change) => __awaiter(void 0, void 0, void 0, function* () {
+    const updateConverseList = async (change) => {
         let socketEventForAuthor;
         let socketEventForRecipient;
         let payload;
@@ -49,7 +40,7 @@ export const messageChangeHandler = (io, socket) => {
             socketEventForAuthor = change.fullDocument.author_id;
             socketEventForRecipient = change.fullDocument.recipient_id;
             const prisma = new PrismaClient();
-            const recipientInfo = yield prisma.user.findUnique({
+            const recipientInfo = await prisma.user.findUnique({
                 where: {
                     id: change.fullDocument.recipient_id,
                 },
@@ -81,11 +72,11 @@ export const messageChangeHandler = (io, socket) => {
             socket.emit(`converseList/${socketEventForAuthor}`, payload);
         if (socketEventForRecipient)
             socket.emit(`converseList/${socketEventForRecipient}`, payload);
-    });
-    const readMessage = (payload, res) => __awaiter(void 0, void 0, void 0, function* () {
+    };
+    const readMessage = async (payload, res) => {
         try {
             if (payload.user_id !== undefined && payload.converse_id !== undefined) {
-                yield updateUnreadMessagesCount(payload.user_id, payload.converse_id);
+                await updateUnreadMessagesCount(payload.user_id, payload.converse_id);
                 res({ status: "success" });
             }
             else
@@ -95,7 +86,7 @@ export const messageChangeHandler = (io, socket) => {
             console.log(error);
             res({ status: "fail", message: error.message });
         }
-    });
+    };
     changeStream.on("change", updateConverseList);
     changeStream.on("change", sendMessage);
     socket.on("read_message", readMessage);

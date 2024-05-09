@@ -1,19 +1,10 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-import { createPost as createPostQuery } from "../models/postQuery.ts";
+import { createPost as createPostQuery } from "../models/postQuery";
 import { moveFile } from "../utils/fileManager";
-import { likePostTogggle as likePostToggleFnc } from "../models/postQuery.ts";
-import { isValidObjectId } from "../utils/checker.ts";
-import { capitalize } from "../utils/index.ts";
-import { recommendPosts } from "../utils/recomAlgo.ts";
-const createPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+import { likePostTogggle as likePostToggleFnc } from "../models/postQuery";
+import { isValidObjectId } from "../utils/checker";
+import { capitalize } from "../utils/index";
+import { recommendPosts } from "../utils/recomAlgo";
+const createPost = async (req, res) => {
     const userId = req.userId; // Edit from "string" to "req.user.id
     // TODO add validation
     if (!userId)
@@ -23,43 +14,52 @@ const createPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         });
     // Create Post
     try {
-        yield createPostQuery(Object.assign(Object.assign({}, req.body), { userId }), req.prisma);
+        await createPostQuery({ ...req.body, userId }, req.prisma);
     }
     catch (error) {
         console.error(error);
         return res.code(500).send({ status: "fail", message: "Internal Error" });
     }
     // Move tmp file to the public folder
-    req.body.media.forEach((elem) => __awaiter(void 0, void 0, void 0, function* () { return yield moveFile([elem.filename], "tmp", "public"); }));
+    req.body.media.forEach(async (elem) => await moveFile([elem.filename], "tmp", "public"));
     return res.code(201).send({ status: "success", message: "Post created" });
-});
-const updatePost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c, _d;
+};
+const updatePost = async (req, res) => {
+    let savedMedia = [];
+    if (req.body.savedMedia)
+        savedMedia = JSON.parse(req.body.savedMedia) ?? [];
     if (!req.userId)
         return res
             .code(401)
             .send({ status: "fail", message: "User is not authorize" });
     //Check if post exist
-    const postExist = yield req.prisma.post.findUnique({
+    const postExist = await req.prisma.post.findUnique({
         where: { id: req.body.postId },
     });
     if (postExist === null)
         return res.code(404).send({ status: "fail", message: "Post not found" });
     // Check if post is belong to user or the admin
-    if (postExist.author_id !== req.userId && (req === null || req === void 0 ? void 0 : req.role) !== "ADMIN")
+    if (postExist.author_id !== req.userId && req?.role !== "ADMIN")
         return res
             .code(403)
             .send({ status: "fail", message: "User is not authorize" });
+    // Process Data
+    let fileterSavedMedia = postExist.media.filter((media) => savedMedia.find((saved) => saved.filename === media.filename));
+    if (req.body.media)
+        fileterSavedMedia = [...fileterSavedMedia, ...req.body.media];
+    const postData = {
+        tags: req.body.tags ?? postExist.tags,
+        context: req.body.context ?? postExist.context,
+        title: req.body.title ?? postExist.title,
+        media: fileterSavedMedia,
+    };
     // Update post
     try {
-        yield req.prisma.post.update({
+        const updateData = await req.prisma.post.update({
             where: { id: req.body.postId },
-            data: {
-                tags: (_a = req.body.tags) !== null && _a !== void 0 ? _a : postExist.tags,
-                media: (_c = (_b = req.body.media) !== null && _b !== void 0 ? _b : postExist.media) !== null && _c !== void 0 ? _c : [],
-                context: (_d = req.body.context) !== null && _d !== void 0 ? _d : postExist.context,
-            },
+            data: postData,
         });
+        console.log(updateData);
     }
     catch (error) {
         console.error(error);
@@ -67,10 +67,14 @@ const updatePost = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
     // Move tmp file to the public folder
     if (req.body.media)
-        req.body.media.forEach((elem) => __awaiter(void 0, void 0, void 0, function* () { return yield moveFile([elem.filename], "tmp", "public"); }));
-    return res.code(200).send({ status: "success", message: "Post updated" });
-});
-const getPosts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        req.body.media.forEach(async (elem) => await moveFile([elem.filename], "tmp", "public"));
+    return res.code(200).send({
+        status: "success",
+        message: "Post updated",
+        data: { updatedMedia: fileterSavedMedia },
+    });
+};
+const getPosts = async (req, res) => {
     // TODO add validaton
     if (!req.userId)
         return res
@@ -79,7 +83,7 @@ const getPosts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // GET posts
     let posts;
     try {
-        posts = yield req.prisma.post.findMany({
+        posts = await req.prisma.post.findMany({
             where: {
                 status: "ACTIVE",
             },
@@ -135,9 +139,9 @@ const getPosts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
     console.log({ status: "success", data: posts });
     return res.code(200).send({ status: "success", data: posts });
-});
-const getAllUserPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    let posts = yield req.prisma.post.findMany({
+};
+const getAllUserPost = async (req, res) => {
+    let posts = await req.prisma.post.findMany({
         where: {
             author: {
                 username: req.params.usernameOrId,
@@ -192,7 +196,7 @@ const getAllUserPost = (req, res) => __awaiter(void 0, void 0, void 0, function*
         },
     });
     if (isValidObjectId(req.params.usernameOrId) && posts.length === 0) {
-        posts = yield req.prisma.post.findMany({
+        posts = await req.prisma.post.findMany({
             where: {
                 author: {
                     id: req.params.usernameOrId,
@@ -291,10 +295,10 @@ const getAllUserPost = (req, res) => __awaiter(void 0, void 0, void 0, function*
         status: "success",
         data: data,
     });
-});
-const deletePost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const deletePost = async (req, res) => {
     // TODO add validation
-    if (req.body.postId === undefined)
+    if (req.params.postId === undefined)
         return res
             .code(400)
             .send({ status: "fail", message: "Post id is required" });
@@ -303,22 +307,22 @@ const deletePost = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             .code(401)
             .send({ status: "fail", message: "User is unauthorize" });
     // Check if post exist
-    const postExist = yield req.prisma.post.findUnique({
+    const postExist = await req.prisma.post.findUnique({
         where: {
-            id: req.body.postId,
+            id: req.params.postId,
         },
     });
     if (!postExist)
         return res.code(404).send({ status: "fail", message: "Post is not exist" });
     // Check if post is belong to user
-    if (postExist.author_id !== req.userId)
+    if (postExist.author_id !== req.userId && req.role !== "ADMIN")
         return res
             .code(403)
             .send({ status: "fail", message: "User is not authorize" });
     // delete post
-    const deleteStatus = yield req.prisma.post.update({
+    const deleteStatus = await req.prisma.post.update({
         where: {
-            id: req.body.postId,
+            id: req.params.postId,
         },
         data: {
             status: "ARCHIVED",
@@ -327,9 +331,9 @@ const deletePost = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     if (!deleteStatus)
         return res.code(500).send({ status: "fail", message: "Internal Error" });
     return res.code(200).send({ status: "success", message: "Post deleted" });
-});
-const getAllPosts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const posts = yield req.prisma.post.findMany({
+};
+const getAllPosts = async (req, res) => {
+    const posts = await req.prisma.post.findMany({
         where: { status: "ACTIVE" },
         select: {
             id: true,
@@ -415,15 +419,16 @@ const getAllPosts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         };
     });
     return res.code(200).send({ status: "success", data });
-});
-const getPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const getPost = async (req, res) => {
     if (!req.params.postId)
         return res
             .code(400)
             .send({ status: "fail", message: "Post id is required" });
-    const postExist = yield req.prisma.post.findUnique({
+    const postExist = await req.prisma.post.findUnique({
         where: {
             id: req.params.postId,
+            status: "ACTIVE",
         },
         select: {
             author: {
@@ -436,21 +441,20 @@ const getPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (!postExist)
         return res.code(404).send({ status: "fail", message: "Post not found" });
     return res.code(200).send({ status: "success", data: postExist });
-});
-const likePostToggle = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _e;
+};
+const likePostToggle = async (req, res) => {
     if (!req.userId)
         return res
             .code(401)
             .send({ status: "fail", message: "User is not authorize" });
-    if (!((_e = req.body) === null || _e === void 0 ? void 0 : _e.postId))
+    if (!req.body?.postId)
         return res.code(400).send({
             status: "fail",
             message: "Missing body parameter",
             error: "Missing postId field",
         });
-    yield likePostToggleFnc({ postId: req.body.postId, userId: req.userId }, req.prisma);
-    const postExist = yield req.prisma.post.findUnique({
+    await likePostToggleFnc({ postId: req.body.postId, userId: req.userId }, req.prisma);
+    const postExist = await req.prisma.post.findUnique({
         where: {
             id: req.body.postId,
         },
@@ -481,10 +485,10 @@ const likePostToggle = (req, res) => __awaiter(void 0, void 0, void 0, function*
     return res
         .code(200)
         .send({ status: "success", message: "Post like status toggled" });
-});
-const getTopTags = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const getTopTags = async (req, res) => {
     const count = parseInt(req.query.count) || 10;
-    const tags = yield req.prisma.post.findMany({
+    const tags = await req.prisma.post.findMany({
         select: {
             tags: true,
         },
@@ -504,9 +508,9 @@ const getTopTags = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         status: "success",
         data: Object.fromEntries(sortedTags.slice(0, count)),
     });
-});
-const getPostById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const postDoc = yield req.prisma.post.findUnique({
+};
+const getPostById = async (req, res) => {
+    const postDoc = await req.prisma.post.findUnique({
         where: { id: req.params.postId },
         select: {
             id: true,
@@ -572,7 +576,9 @@ const getPostById = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             address: capitalize(`${postDoc.author.address.barangay}, ${postDoc.author.address.municipality}, ${postDoc.author.address.province}`),
         },
         comments: postDoc.comments.map((comment) => {
-            return Object.assign(Object.assign({}, comment), { author: {
+            return {
+                ...comment,
+                author: {
                     id: comment.author.id,
                     fullname: capitalize(`${comment.author.firstname} ${comment.author.lastname}`),
                     username: comment.author.username,
@@ -581,13 +587,14 @@ const getPostById = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                     cover: comment.author.user_image.cover_name,
                     address: capitalize(`${comment.author.address.barangay}, ${comment.author.address.municipality}, ${comment.author.address.province}`),
                     affiliation: comment.author.affiliation,
-                } });
+                },
+            };
         }),
     };
-    return res.code(200).send({ status: "ok", data: parsedDoc });
-});
-const getRecommendedPosts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const allPosts = yield req.prisma.post.findMany({
+    return res.code(200).send({ status: "success", data: parsedDoc });
+};
+const getRecommendedPosts = async (req, res) => {
+    const allPosts = await req.prisma.post.findMany({
         where: { status: "ACTIVE" },
         select: {
             id: true,
@@ -682,7 +689,7 @@ const getRecommendedPosts = (req, res) => __awaiter(void 0, void 0, void 0, func
             });
             return post.author.follower_ids.includes(req.userId);
         });
-    const user = yield req.prisma.user.findUnique({
+    const user = await req.prisma.user.findUnique({
         where: { id: req.userId },
         select: {
             id: true,
@@ -692,9 +699,9 @@ const getRecommendedPosts = (req, res) => __awaiter(void 0, void 0, void 0, func
     });
     if (!user)
         return res.code(404).send({ status: "fail", message: "User not found" });
-    const recomPost = yield recommendPosts(user, postParsedData);
-    return res.code(200).send({ status: "success", data: recomPost !== null && recomPost !== void 0 ? recomPost : [] });
-});
+    const recomPost = await recommendPosts(user, postParsedData);
+    return res.code(200).send({ status: "success", data: recomPost ?? [] });
+};
 const postController = {
     createPost,
     updatePost,

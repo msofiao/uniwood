@@ -1,6 +1,6 @@
-import { converseController } from "../controllers/converseController.ts";
-import { authorize } from "../middlewares/authorize.ts";
-import { arbitraryMultipartConsumer } from "../middlewares/multipartConsumer.ts";
+import { converseController } from "../controllers/converseController";
+import { authorize } from "../middlewares/authorize";
+import { arbitraryMultipartConsumer } from "../middlewares/multipartConsumer";
 export function ConverseRoute(instance, option, done) {
     instance.post("/sendMessage", { preValidation: [authorize("USER"), arbitraryMultipartConsumer] }, converseController.sendMessage);
     instance.get("/search", { preValidation: [authorize("USER")] }, converseController.searchConversation);

@@ -9,3 +9,4 @@ export * from "./projects";
 export * from "./search";
 export * from "./testRoute";
 export * from "./converse";
+export * from "./otp";
