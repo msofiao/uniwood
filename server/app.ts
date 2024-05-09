@@ -15,20 +15,24 @@ import { FastifyInstance } from "fastify";
 // } from "./routes/index";
 // import { messageChangeHandler } from "./mongodb/sockets/index";
 // import fastifyCookie from "@fastify/cookie";
-import fastifyCors from "@fastify/cors";
+// import fastifyCors from "@fastify/cors";
 // import fastifyMultipart from "@fastify/multipart";
 // import fastifyStatic from "@fastify/static";
 // import fastifySocketIO from "fastify-socket.io";
 // import { Socket } from "socket.io";
-import {
-  corsOption,
-  // multipartOption,
-  // cookieOption,
-  // statisCoption,
-  // socketIOOption,
-} from "./config";
+// import {
+//   corsOption,
+// multipartOption,
+// cookieOption,
+// statisCoption,
+// socketIOOption,
+// } from "./config";
 // import { onRequestHook } from "./hooks/index";
 // import { NotificationChangeHandler } from "./mongodb/sockets/notificationHandler";
+import dotenv from "dotenv";
+import path from "node:path";
+
+dotenv.config({ path: path.resolve(import.meta.url, "../.env") });
 
 export default function App(
   instance: FastifyInstance,
@@ -36,7 +40,7 @@ export default function App(
   done: () => void,
 ) {
   // ===== CORE PLUGINS ===== //
-  instance.register(fastifyCors, corsOption);
+  // instance.register(fastifyCors, corsOption);
   // instance.register(fastifyMultipart, multipartOption);
   // instance.register(fastifyCookie, cookieOption);
   // instance.register(fastifyStatic, statisCoption);

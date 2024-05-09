@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "ES2022",
-    "outDir": "server/build",
+    "outDir": "build",
     "rootDir": "server",
     "moduleResolution": "Bundler",
     "baseUrl": "./",
@@ -23,6 +23,6 @@
     "noFallthroughCasesInSwitch": true,
     "strict": false
   },
-  "include": ["server/**/*.ts"],
+  "include": ["server"],
   "exclude": ["node_modules", "dist", "client"]
 }
