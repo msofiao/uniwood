@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "es2016",
-    "module": "ESNext",
-    "outDir": "build",
+    "target": "ES2022",
+    "module": "ES2022",
+    "outDir": "server/build",
     "rootDir": "server",
     "moduleResolution": "Bundler",
     "baseUrl": "./",
