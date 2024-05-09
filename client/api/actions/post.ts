@@ -6,8 +6,6 @@ export async function action({ request }: { request: Request; params: any }) {
     case "POST":
       data = await sendPostPostRequest(await request.formData());
       break;
-      case "PUT":
-        data
     default:
       data = null;
   }
