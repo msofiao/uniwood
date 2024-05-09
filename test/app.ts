@@ -1,25 +1,23 @@
-import { FastifyInstance } from "fastify";
+import {
+  FastifyInstance,
+  FastifyReply,
+  FastifyRequest,
+  FastifyServerOptions,
+} from "fastify";
+import routes from "./routes";
 
-export default function App(
+async function app(
   instance: FastifyInstance,
-  _options: any,
-  done: () => void,
+  opts: FastifyServerOptions,
+  done
 ) {
-  // ===== Core Plugin ===== //
-  instance.register(import("@fastify/cors"), {
-    origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type"],
+  instance.get("/", async (req: FastifyRequest, res: FastifyReply) => {
+    res.status(200).send({
+      hello: "World",
+    });
   });
-
-  instance.get("/test", async (_req, res) => {
-    return res.code(200).send({ status: "success", message: "Test Route" });
-  });
-  instance.get("/", async (_req, res) => {
-    return res
-      .code(200)
-      .send({ status: "success", message: "Welcome to the API" });
-  });
-
+  instance.register(routes, { prefix: "/api/v1" });
   done();
 }
+
+export default app;
