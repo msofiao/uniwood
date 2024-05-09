@@ -27,7 +27,7 @@ import { corsOption,
  } from "./config";
 // import { onRequestHook } from "./hooks/index";
 // import { NotificationChangeHandler } from "./mongodb/sockets/notificationHandler";
-export default function App(instance, options, done) {
+export default function App(instance, _options, done) {
     // ===== CORE PLUGINS ===== //
     instance.register(fastifyCors, corsOption);
     // instance.register(fastifyMultipart, multipartOption);
@@ -98,11 +98,13 @@ export default function App(instance, options, done) {
     //   // Change Stream Handlers
     // });
     //! TEST
-    instance.get("/test", async (req, res) => {
-        return { status: "success", message: "Test Route" };
+    instance.get("/test", async (_req, res) => {
+        return res.code(200).send({ status: "success", message: "Test Route" });
     });
-    instance.get("/", async (req, res) => {
-        return { status: "success", message: "Welcome to the API" };
+    instance.get("/", async (_req, res) => {
+        return res
+            .code(200)
+            .send({ status: "success", message: "Welcome to the API" });
     });
     done();
 }

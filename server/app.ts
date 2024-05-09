@@ -32,7 +32,7 @@ import {
 
 export default function App(
   instance: FastifyInstance,
-  options: any,
+  _options: any,
   done: () => void,
 ) {
   // ===== CORE PLUGINS ===== //
@@ -113,11 +113,13 @@ export default function App(
   // });
 
   //! TEST
-  instance.get("/test", async (req, res) => {
-    return { status: "success", message: "Test Route" };
+  instance.get("/test", async (_req, res) => {
+    return res.code(200).send({ status: "success", message: "Test Route" });
   });
-  instance.get("/", async (req, res) => {
-    return { status: "success", message: "Welcome to the API" };
+  instance.get("/", async (_req, res) => {
+    return res
+      .code(200)
+      .send({ status: "success", message: "Welcome to the API" });
   });
 
   done();
