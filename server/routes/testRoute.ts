@@ -1,7 +1,6 @@
 import { FastifyInstance, FastifyRequest } from "../types/fastify";
 import {
   arbitraryMultipartConsumer,
-  multipartConsumer,
 } from "../middlewares/multipartConsumer";
 import { moveFile } from "../utils/fileManager";
 

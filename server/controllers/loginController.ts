@@ -1,5 +1,5 @@
 import { Credential, User } from "@prisma/client";
-import type { FastifyRequest, FastifyReply } from "../types/fastify.d.ts";
+import type { FastifyRequest, FastifyReply } from "../types/fastify.d";
 import { compare } from "bcrypt";
 import {
   createAccessToken,
@@ -7,8 +7,6 @@ import {
   sendAccessToken,
   sendRefreshToken,
 } from "../utils/tokens";
-import { randomInt } from "node:crypto";
-import { sendRegistrationOTP } from "../utils/mailer.ts";
 
 export const login = async (
   req: FastifyRequest<{

@@ -1,6 +1,6 @@
-import type { FastifyRequest, FastifyReply } from "../types/fastify.d.ts";
-import { removeFiles, storeFile } from "../utils/fileManager.ts";
-import { PostPostBody, PostPutBody } from "../controllers/postsController.ts";
+import type { FastifyRequest, FastifyReply } from "../types/fastify.d";
+import { removeFiles, storeFile } from "../utils/fileManager";
+import { PostPostBody, PostPutBody } from "../controllers/postsController";
 
 // *This Multipart consumer is for posts with meedia that contains each caption in the image
 

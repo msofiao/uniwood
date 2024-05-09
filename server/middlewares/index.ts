@@ -1,2 +1,2 @@
-export * from "./authorize.ts";
-export * from "./multipartConsumer.ts";
+export * from "./authorize";
+export * from "./multipartConsumer";

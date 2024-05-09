@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import {  PrismaClient } from "@prisma/client";
 
 /**
  * Updates the unread messsages count of a conversation

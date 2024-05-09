@@ -1,10 +1,10 @@
 import jwt from "jsonwebtoken";
 import path from "node:path";
 import dotenv from "dotenv";
-import type { FastifyReply } from "../types/fastify.d.ts";
-import { accessTokenOption, refreshTokenOptions } from "../config/jwtOption.ts";
+import type { FastifyReply } from "../types/fastify.d";
+import { accessTokenOption, refreshTokenOptions } from "../config/jwtOption";
 import "@fastify/cookie";
-import type { AccessTokenPayload, RefreshTokenPayload } from "../types/global.d.ts";
+import type { AccessTokenPayload, RefreshTokenPayload } from "../types/global.d";
 
 dotenv.config({
   path: path.resolve(import.meta.dirname, "../../.env"),

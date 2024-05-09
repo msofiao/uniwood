@@ -1,15 +1,15 @@
-import type { FastifyRequest, FastifyReply } from "../types/fastify.d.ts";
+import type { FastifyRequest, FastifyReply } from "../types/fastify.d";
 import jwt from "jsonwebtoken";
 import {
   createAccessToken,
   createRefreshToken,
   sendAccessToken,
   sendRefreshToken,
-} from "../utils/index.ts";
+} from "../utils/index";
 import dotenv from "dotenv";
 import path from "node:path";
 dotenv.config({
-  path: path.resolve(import.meta.dirname, "../.env"),
+  path: path.resolve(import.meta.dirname, "../../.env"),
 });
 
 const refreshToken = async (req: FastifyRequest, res: FastifyReply) => {

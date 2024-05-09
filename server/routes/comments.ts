@@ -1,6 +1,6 @@
-import { FastifyInstance } from "../types/fastify.ts";
-import commentController, { test } from "../controllers/commentController.ts";
-import { authorize } from "../middlewares/authorize.ts";
+import { FastifyInstance } from "../types/fastify";
+import commentController, { test } from "../controllers/commentController";
+import { authorize } from "../middlewares/authorize";
 
 export function CommentsRoute(
   instance: FastifyInstance,
