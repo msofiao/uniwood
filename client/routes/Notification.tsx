@@ -24,7 +24,7 @@ export default function Notification() {
 
   return (
 
-      <div className=" max-h-screen overflow-y-auto">
+      <div className=" max-h-screen overflow-y-auto w">
         <Header />
         <NotifTab />
       </div>
@@ -34,7 +34,7 @@ export default function Notification() {
 
 function Header() {
   return (
-    <p className="mb-3 ml-4  mt-5 font-header text-2xl text-slate-800">
+    <p className="mb-3 ml-4 mt-5 font-semibold font-header text-2xl text-slate-800">
       Notifications
     </p>
   );
@@ -103,7 +103,7 @@ function NotifTab() {
     if (dateDiffByHours < 24 && dateReference !== "TODAY") {
       dateReference = "TODAY";
       return (
-        <p className="text-header test-slate-800 mb-2 ml-6 mt-4 text-2xl">
+        <p className="text-header test-slate-800 mb-2 ml-6 mt-4 text-xl">
           Today
         </p>
       );

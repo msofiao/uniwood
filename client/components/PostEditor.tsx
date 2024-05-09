@@ -1,15 +1,5 @@
 import { CloseRounded, AddPhotoAlternateRounded } from "@mui/icons-material";
-import {
-  Modal,
-  Paper,
-  Typography,
-  MenuItem,
-  Avatar,
-  Tooltip,
-  useTheme,
-  IconButton,
-  Chip,
-} from "@mui/material";
+import { Modal, Avatar, Tooltip, IconButton, Chip } from "@mui/material";
 import React, {
   Dispatch,
   FormEvent,
@@ -24,99 +14,79 @@ import { useFetcher } from "react-router-dom";
 import { UserInfoContext } from "../providers/UserInfoProvider";
 import axiosClient from "../utils/axios";
 import { AlertContext } from "../providers/AlertProvider";
+import { PostContext } from "./Post";
+import { TokenContext } from "../providers/TokenProvider";
 
-export default function Poster({
-  setPostModalView,
-}: {
-  setPostModalView: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
-  const theme = useTheme();
-  const { userInfo } = useContext(UserInfoContext)!;
+const EditPostContext = React.createContext<EditPostContextProps | null>(null);
 
-  return (
-    <Paper elevation={1} className="poster md:w-full sm:w-11/12">
-      <div className="pane1">
-        <Avatar
-          className="avatar md:size-12 sm:size-24"
-          src={`${process.env.SERVER_PUBLIC}/${userInfo.pfp}`}
-        />
-        <Typography
-          className="context md:text-lg sm:text-3xl p-5"
-          color={theme.palette.text.secondary}
-          sx={{
-            ":hover": {
-              cursor: "pointer",
-              backgroundColor: "#d7dbdc",
-              transition: "background-color 0.3s ease",
-            },
-            background: "#eff3f4",
-          }}
-          onClick={() => setPostModalView(true)}
-        >
-          Share your Knowlge or Idea
-        </Typography>
-      </div>
-      <div className="flex justify-center">
-      <button
-        className="md:m-2 mt-5 md:w-full sm:w-2/6 rounded-full bg-primary-400 md:py-2 sm:p-4 sm:text-3xl md:text-lg normal-case font-semibold text-white hover:shadow-md"
-        onClick={() => setPostModalView(true)}
-      >
-        Post
-      </button>
-      </div>
-      
-    </Paper>
-  );
-}
-
-export function PosterModal({
+export function PostEditor({
   postModalView,
   setPostModalView,
+  post,
+  setPost,
 }: {
   postModalView: boolean;
   setPostModalView: React.Dispatch<React.SetStateAction<boolean>>;
+  post: Post;
+  setPost: React.Dispatch<React.SetStateAction<Post | null>>;
 }) {
+  const { accessToken } = useContext(TokenContext)!;
   const [mediaData, setMediaData] = useState<MediaDataProps[]>([]);
   const imageFileData = useRef<{ fileSrc: File; id: string }[]>([]);
   const postFormData = useRef(new FormData());
   const postFetcher = useFetcher();
   const { setAlert } = useContext(AlertContext);
-  const rootFetcher = useFetcher();
+
+  const [postTmp, setPostTmp] = useState<Post>(post);
 
   const handlePostSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (mediaData !== null) {
-      mediaData.forEach((image, index) => {
-        const imgFile = imageFileData.current?.find(
-          (imageFile) => imageFile.id === image.id,
-        );
-        postFetcher.formData?.append(
-          `image-${index}`,
-          imgFile?.fileSrc as File,
-        );
-        if (image.caption !== "")
-          postFetcher.formData?.append(`caption-${index}`, image.caption);
-        postFormData.current.append(`image-${index}`, imgFile?.fileSrc as File);
-      });
-      rootFetcher.submit({ idle: true }, { method: "POST", action: "/posts" });
-    }
+
+    // Attach data to form
+    postFormData.current.append("context", postTmp.context);
+    postFormData.current.append("title", postTmp.title);
+    postFormData.current.append("tags", postTmp.tags.toString());
+    postFormData.current.append("savedMedia", JSON.stringify(postTmp.media));
+    postFormData.current.append("postId", postTmp.id);
+    mediaData.forEach((media, index) => {
+      const file = imageFileData.current.find(
+        (fileData) => fileData.id === media.id,
+      );
+      if (!file) return;
+
+      if (media.type.match(/image/))
+        postFormData.current.append(`image-${index}`, file.fileSrc);
+
+      if (media.type.match(/video/))
+        postFormData.current.append(`video-${index}`, file.fileSrc);
+    });
 
     axiosClient
-      .post("/posts", postFormData.current, {
+      .put("/posts", postFormData.current, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          Authorization: `Bearer ${accessToken}`,
           "Content-Type": "multipart/form-data",
         },
       })
-      .then(() => {
+      .then((res) => {
         setPostModalView(!postModalView);
         setAlert({
           severity: "success",
-          message: "Posted Succesfully",
+          message: "Updated Succesfully",
           visible: true,
         });
         setMediaData([]);
+        console.log(res.data.data);
+        setPost({ ...postTmp, media: res.data.data.updatedMedia });
         postFormData.current = new FormData();
+      })
+      .catch(() => {
+        setPostModalView(!postModalView);
+        setAlert({
+          severity: "error",
+          message: "Failed to update post",
+          visible: true,
+        });
       });
   };
 
@@ -126,33 +96,41 @@ export function PosterModal({
         open={postModalView}
         onClose={() => setPostModalView(!postModalView)}
       >
-        <postFetcher.Form
-          className="absolute left-1/2 top-1/2 flex  max-h-[85%] w-[525px] -translate-x-1/2 -translate-y-1/2 flex-col md:min-h-[450px] md:min-w-[500px] sm:min-h-[940px] sm:min-w-[1000px] overflow-hidden rounded-lg bg-white  shadow-lg"
-          method="POST"
-          action="/posts"
-          onSubmit={handlePostSubmit}
-          encType="multipart/form-data"
-        >
-          <ModalHeader setModalView={setPostModalView} />
-          <UserInfo />
-          <div className="w-full overflow-y-auto pb-5">
-            <PostForm postFormDataRef={postFormData} />
-            <ImageInputSet
-              mediaData={mediaData}
-              imageFileData={imageFileData}
-              setMediaData={setMediaData}
-            />
-          </div>
+        <EditPostContext.Provider value={{ post }}>
+          <postFetcher.Form
+            className="absolute left-1/2 top-1/2 flex  max-h-[85%] w-[525px] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-lg bg-white  shadow-lg"
+            method="POST"
+            action="/posts"
+            onSubmit={handlePostSubmit}
+            encType="multipart/form-data"
+          >
+            <ModalHeader setModalView={setPostModalView} />
+            <UserInfo />
+            <div className="w-full overflow-y-auto pb-5">
+              <PostForm
+                postFormDataRef={postFormData}
+                postTmp={postTmp}
+                setPostTmp={setPostTmp}
+              />
+              <ImageInputSet
+                mediaData={mediaData}
+                imageFileData={imageFileData}
+                setMediaData={setMediaData}
+                postTmp={postTmp}
+                setPosTmp={setPostTmp}
+              />
+            </div>
 
-          <div className="sticky bottom-0 w-full border-t-2 border-solid border-secondary-100 bg-white px-5 py-2 backdrop-blur-sm">
-            <Button
-              className="ml-auto block rounded-md bg-secondary-300 px-5 py-2 font-semibold normal-case text-white hover:bg-secondary-400 active:bg-secondary-500 md:w-20 sm:w-52 md:h-10 sm:h-16 md:text-base sm:text-3xl"
-              type="submit"
-            >
-              Post
-            </Button>
-          </div>
-        </postFetcher.Form>
+            <div className="sticky bottom-0 w-full border-t-2 border-solid border-secondary-100 bg-white px-5 py-2 backdrop-blur-sm">
+              <Button
+                className="ml-auto block rounded-md bg-secondary-300 px-5 py-2 font-bold normal-case text-white hover:bg-secondary-400 active:bg-secondary-500 "
+                type="submit"
+              >
+                Update Post
+              </Button>
+            </div>
+          </postFetcher.Form>
+        </EditPostContext.Provider>
       </Modal>
     )
   );
@@ -162,10 +140,14 @@ function ImageInputSet({
   mediaData,
   imageFileData,
   setMediaData,
+  postTmp,
+  setPosTmp,
 }: {
   mediaData: MediaDataProps[];
   imageFileData: ImageFileDataProps;
   setMediaData: SetMediaDataType;
+  postTmp: Post;
+  setPosTmp: Dispatch<SetStateAction<Post>>;
 }) {
   const handlePostImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -218,63 +200,128 @@ function ImageInputSet({
       />
       <label
         htmlFor="post-image-input"
-        className="group flex md:size-[100px] sm:size-[150px] items-center justify-center rounded-lg bg-secondary-200 hover:cursor-pointer hover:bg-secondary-300"
+        className="group flex size-[100px] items-center justify-center rounded-lg bg-secondary-200 hover:cursor-pointer hover:bg-secondary-300"
       >
         <Tooltip
           title="Attach Image"
           className="text-gray-700 group-hover:text-gray-100"
         >
-          <AddPhotoAlternateRounded className="md:size-10 sm:size-16"/>
+          <AddPhotoAlternateRounded />
         </Tooltip>
       </label>
+      <ImageUrlPostSet postTmp={postTmp} setPosTmp={setPosTmp} />
       <ImagePostSet mediaData={mediaData} setMediaData={setMediaData} />
     </div>
   );
 }
 
-function PostForm({ postFormDataRef }: PostFormProps) {
-  const [tags, setTags] = useState<string[]>([]);
-
-  const handleInputBlur = (
-    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement, Element>,
+function PostForm({ postTmp, setPostTmp }: PostFormProps) {
+  const updateValues = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    postFormDataRef.current.append(e.target.name, e.target.value);
+    setPostTmp({ ...postTmp, [e.target.name]: e.target.value });
   };
 
   return (
-    <div className="scroll-y-auto mt-5 flex w-full flex-col gap-5 px-5">
+    <div className="scroll-y-auto mt-5 flex w-full flex-col gap-5 px-5 text-slate-800">
       <TextField
+        onChange={updateValues}
         slotProps={{
           input: {
             className:
-              "bg-slate-100 w-full rounded-lg p-3 border focus-visible:outline-none hover:border-secondary-300 focus-visible:border-secondary-400 border-2 border-secondary-200 md:text-base sm:text-4xl",
+              "bg-slate-100 w-full rounded-lg p-3 border focus-visible:outline-none hover:border-secondary-300 focus-visible:border-secondary-400 border-2 border-secondary-200",
           },
         }}
+        value={postTmp.title}
         placeholder="Title (Optional)"
         name="title"
-        onChange={handleInputBlur}
       />
       <TextField
         slotProps={{
           input: {
             className:
-              "bg-slate-100 w-full rounded-lg p-3 border hover:border-secondary-300 focus-visible:outline-none focus-visible:border-secondary-400 border-2 border-secondary-200 resize-none md:text-base sm:text-3xl",
+              "bg-slate-100 w-full rounded-lg p-3 border hover:border-secondary-300 focus-visible:outline-none focus-visible:border-secondary-400 border-2 border-secondary-200 resize-none",
           },
         }}
+        value={postTmp.context}
         rows={5}
-        onChange={handleInputBlur}
+        onChange={updateValues}
         placeholder="Share your knowledge or idea"
         name="context"
         required
         multiline
       />
-      <InputTag
-        tags={tags}
-        setTags={setTags}
-        postFormDataRef={postFormDataRef}
-      />
+      <InputTag postTmp={postTmp} setPostTmp={setPostTmp} />
     </div>
   );
+}
+
+function ImageUrlPostSet({
+  postTmp,
+  setPosTmp,
+}: {
+  postTmp: Post;
+  setPosTmp: Dispatch<SetStateAction<Post>>;
+}) {
+  const { post } = useContext(PostContext)!;
+  const processMediaDataToElement = (media: {
+    filename: string;
+    caption?: string;
+  }) => {
+    if (media.filename.match(/.(jpg|png|gif|avif|webp|heic|heif)/)) {
+      return (
+        <div className="relative" key={media.filename.slice(0, 10)}>
+          <img
+            src={`${process.env.SERVER_PUBLIC}/${media.filename}`}
+            className="size-[100px] rounded-lg"
+          />
+          <IconButton
+            title="Remove Image"
+            className="absolute -right-3 -top-3 size-8 border-2 border-solid border-gray-400 bg-gray-100 hover:bg-gray-200"
+            onClick={() => {
+              if (post) {
+                setPosTmp({
+                  ...postTmp,
+                  media: postTmp.media.filter(
+                    (subMedia) => subMedia.filename !== media.filename,
+                  ),
+                });
+              }
+            }}
+          >
+            <CloseRounded className="icon" />
+          </IconButton>
+        </div>
+      );
+    } else {
+      return (
+        <div className="relative">
+          <video
+            src={`${process.env.SERVER_PUBLIC}/${media.filename}`}
+            className="size-[100px] rounded-lg"
+          />
+          <IconButton
+            title="Remove Image"
+            className="absolute -right-3 -top-3 size-8 border-2 border-solid border-gray-400 bg-gray-100 hover:bg-gray-200"
+            onClick={() => {
+              if (post) {
+                setPosTmp({
+                  ...postTmp,
+                  media: postTmp.media.filter(
+                    (subMedia) => subMedia.filename !== media.filename,
+                  ),
+                });
+              }
+            }}
+          >
+            <CloseRounded className="icon" />
+          </IconButton>
+        </div>
+      );
+    }
+  };
+
+  return <>{postTmp.media.map(processMediaDataToElement)}</>;
 }
 
 function ImagePostSet({
@@ -288,7 +335,7 @@ function ImagePostSet({
     if (media.type.match(/image/)) {
       return (
         <div className="relative" key={index}>
-          <img src={media.src} className="md:h-[95px] sm:h-36 rounded-lg" />
+          <img src={media.src} className="size-[100px] rounded-lg" />
           <IconButton
             title="Remove Image"
             className="absolute -right-3 -top-3 size-8 border-2 border-solid border-gray-400 bg-gray-100 hover:bg-gray-200"
@@ -305,7 +352,7 @@ function ImagePostSet({
     } else {
       return (
         <div className="relative">
-          <video src={media.src} className="size-[100px] rounded-lg" controls />
+          <video src={media.src} className="size-[100px] rounded-lg" />
           <IconButton
             title="Remove Image"
             className="absolute -right-3 -top-3 size-8 border-2 border-solid border-gray-400 bg-gray-100 hover:bg-gray-200"
@@ -331,10 +378,10 @@ function UserInfo() {
   return (
     <div className=" flex items-center gap-2 rounded-sm border-b-4 border-solid border-b-secondary-400 px-5 pb-3 font-semibold text-slate-800">
       <Avatar
-        className="-z-10 md:size-10 sm:size-24"
+        className="-z-10"
         src={`${process.env.SERVER_PUBLIC}/${userInfo.pfp}`}
       />
-      <p className="md:text-base sm:text-4xl">{userInfo.fullname}</p>
+      <p>{userInfo.fullname}</p>
     </div>
   );
 }
@@ -344,19 +391,15 @@ function ModalHeader({ setModalView }: ModalHeaderProps) {
 
   return (
     <div className="sticky top-0 mb-3 flex w-full items-center justify-center border-b-2 border-solid border-secondary-100 bg-white px-5 py-3 text-slate-800">
-      <p className="z-50 md:text-xl md:p-0 sm:p-5 sm:text-5xl font-extrabold">Create Post</p>
+      <p className="z-50 text-xl font-extrabold text-slate-800">Update Post</p>
       <IconButton className="absolute right-3" onClick={closeModal}>
-        <CloseRounded className="md:size-8 sm:size-24"/>
+        <CloseRounded />
       </IconButton>
     </div>
   );
 }
 
-function InputTag({
-  tags,
-  setTags,
-  postFormDataRef,
-}: InputTagProps & PostFormProps) {
+function InputTag({ postTmp, setPostTmp }: InputTagProps) {
   const { setAlert } = useContext(AlertContext)!;
   const [inputValue, setInputValue] = useState<string>("");
   const [inputFocused, setInputFocused] = useState<boolean>(false);
@@ -371,7 +414,7 @@ function InputTag({
       e.preventDefault();
       return;
     }
-    if (tags.find((e) => tag === e)) {
+    if (postTmp.tags.find((e) => tag === e)) {
       setInputValue("");
       return setAlert({
         visible: true,
@@ -380,21 +423,22 @@ function InputTag({
       });
     }
     setInputValue("");
-    setTags([...tags, tag]);
+    setPostTmp({ ...postTmp, tags: [...postTmp.tags, tag] });
     e.preventDefault();
   };
   const handleInputValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.currentTarget.value);
   };
   const removeChip = (word: string) => () => {
-    setTags(tags.filter((tag) => tag !== word));
+    setPostTmp({
+      ...postTmp,
+      tags: postTmp.tags.filter((tag) => tag !== word),
+    });
   };
   const focusInput = () => {
     ref.current?.focus();
   };
   const inputFocusIn = () => setInputFocused(true);
-  const attachTagToForm = () =>
-    postFormDataRef.current.append("tags", tags.toString());
 
   const focusFormStyle = inputFocused
     ? "border-secondary-400"
@@ -402,37 +446,41 @@ function InputTag({
 
   return (
     <div
-      className={`${focusFormStyle} ${inputFocused || "hover:border-secondary-300"} flex min-h-[55.2px] w-full flex-wrap justify-center items-center rounded-lg border-2 border-solid bg-slate-100 p-2 hover:cursor-text`}
+      className={`${focusFormStyle} ${inputFocused || "hover:border-secondary-300"} flex min-h-[55.2px] w-full flex-wrap justify-center rounded-lg border-2 border-solid bg-slate-100 p-2 hover:cursor-text `}
       onClick={focusInput}
     >
-      {tags.map((tag) => (
+      {postTmp.tags.map((tag) => (
         <Chip
           key={tag}
-          className="max-w flex-gow mb-1 ml-1 min-w-[10px] border-2 border-solid border-secondary-300  bg-secondary-200  font-body text-slate-800 hover:cursor-default focus-visible:border-none md:text-base sm:text-4xl"
+          className="max-w flex-gow mb-1 ml-1 min-w-[10px] border-2 border-solid border-secondary-300  bg-secondary-200  font-body text-slate-800 hover:cursor-default focus-visible:border-none"
           label={tag}
           onDelete={removeChip(tag)}
         />
       ))}
       <input
-        className="ml-1 mr-auto bg-transparent font-mono  focus-visible:outline-none md:text-base sm:text-3xl md:p-0 sm:p-3"
+        className="ml-1 mr-auto bg-transparent font-mono  focus-visible:outline-none"
         type="text"
-        placeholder={tags.length === 0 ? "tags" : ""}
+        placeholder={postTmp.tags.length === 0 ? "tags" : ""}
         ref={ref}
         name="tag"
         size={inputValue === "" ? 4 : inputValue.length + 1}
         onChange={handleInputValue}
         value={inputValue}
         onFocusCapture={inputFocusIn}
-        onBlur={attachTagToForm}
         onKeyDown={addInterest}
       />
     </div>
   );
 }
 
+// Types
+
+interface EditPostContextProps {
+  post: Post;
+}
 interface InputTagProps {
-  tags: string[];
-  setTags: React.Dispatch<React.SetStateAction<string[]>>;
+  postTmp: Post;
+  setPostTmp: Dispatch<SetStateAction<Post>>;
 }
 
 interface ModalHeaderProps {
@@ -441,10 +489,8 @@ interface ModalHeaderProps {
 
 interface PostFormProps {
   postFormDataRef: MutableRefObject<FormData>;
-}
-
-interface ModalAlertProps {
-  setModalView: Dispatch<SetStateAction<boolean>>;
+  postTmp: Post;
+  setPostTmp: Dispatch<SetStateAction<Post>>;
 }
 
 interface MediaDataProps {

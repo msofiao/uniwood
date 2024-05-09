@@ -191,6 +191,14 @@ model Test {
   messengersId String[] @unique @default([]) @db.ObjectId
 }
 
+model RegisterOTP {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  email     String    @unique
+  otp       String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+}
+
 // * TYPES
 // type Message {
 //   id        String

@@ -9,5 +9,6 @@ export async function action({ request }: { request: Request; params: any }) {
     default:
       data = null;
   }
+
   return data;
 }
