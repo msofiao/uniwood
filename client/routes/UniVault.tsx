@@ -87,11 +87,11 @@ export default function UniVault() {
   const content = activeTab === "Articles" ? articles.links : trainings.links;
 
   return (
-    <div className="container mx-auto px-4">
-      <h1 className="mb-4 mt-8 text-center text-3xl font-semibold">UniVault</h1>
-      <div className="flex flex-col justify-center md:flex-row">
+    <div className="container mx-auto">
+      <h1 className="mb-4 mt-8 text-center md:text-3xl sm:text-7xl font-semibold">UniVault</h1>
+      <div className="flex justify-center md:flex-row">
         <button
-          className={`mb-4 mr-4 w-full rounded-md px-4 py-2 transition duration-300 focus:outline-none md:mb-0 md:w-auto ${
+          className={`mb-4 mr-4  rounded-md px-4 py-2 transition duration-300 focus:outline-none md:mb-0 md:w-auto ${
             activeTab === "Articles"
               ? "bg-prima text-white hover:bg-orange-600"
               : "bg-gray-300 text-gray-700 hover:bg-gray-400"
@@ -101,7 +101,7 @@ export default function UniVault() {
           Articles
         </button>
         <button
-          className={`w-full rounded-md px-4 py-2 transition duration-300 focus:outline-none md:w-auto ${
+          className={`mb-4 mr-4 w-full rounded-md px-4 py-2 transition duration-300 focus:outline-none md:mb-0 md:w-auto ${
             activeTab === "Trainings"
               ? "bg-prima text-white hover:bg-orange-600"
               : "bg-gray-300 text-gray-700 hover:bg-gray-400"
