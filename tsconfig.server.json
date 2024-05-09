@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "module": "NodeNext",
+    "module": "CommonJS",
     "outDir": "./build",
     "rootDir": "./test",
-    "moduleResolution": "NodeNext",
+    // "moduleResolution": "NodeNext",
     "baseUrl": "./",
     // "types": ["./@types"],
     // "noEmit": true,
