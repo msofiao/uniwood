@@ -6,11 +6,7 @@
     "rootDir": "./test",
     // "moduleResolution": "Bundler",
     "baseUrl": "./",
-    // "types": [
-    //   "./server/types/fastify.d.ts",
-    //   "./server/types/global.d.ts",
-    //   "./server/types/mongodb.d.ts"
-    // ],
+    // "types": ["./@types"],
     // "noEmit": true,
     // "resolveJsonModule": true,
     // "allowImportingTsExtensions": true,
