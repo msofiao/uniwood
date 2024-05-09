@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Thesis Project",
   "main": "index.js",
-  "type": "module",
   "prisma": {
     "schema": "./server/models/schema.prisma"
   },
