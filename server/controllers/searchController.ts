@@ -1,4 +1,4 @@
-import type { FastifyRequest, FastifyReply } from "../types/fastify.d.ts";
+import type { FastifyRequest, FastifyReply } from "../types/fastify.d";
 import { capitalize } from "../utils/index";
 
 const search = async (

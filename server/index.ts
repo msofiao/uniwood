@@ -7,7 +7,7 @@ import fastifyMultipart from "@fastify/multipart";
 import fastifyStatic from "@fastify/static";
 import fastifyCors from "@fastify/cors";
 import fastifySocketIO from "fastify-socket.io";
-import type { FastifyInstance } from "./types/fastify.d.ts";
+import type { FastifyInstance } from "./types/fastify.d";
 import { Socket } from "socket.io";
 import {
   corsOption,

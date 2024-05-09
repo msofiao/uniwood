@@ -1,4 +1,4 @@
-import type { FastifyRequest } from "../types/fastify.d.ts";
+import type { FastifyRequest } from "../types/fastify.d";
 
 export function requestFieldChecker(fields: string[], req: FastifyRequest) {
   const error: string[] = [];

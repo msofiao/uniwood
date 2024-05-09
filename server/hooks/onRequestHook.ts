@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import type { FastifyRequest, FastifyReply } from "../types/fastify.d.ts";
+import type { FastifyRequest, FastifyReply } from "../types/fastify.d";
 
 export function onRequestHook(
   req: FastifyRequest,
