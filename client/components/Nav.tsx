@@ -85,7 +85,6 @@ export default function Nav() {
         alt="logo"
       />
       <Links focusState={focusState} />
-      
       <AvatarNav />
       <PosterModal
         postModalView={posterModalView}
@@ -96,17 +95,6 @@ export default function Nav() {
 }
 
 // function ButtonNav({ openPosterModal }: { openPosterModal: VoidFunc }) {
-//   // return (
-//   //   <Button
-//   //     className="mt-5 rounded-full  bg-primary-400 py-3 normal-case text-white"
-//   //     variant="contained"
-//   //     fullWidth
-//   //     onClick={openPosterModal}
-//   //   >
-//   //     Post
-//   //   </Button>
-//   // );
-// }
 
 function AvatarNav() {
   const theme = useTheme();

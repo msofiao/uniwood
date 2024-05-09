@@ -9,7 +9,7 @@ export const sendLoginRequest = async (form: FormData) => {
         usernameOrEmail: form.get("usernameOrEmail"),
         password: form.get("password"),
       },
-      { withCredentials: true }
+      { withCredentials: true },
     )
     .then((res) => res.data)
     .catch((err: AxiosError) => err.response?.data);
@@ -47,4 +47,13 @@ export const sendPostPostRequest = async (form: FormData) => {
     })
     .then((res) => res.data)
     .catch((err: AxiosError) => err.response?.data);
+};
+
+export const sendPutPostRequest = async (form: FormData) => {
+  return axiosClient.put("/posts", form, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      "Content-Type": "multipart/form-data",
+    },
+  });
 };
