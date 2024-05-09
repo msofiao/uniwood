@@ -2,8 +2,8 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "ES2022",
-    "outDir": "build",
-    "rootDir": "server",
+    "outDir": "./build",
+    "rootDir": "./test",
     "moduleResolution": "Bundler",
     "baseUrl": "./",
     // "types": [
@@ -23,6 +23,6 @@
     "noFallthroughCasesInSwitch": true,
     "strict": false
   },
-  "include": ["server"],
+  "include": ["./test"],
   "exclude": ["node_modules", "dist", "client"]
 }
