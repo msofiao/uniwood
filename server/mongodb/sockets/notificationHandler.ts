@@ -73,6 +73,7 @@ export const NotificationChangeHandler = (io: Server, socket: Socket) => {
               pfp: notifBy.user_image.pfp_name,
             },
           };
+          break;
         case "FOLLOW":
           payload = {
             id: change.fullDocument._id,
@@ -87,6 +88,7 @@ export const NotificationChangeHandler = (io: Server, socket: Socket) => {
               pfp: notifBy.user_image.pfp_name,
             },
           };
+          break;
         default:
           break;
       }

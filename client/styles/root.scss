@@ -22,15 +22,14 @@
     margin: 0 45px;
 
     @media (max-width: 450px) {
-      grid-column: 1/-1;
-      margin: 0;
-    }
-  }
+
   @media (max-width: 450px) {
     main {
+
       grid-column: 1/-1;
       margin: 0;
     }
+  
   }
   
   section {

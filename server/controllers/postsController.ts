@@ -1,11 +1,11 @@
 import { PostMedia } from "@prisma/client";
-import type { FastifyReply, FastifyRequest } from "../types/fastify.d.ts";
-import { createPost as createPostQuery } from "../models/postQuery.ts";
+import type { FastifyReply, FastifyRequest } from "../types/fastify.d";
+import { createPost as createPostQuery } from "../models/postQuery";
 import { moveFile } from "../utils/fileManager";
-import { likePostTogggle as likePostToggleFnc } from "../models/postQuery.ts";
-import { isValidObjectId } from "../utils/checker.ts";
-import { capitalize } from "../utils/index.ts";
-import { recommendPosts } from "../utils/recomAlgo.ts";
+import { likePostTogggle as likePostToggleFnc } from "../models/postQuery";
+import { isValidObjectId } from "../utils/checker";
+import { capitalize } from "../utils/index";
+import { recommendPosts } from "../utils/recomAlgo";
 
 const createPost = async (
   req: FastifyRequest<{ Body: PostPostBody }>,
@@ -340,7 +340,7 @@ const getAllUserPost = async (
 };
 
 const deletePost = async (
-  req: FastifyRequest<{ Params: { postId: string | undefined } }>,
+  req: FastifyRequest<{ Params: { postId: string | undefined }; Body: any }>,
   res: FastifyReply,
 ) => {
   // TODO add validation
@@ -692,7 +692,7 @@ const getPostById = async (
     }),
   };
 
-  return res.code(200).send({ status: "ok", data: parsedDoc });
+  return res.code(200).send({ status: "success", data: parsedDoc });
 };
 
 const getRecommendedPosts = async (

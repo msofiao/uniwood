@@ -81,22 +81,24 @@ function Semifooter() {
     <>
       <div className="m-10">
         <div className="flex justify-center item-center mt-28">
-          <img src={logo} alt="" className="md:h-80 sm:h-44"/>
+
+          <img src={logo} alt="" className="lg:h-80 sm:h-44"/>
         </div>
-        <div className="flex md:flex-row sm:flex-col justify-center items-center lg:mx-36 lg:my-10">
+        <div className="flex lg:flex-row sm:flex-col justify-center items-center lg:mx-36 lg:my-10">
           <div className="flex-1 mx-10 my-10 sm:w-full">
-            <p className="text-center font-semibold text-3xl md:mb-5">
+            <p className="text-center font-semibold text-3xl lg:mb-5">
               About UniWood
             </p>
-            <p className="text-center md:text-base sm:text-sm">
+            <p className="text-center lg:text-base sm:text-sm">
             UniWood is a platform designed to connect, support, and empower the woodworking community. It serves as a comprehensive online space where woodworkers, woodcrafters, and woodworking enthusiasts can engage, share their projects, and learn from one another.
             </p>
           </div>
           <div className="flex-1 mx-10 my-10 sm:w-full">
-            <p className="text-center font-semibold text-3xl md:mb-5">
+
+            <p className="text-center font-semibold text-3xl lg:mb-5">
               What We Do
             </p>
-            <p className="text-center md:text-base sm:text-sm">
+            <p className="text-center lg:text-base sm:text-sm">
             An online platform designed for the woodworking community, enabling users to connect, and share projects. Offers features like community posts, real-time messaging, and educational resources to foster learning and knowledge sharing, creating a vibrant space for growth and connection.
             </p>
           </div>

@@ -1,16 +1,12 @@
 {
   "compilerOptions": {
-    "target": "es2016",
-    "module": "ESNext",
-    "outDir": "build",
-    "rootDir": "server",
-    "moduleResolution": "Bundler",
+    "target": "ES2021",
+    "module": "commonjs",
+    "outDir": "./build",
+    "rootDir": "./test",
+    // "moduleResolution": "NodeNext",
     "baseUrl": "./",
-    // "types": [
-    //   "./server/types/fastify.d.ts",
-    //   "./server/types/global.d.ts",
-    //   "./server/types/mongodb.d.ts"
-    // ],
+    // "types": ["./@types"],
     // "noEmit": true,
     // "resolveJsonModule": true,
     // "allowImportingTsExtensions": true,
@@ -21,8 +17,9 @@
     "noUnusedLocals": true,
     // "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "strict": false
+    "strict": false,
+    "skipLibCheck": true
   },
-  "include": ["server/**/*.ts"],
+  "include": ["./test"],
   "exclude": ["node_modules", "dist", "client"]
 }

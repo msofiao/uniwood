@@ -1,6 +1,6 @@
-import { converseController } from "../controllers/converseController.ts";
-import { authorize } from "../middlewares/authorize.ts";
-import { arbitraryMultipartConsumer } from "../middlewares/multipartConsumer.ts";
+import { converseController } from "../controllers/converseController";
+import { authorize } from "../middlewares/authorize";
+import { arbitraryMultipartConsumer } from "../middlewares/multipartConsumer";
 import { FastifyInstance } from "../types/fastify";
 
 export  function ConverseRoute(

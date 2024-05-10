@@ -1,12 +1,9 @@
 import { ObjectId } from "mongodb";
-import type { IMessage } from "../types/mongodb.d.ts";
-import type {
-  FastifyReply,
-  FastifyRequest,
-} from "../types/fastify.d.ts";
-import { converseDocExistByMessengersId } from "../models/converseOperations.js";
-import { capitalize } from "../utils/stringFormatter.ts";
-import { moveFile, removeFiles } from "../utils/fileManager.ts";
+import type { IMessage } from "../types/mongodb.d";
+import type { FastifyReply, FastifyRequest } from "../types/fastify.d";
+import { converseDocExistByMessengersId } from "../models/converseOperations";
+import { capitalize } from "../utils/stringFormatter";
+import { moveFile, removeFiles } from "../utils/fileManager";
 
 export const sendMessage = async (
   req: FastifyRequest<{ Body: ICreateConverseBody }>,
@@ -139,7 +136,9 @@ export const searchConversation = async (
     return reply.code(404).send({ status: "fail", message: "Not Found" });
   }
 
-  return reply.code(200).send({ stauts: "ok", converseId: converseDoc.id });
+  return reply
+    .code(200)
+    .send({ stauts: "success", converseId: converseDoc.id });
 };
 
 export const getConverse = async (
@@ -188,7 +187,7 @@ export const getConverse = async (
     messages: converseDoc.messages,
   };
 
-  return res.code(200).send({ status: "ok", data: parsedConverseDoc });
+  return res.code(200).send({ status: "success", data: parsedConverseDoc });
 };
 
 export const getConverseList = async (
@@ -259,7 +258,7 @@ export const getConverseList = async (
     data: {},
   });
 
-  return res.code(200).send({ status: "ok", data: parseConversesDoc });
+  return res.code(200).send({ status: "success", data: parseConversesDoc });
 };
 
 export const getRecipient = async (
@@ -302,7 +301,7 @@ export const getRecipient = async (
     pfp: recipientDoc.messengers[0].user_image.pfp_name,
   };
 
-  return res.code(200).send({ status: "ok", data: pareseReicipientDoc });
+  return res.code(200).send({ status: "success", data: pareseReicipientDoc });
 };
 
 const getConverseMedia = async (
@@ -332,7 +331,7 @@ const getConverseMedia = async (
     },
   });
 
-  return reply.code(200).send({ status: "ok", data: mediaList });
+  return reply.code(200).send({ status: "success", data: mediaList });
 };
 
 // Types

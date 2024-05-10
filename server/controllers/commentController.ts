@@ -1,5 +1,5 @@
 import { Comment } from "@prisma/client";
-import type { FastifyRequest, FastifyReply } from "../types/fastify.d.ts";
+import type { FastifyRequest, FastifyReply } from "../types/fastify.d";
 import {
   commentExist,
   upVoteToggle as upVoteToggleQuery,

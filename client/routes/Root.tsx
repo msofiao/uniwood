@@ -68,7 +68,7 @@ export default function Root() {
     <div className="root">
       <Navmob />
       <main>
-      <Navmob />
+        <Navmob />
         <Outlet />
       </main>
       <Nav />

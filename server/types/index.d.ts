@@ -1,3 +1,3 @@
-export type * from "./fastify.d.ts";
-export type * from "./mongodb.d.ts";
-export type * from "./global.d.ts";
+export type * from "./fastify.d";
+export type * from "./mongodb.d";
+export type * from "./global.d";

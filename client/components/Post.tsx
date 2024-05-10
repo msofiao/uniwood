@@ -516,3 +516,72 @@ function Comment({
     </div>
   );
 }
+
+function PostDeleteAlert({ dialogOpen, setDialogOpen }: PostDeleteDialogProps) {
+  const { accessToken } = useContext(TokenContext)!;
+  const { post, setPost } = useContext(PostContext)!;
+  const { setAlert } = useContext(AlertContext)!;
+
+  const closeDialog = () => {
+    setDialogOpen(false);
+  };
+
+  const deletePost = () => {
+    if (!post) return;
+    axiosClient
+      .delete(`/posts/${post.id}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+      .then(() => {
+        setAlert({
+          message: "Post Deleted",
+          severity: "success",
+          visible: true,
+        });
+        setPost(null);
+      })
+      .catch(() => {
+        setAlert({
+          message: "Failed to delete post",
+          severity: "error",
+          visible: true,
+        });
+      });
+    setDialogOpen(false);
+  };
+
+  return (
+    <Modal open={dialogOpen} onClose={closeDialog}>
+      <div className="position absolute left-[50%] top-[50%] flex h-[300px] w-[450px] translate-x-[-50%] translate-y-[-50%] flex-col items-center justify-center rounded-xl bg-white px-5 py-8 shadow-lg">
+        <PriorityHighRounded className="rounded-full bg-red-200 p-2 text-[50px] text-red-400" />
+        <p className="text my-3 text-lg font-bold text-slate-800">
+          Are you sure ?
+        </p>
+        <p className="mb-7 text-center text-slate-600">
+          This action cannot be undone. All values associated with the post will
+          be lost
+        </p>
+        <button
+          className="w-full rounded-lg bg-red-400  py-2 font-bold text-white hover:bg-red-500 "
+          onClick={deletePost}
+        >
+          Delete Post
+        </button>
+        <button
+          className="mt-4 w-full rounded-lg border-[3px] border-solid border-slate-300 py-2 font-body font-bold text-slate-700 hover:bg-slate-300 hover:text-white"
+          onClick={closeDialog}
+        >
+          Cancel
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
+// Types
+interface PostDeleteDialogProps {
+  dialogOpen: boolean;
+  setDialogOpen: Dispatch<SetStateAction<boolean>>;
+}

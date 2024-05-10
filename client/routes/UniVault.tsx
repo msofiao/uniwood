@@ -2,20 +2,6 @@ import React, { useState, useEffect } from "react";
 
 export default function UniVault() {
   const [activeTab, setActiveTab] = useState("Articles");
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768); // Change the breakpoint as needed
-    };
-
-    // Call handleResize initially and add event listener
-    handleResize();
-    window.addEventListener("resize", handleResize);
-
-    // Remove event listener on component unmount
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   const articles = {
     links: [
@@ -87,11 +73,14 @@ export default function UniVault() {
   const content = activeTab === "Articles" ? articles.links : trainings.links;
 
   return (
-    <div className="container mx-auto">
-      <h1 className="mb-4 mt-8 text-center md:text-3xl sm:text-7xl font-semibold">UniVault</h1>
-      <div className="flex justify-center md:flex-row">
+
+
+    <div className="px-4 custom:w-full sm:w-11/12 text-4xl custom2:text-base">
+      <h1 className="custom2:mb-4 mb-8 mt-8 text-center text-6xl custom2:text-3xl font-bold">UniVault</h1>
+      <div className="flex flex-row justify-center gap-8 ">
+
         <button
-          className={`mb-4 mr-4  rounded-md px-4 py-2 transition duration-300 focus:outline-none md:mb-0 md:w-auto ${
+          className={`mb-4 custom2:rounded-md rounded-lg px-10 custom2:py-2 py-6 transition duration-300 focus:outline-none md:mb-2  ${
             activeTab === "Articles"
               ? "bg-prima text-white hover:bg-orange-600"
               : "bg-gray-300 text-gray-700 hover:bg-gray-400"
@@ -101,7 +90,8 @@ export default function UniVault() {
           Articles
         </button>
         <button
-          className={`mb-4 mr-4 w-full rounded-md px-4 py-2 transition duration-300 focus:outline-none md:mb-0 md:w-auto ${
+
+          className={`mb-4 custom2:rounded-md rounded-lg px-10 custom2:py-2 py-6 transition duration-300 focus:outline-none md:mb-2  ${
             activeTab === "Trainings"
               ? "bg-prima text-white hover:bg-orange-600"
               : "bg-gray-300 text-gray-700 hover:bg-gray-400"
@@ -111,7 +101,7 @@ export default function UniVault() {
           Trainings
         </button>
       </div>
-      <div className="mt-8">
+      <div className="mt-8 ">
         {content.map((item) => (
           <a
             key={item.id}
@@ -120,17 +110,17 @@ export default function UniVault() {
             rel="noopener noreferrer"
           >
             <div
-              className={`mb-4 cursor-pointer rounded-lg bg-white p-6 shadow-md ${isMobile ? "" : "transform transition duration-300 hover:scale-105"}`}
+              className={`mb-10 custom2:mb-4 custom2:p-6 p-10 cursor-pointer rounded-lg bg-white shadow-md transition duration-300 hover:shadow-lg`}
             >
-              <h2 className="mb-2 text-lg font-bold">{item.title}</h2>
+              <h2 className="custom2:mb-2 mb-5 text-4xl custom2:text-lg font-bold">{item.title}</h2>
               <p
-                className="mb-4 overflow-hidden text-sm text-gray-600"
+                className="mb-4 overflow-hidden text-2xl custom2:text-sm text-gray-600"
                 style={{ textOverflow: "ellipsis", maxHeight: "3em" }}
               >
                 {item.description}
               </p>
               {item.author && (
-                <p className="text-xs text-gray-500">Author: {item.author}</p>
+                <p className="text-xl custom2:text-xs text-gray-500">Author: {item.author}</p>
               )}
             </div>
           </a>

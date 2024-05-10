@@ -1,5 +1,5 @@
-import type { FastifyRequest, FastifyReply } from "../types/fastify.d.ts";
-import { removeFiles, storeFile } from "../utils/fileManager.ts";
+import type { FastifyRequest, FastifyReply } from "../types/fastify.d";
+import { removeFiles, storeFile } from "../utils/fileManager";
 import {
   ProjectPostBody,
   ProjectPutBody,

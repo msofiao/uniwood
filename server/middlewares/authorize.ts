@@ -2,13 +2,9 @@ import { FastifyRequest, FastifyReply } from "../types/fastify";
 import jwt from "jsonwebtoken";
 import path from "node:path";
 import dotenv from "dotenv";
-import { Socket } from "socket.io";
-import { PrismaClient } from "@prisma/client";
-import { RefreshTokenPayload } from "../types/global";
 dotenv.config({
-  path: path.resolve(import.meta.dirname, "../.env"),
+  path: path.resolve(import.meta.dirname, "../../.env"),
 });
-const prisma = new PrismaClient();
 
 /**
  * Checks if user is Authorize

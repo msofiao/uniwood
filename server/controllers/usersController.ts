@@ -6,7 +6,7 @@ import type {
   FileInfo,
   UserProfileInfo,
   FastifyRequest,
-} from "../types/index.d.ts";
+} from "../types/index.d";
 import {
   moveFile,
   capitalize,

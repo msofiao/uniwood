@@ -7,7 +7,7 @@ import fastifyMultipart from "@fastify/multipart";
 import fastifyStatic from "@fastify/static";
 import fastifyCors from "@fastify/cors";
 import fastifySocketIO from "fastify-socket.io";
-import type { FastifyInstance } from "./types/fastify.d.ts";
+import type { FastifyInstance } from "./types/fastify.d";
 import { Socket } from "socket.io";
 import {
   corsOption,
@@ -28,6 +28,7 @@ import {
   ProjectsRoute,
   CommentsRoute,
   TestRoute,
+  OtpRoute,
 } from "./routes/index";
 import { onRequestHook } from "./hooks/index";
 import { messageChangeHandler } from "./mongodb/sockets/index";
@@ -83,6 +84,7 @@ app.register(ConverseRoute, { prefix: "/converse" });
 app.register(NotificationRoute, {
   prefix: "/notifications",
 });
+app.register(OtpRoute, { prefix: "/otp" });
 
 app.ready((err) => {
   if (err) throw err;

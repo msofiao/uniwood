@@ -10,7 +10,6 @@ class GetPrismaInstance {
   }
 }
 
-const prisma = GetPrismaInstance.myString;
 
 console.log({ prisma: GetPrismaInstance.getPrismaInstance() });
 

@@ -4,7 +4,7 @@ import { createWriteStream } from "fs";
 import { rename, unlink } from "fs/promises";
 import { randomBytes } from "crypto";
 import path from "path";
-import type { FileInfo } from "../types/global.d.ts";
+import type { FileInfo } from "../types/global.d";
 /**
  * Stores a file a the server folder
  *

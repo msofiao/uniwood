@@ -49,12 +49,14 @@ import React from "react";
 import { LoadingButton, TabContext, TabPanel } from "@mui/lab";
 import axiosClient from "../utils/axios";
 import { login } from "../api/login";
+import { TokenContextProps } from "../types/providers";
 
 const RFormDataContext = createContext<RegisterFDataProps | null>(null);
 const ModalAlertContext = createContext<ModalAlertContextProps | null>(null);
 const steps = [
   "Personal Infortmation",
   "User Credential",
+  "OTP Verification",
   "Suggested Accounts and Interests",
 ];
 
@@ -1053,6 +1055,10 @@ function stepReducer(state: number, action: "next" | "back") {
     default:
       return state;
   }
+}
+
+function OTPForm() {
+  
 }
 
 // Types

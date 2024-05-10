@@ -11,6 +11,7 @@ import {
   SearchRoute,
   NotificationRoute,
   ConverseRoute,
+  OtpRoute,
 } from "./routes/index";
 import { messageChangeHandler } from "./mongodb/sockets/index";
 import fastifyCookie from "@fastify/cookie";
@@ -21,17 +22,21 @@ import fastifySocketIO from "fastify-socket.io";
 import { Socket } from "socket.io";
 import {
   corsOption,
-  multipartOption,
-  cookieOption,
-  statisCoption,
-  socketIOOption,
+multipartOption,
+cookieOption,
+statisCoption,
+socketIOOption,
 } from "./config";
 import { onRequestHook } from "./hooks/index";
 import { NotificationChangeHandler } from "./mongodb/sockets/notificationHandler";
+import dotenv from "dotenv";
+import path from "node:path";
+
+dotenv.config({ path: path.resolve(import.meta.url, "../.env") });
 
 export default function App(
   instance: FastifyInstance,
-  options: any,
+  _options: any,
   done: () => void,
 ) {
   // ===== CORE PLUGINS ===== //
@@ -75,10 +80,10 @@ export default function App(
   instance.register(NotificationRoute, {
     prefix: "/notifications",
   });
+  instance.register(OtpRoute, { prefix: "/otp" });
 
   const onConnection = (socket: Socket) => {
     socket.on("test", (message, cb) => {
-      // const cookies = parse(socket.request.headers.cookie!);
       socket.emit("test", message);
       socket.broadcast.emit("test", message);
     });
@@ -108,6 +113,16 @@ export default function App(
     instance.io.on("connection", onConnection);
 
     // Change Stream Handlers
+  });
+
+  //! TEST
+  instance.get("/test", async (_req, res) => {
+    return res.code(200).send({ status: "success", message: "Test Route" });
+  });
+  instance.get("/", async (_req, res) => {
+    return res
+      .code(200)
+      .send({ status: "success", message: "Welcome to the API" });
   });
 
   done();
