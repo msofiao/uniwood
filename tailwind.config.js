@@ -2,6 +2,7 @@
 
 module.exports = {
   important: true,
+  output: "./client/tailwind.css",
   content: [
     "./client/routes/**/*.tsx",
     "./client/components/**/*.tsx",
@@ -57,9 +58,9 @@ module.exports = {
         poppins: ["Poppins", "sans-serif"],
       },
       screens: {
-        sm : "300px",
-        custom:"450.5px",
-        custom2:"450px"
+        sm: "300px",
+        custom: "450.5px",
+        custom2: "450px",
       },
     },
   },
