@@ -79,7 +79,7 @@ export default function Nav() {
 
   return (
 
-    <nav className="sticky top-0 flex h-screen w-full flex-col justify-center custom2:flex sm:hidden  px-5">
+    <nav className="sticky top-0  h-screen w-full flex-col justify-center custom2:flex hidden px-5">
       <img
         className="absolute -top-4 left-1/2 mx-auto aspect-square w-[225px] -translate-x-1/2 "  
         src={`${process.env.SERVER_PUBLIC}/assets/logo_label.svg`}
