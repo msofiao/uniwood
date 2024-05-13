@@ -7,6 +7,7 @@ import MessageList from "../components/MessageList";
 import Conversation from "../components/Conversation";
 import MessageUserDetail from "../components/MessageUserDetail";
 import { MessageComponentContext } from "../context/mesComContext";
+import Navmob from "../components/Navmob";
 import axiosClient from "../utils/axios";
 
 export default function Message() {
@@ -89,11 +90,23 @@ export default function Message() {
         setRecipientInfo,
       }}
     >
-      <div className="grid h-screen grid-cols-[325px_375px_500px_minmax(0,_1fr)]">
-        <Nav />
-        <MessageList />
-        <Conversation />
-        <MessageUserDetail />
+      <div >
+        <Navmob/>
+        <div className="grid h-screen grid-cols-[325px_375px_500px_minmax(0,_1fr)]">
+          
+          <div className="custom2:block hidden">
+          <Nav />
+          </div>
+          
+          <MessageList />
+          
+          
+          <Conversation />
+          
+          <div className="custom2:block hidden">
+          <MessageUserDetail />
+          </div>
+        </div>
       </div>
     </MessageComponentContext.Provider>
   );

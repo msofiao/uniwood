@@ -24,7 +24,7 @@ export default function Notification() {
 
   return (
 
-      <div className=" max-h-screen overflow-y-auto w">
+      <div className="">
         <Header />
         <NotifTab />
       </div>
@@ -34,7 +34,7 @@ export default function Notification() {
 
 function Header() {
   return (
-    <p className="mb-3 ml-4 mt-5 font-semibold font-header text-2xl text-slate-800">
+    <p className="mb-3 ml-4 mt-5 font-semibold font-header text-center custom2:text-3xl text-6xl text-slate-800">
       Notifications
     </p>
   );
@@ -103,21 +103,21 @@ function NotifTab() {
     if (dateDiffByHours < 24 && dateReference !== "TODAY") {
       dateReference = "TODAY";
       return (
-        <p className="text-header test-slate-800 mb-2 ml-6 mt-4 text-xl">
+        <p className="text-header test-slate-800 mb-2 ml-6 mt-4 custom2:text-base text-6xl">
           Today
         </p>
       );
     } else if (dateDiffByHours > 24 && dateReference !== "THIS WEEK") {
       dateReference = "THIS WEEK";
       return (
-        <p className="text-header test-slate-800 mb-2 ml-6 mt-4 text-2xl">
+        <p className="text-header test-slate-800 mb-2 ml-6 mt-4 custom2:text-lg text-6xl">
           This Week
         </p>
       );
     } else if (dateDiffByHours > 24 * 7 && dateReference !== "EARLIER") {
       dateReference = "EARLIER";
       return (
-        <p className="text-header test-slate-800 mb-2 ml-6 mt-4 text-2xl">
+        <p className="text-header test-slate-800 mb-2 ml-6 mt-4 custom2:text-lg text-6xl">
           Earlier
         </p>
       );
@@ -161,10 +161,15 @@ function NotifTab() {
 
   return (
     <TabContext value={tabIndex}>
-      <TabList onChange={handleTabChange}>
-        <Tab className="w-1/2 font-bold normal-case" label="All" value="1" />
+      <TabList className="text-center" onChange={handleTabChange}>
+        <Tab 
+        
+        className="w-1/2 font-bold normal-case custom2:text-base text-6xl" 
+        label="All" 
+        value="1" />
         <Tab
-          className="w-1/2 font-bold normal-case"
+        
+          className="w-1/2 font-bold normal-case custom2:text-base text-6xl"
           label="Following"
           value="2"
         />
@@ -173,7 +178,7 @@ function NotifTab() {
         {notifications.length !== 0 ? (
           notifications.map(NotifElemeGenerator)
         ) : (
-          <p className="ml-5 mt-5 font-body text-lg italic text-slate-500">
+          <p className="ml-5 mt-5 font-body custom2:text-lg text-4xl italic text-slate-500 ">
             No notification from followed users
           </p>
         )}
@@ -185,7 +190,7 @@ function NotifTab() {
         {followingNotifs.length !== 0 ? (
           followingNotifs.map(NotifElemeGenerator)
         ) : (
-          <p className=" ml-5 mt-5 font-body text-lg italic text-slate-500">
+          <p className=" ml-5 mt-5 font-body custom2:text-lg text-6xl italic text-slate-500">
             No notification from followed users
           </p>
         )}
@@ -341,13 +346,13 @@ function LikedPost({ notif, navigate }: NotifElemProps) {
       onClick={navToPost}
       className="flex items-center gap-4 px-10 py-4 hover:cursor-pointer hover:bg-gray-200"
     >
-      <Avatar src={notif.notifBy.fullname} className="size-12" />
+      <Avatar src={notif.notifBy.fullname} className="size-16" />
       <div className="flex flex-col justify-center gap-1">
-        <p className="gap-1 font-body text-base text-slate-800">
+        <p className="gap-1 font-body custom2:text-lg text-6xl text-slate-800">
           <span className="font-bold">{notif.notifBy.fullname} </span>
           liked your post
         </p>
-        <p className="font-body text-xs text-slate-600">
+        <p className="font-body custom2:text-base text-4xl text-slate-600">
           {convoDateFormat(notif.createdAt)}
         </p>
       </div>
@@ -364,13 +369,13 @@ function CommentedPost({ notif, navigate }: NotifElemProps) {
       onClick={navToToPost}
       className="flex items-center gap-4 px-10 py-4 hover:cursor-pointer hover:bg-gray-200"
     >
-      <Avatar src={notif.notifBy.fullname} className="size-12 " />
+      <Avatar src={notif.notifBy.fullname} className="size-16 " />
       <div className="flex flex-col justify-center gap-1 ">
-        <p className="h font-body text-base text-slate-800">
+        <p className="h font-body custom2:text-lg text-6xl text-slate-800">
           <span className="font-bold">{notif.notifBy.fullname} </span>
           commented on your post
         </p>
-        <p className="font-body text-xs text-slate-600">
+        <p className="font-body custom2:text-base text-4xl text-slate-600">
           {convoDateFormat(notif.createdAt)}
         </p>
       </div>
